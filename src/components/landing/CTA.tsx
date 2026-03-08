@@ -29,7 +29,7 @@ export default function CTA() {
 
             <div className="flex flex-wrap justify-center gap-4 mt-10">
               <a
-                href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
+                href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-7 py-4 bg-secondary text-secondary-foreground rounded-2xl font-bold text-sm hover:opacity-90 transition-opacity shadow-xl shadow-secondary/20"

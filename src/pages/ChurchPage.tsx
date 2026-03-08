@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound } from "lucide-react";
+import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound, LogIn, Download, Smartphone } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import Footer from "../components/landing/Footer";
 import elctIcon from "../assets/elct-icon.png";
@@ -8,13 +8,14 @@ import rcIcon from "../assets/rc-icon.png";
 import sdaIcon from "../assets/sda-icon.png";
 import pentecostalIcon from "../assets/pentecostal-icon.png";
 
+
 const elctLevels = [
-  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },
-  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting." },
-  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area." },
-  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities." },
-  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement." },
-  { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history." },
+  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region.", loginPath: "/elct/diocese/sign-in" },
+  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting.", loginPath: "/elct/province/sign-in" },
+  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area.", loginPath: "/elct/head-parish/sign-in" },
+  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities.", loginPath: "/elct/sub-parish/sign-in" },
+  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement.", loginPath: "/elct/community/sign-in" },
+  { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history.", isAppLevel: true },
 ];
 
 const churchData: Record<string, {
@@ -151,91 +152,65 @@ export default function ChurchPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden">
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)`,
-            backgroundSize: "72px 72px",
-          }}
-        />
-        {/* Accent glow */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[200px] opacity-[0.07]" style={{ background: church.accent }} />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.08] blur-[160px]" />
+      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden min-h-[80vh] flex items-center">
+        {/* Layered background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,hsl(220,72%,20%,0.3),transparent)]" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-[200px] opacity-[0.1]" style={{ background: church.accent }} />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[200px]" />
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.5\'/%3E%3C/svg%3E")' }} />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors mb-12 text-sm font-medium">
+        <div className="max-w-5xl mx-auto px-6 pt-36 pb-24 relative z-10 w-full text-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors mb-16 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Text */}
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div className="flex items-center gap-4 mb-8">
-                <img src={church.icon} alt={church.name} className="w-14 h-14 rounded-2xl bg-white/[0.06] p-2 border border-white/[0.06]" />
-                <span className="text-sm font-bold text-white/30 uppercase tracking-widest">{church.name}</span>
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white font-display tracking-tight leading-[1.08] mb-6">
-                {church.fullName}
-              </h1>
-
-              <p className="text-lg font-semibold mb-3" style={{ color: church.accent }}>
-                {church.tagline}
-              </p>
-
-              <p className="text-base text-white/40 leading-relaxed max-w-lg mb-10">
-                {church.description}
-              </p>
-
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-7 py-3.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  Get on Google Play
-                </a>
-                <a
-                  href="https://apps.apple.com/app/id6741481584"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-7 py-3.5 text-white/50 border border-white/[0.08] rounded-xl font-medium text-sm hover:text-white hover:border-white/20 transition-all duration-300"
-                >
-                  Download on App Store
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Right: Quick stats */}
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            {/* Church badge */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:block"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/[0.06] bg-white/[0.03] mb-10"
             >
-              <div className="grid grid-cols-2 gap-4">
-                {church.features.slice(0, 4).map((feat, i) => (
-                  <motion.div
-                    key={feat.title}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + i * 0.08 }}
-                    className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 group"
-                  >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: church.accentLight }}>
-                      <feat.icon className="w-5 h-5" style={{ color: church.accent }} />
-                    </div>
-                    <h3 className="text-sm font-bold text-white/80 mb-1">{feat.title}</h3>
-                    <p className="text-xs text-white/30 leading-relaxed line-clamp-2">{feat.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
+              <img src={church.icon} alt={church.name} className="w-8 h-8 rounded-xl" />
+              <span className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">{church.fullName}</span>
             </motion.div>
-          </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white font-display tracking-tight leading-[1.05] mb-6 max-w-4xl mx-auto">
+              {church.tagline}
+            </h1>
+
+            <p className="text-base sm:text-lg text-white/35 leading-relaxed max-w-2xl mx-auto mb-12">
+              {church.description}
+            </p>
+
+            {/* Feature pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap justify-center gap-3"
+            >
+              {church.features.slice(0, 4).map((feat, i) => (
+                <motion.div
+                  key={feat.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.03] text-white/50 text-sm font-medium"
+                >
+                  <feat.icon className="w-3.5 h-3.5 opacity-60" style={{ color: church.accent }} />
+                  {feat.title}
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
+
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* ELCT Church Structure Levels */}
@@ -265,7 +240,7 @@ export default function ChurchPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
-                  className="p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
+                  className="group p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
@@ -276,7 +251,34 @@ export default function ChurchPage() {
                       <h3 className="text-base font-bold text-foreground">{level.name}</h3>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{level.description}</p>
+                  {level.loginPath && (
+                    <Link
+                      to={level.loginPath}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-secondary/10 text-secondary hover:bg-secondary hover:text-secondary-foreground"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      Admin Login
+                    </Link>
+                  )}
+                  {level.isAppLevel && (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <Smartphone className="w-3.5 h-3.5 text-secondary" />
+                        Download the App
+                      </p>
+                      <div className="flex gap-2">
+                        <a href="https://apps.apple.com/app/id6741481584" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
+                          <Download className="w-3 h-3" />
+                          App Store
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
+                          <Download className="w-3 h-3" />
+                          Google Play
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -365,7 +367,7 @@ export default function ChurchPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
+                href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-secondary text-secondary-foreground rounded-2xl font-bold text-sm hover:opacity-90 transition-opacity"

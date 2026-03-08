@@ -2,7 +2,6 @@ import TabbedFormCard from "../../components/head-parish/TabbedFormCard";
 import { mockSubParishes } from "../../data/headParishMockData";
 
 const subParishOptions = mockSubParishes.map(s => ({ value: String(s.id), label: s.name || "" }));
-const subParishOptions = mockSubParishes.map(s => ({ value: String(s.id), label: s.name || "" }));
 const groupOptions = [
   { value: "1", label: "Vijana" }, { value: "2", label: "Wazee" },
   { value: "3", label: "Wanawake" }, { value: "4", label: "Kwaya Kuu" },

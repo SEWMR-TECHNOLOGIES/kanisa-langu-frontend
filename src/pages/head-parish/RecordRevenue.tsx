@@ -114,7 +114,7 @@ const tabs: TabDef[] = [
 ];
 
 export default function RecordRevenue() {
-  const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const [activeTab, setActiveTab] = useState("head-parish");
   const [formValues, setFormValues] = useState<Record<string, Record<string, string>>>({});
 
   const updateValue = (tabId: string, name: string, value: string) => {

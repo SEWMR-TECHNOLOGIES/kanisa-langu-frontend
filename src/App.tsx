@@ -180,6 +180,7 @@ export default function App() {
           <Route path="debits" element={<Debits />} />
           <Route path="expense-requests" element={<ExpenseRequests />} />
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />
+          <Route path="grouped-requests" element={<GroupedRequests />} />
           <Route path="harambee" element={<Harambee />} />
           <Route path="record-harambee" element={<RecordHarambee />} />
           <Route path="record-harambee-contribution" element={<RecordHarambeeContribution />} />

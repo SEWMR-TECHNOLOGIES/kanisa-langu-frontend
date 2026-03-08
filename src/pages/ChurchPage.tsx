@@ -268,11 +268,11 @@ export default function ChurchPage() {
                         Download the App
                       </p>
                       <div className="flex gap-2">
-                        <a href="#" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
+                        <a href="https://apps.apple.com/app/id6741481584" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
                           <Download className="w-3 h-3" />
                           App Store
                         </a>
-                        <a href="#" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
+                        <a href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold bg-foreground text-background hover:opacity-90 transition-opacity">
                           <Download className="w-3 h-3" />
                           Google Play
                         </a>

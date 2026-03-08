@@ -72,6 +72,10 @@ import ExcludedChurchMembers from "./pages/head-parish/ExcludedChurchMembers";
 import PaymentGatewayWallets from "./pages/head-parish/PaymentGatewayWallets";
 import AssetsManagement from "./pages/head-parish/AssetsManagement";
 import SendPushNotification from "./pages/head-parish/SendPushNotification";
+import RecordHarambeeContribution from "./pages/head-parish/RecordHarambeeContribution";
+import UploadChurchMembers from "./pages/head-parish/UploadChurchMembers";
+import UploadEnvelopeData from "./pages/head-parish/UploadEnvelopeData";
+import UploadHarambeeTargets from "./pages/head-parish/UploadHarambeeTargets";
 
 // ELCT Sub Parish Admin
 import SubParishLayout from "./pages/sub-parish/SubParishLayout";
@@ -176,6 +180,10 @@ export default function App() {
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />
           <Route path="harambee" element={<Harambee />} />
           <Route path="record-harambee" element={<RecordHarambee />} />
+          <Route path="record-harambee-contribution" element={<RecordHarambeeContribution />} />
+          <Route path="upload-church-members" element={<UploadChurchMembers />} />
+          <Route path="upload-envelope-data" element={<UploadEnvelopeData />} />
+          <Route path="upload-harambee-targets" element={<UploadHarambeeTargets />} />
           <Route path="manage-envelopes" element={<ManageEnvelopes />} />
           <Route path="add-asset" element={<AssetsManagement />} />
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />

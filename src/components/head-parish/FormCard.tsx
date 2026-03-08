@@ -2,16 +2,18 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import ModernSelect from "./ModernSelect";
 import ModernDatePicker from "./ModernDatePicker";
+import ModernFileUpload from "./ModernFileUpload";
 
 interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number";
+  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number" | "file" | "time";
   placeholder?: string;
   required?: boolean;
   readOnly?: boolean;
   options?: { value: string; label: string }[];
   colSpan?: 1 | 2;
+  accept?: string;
 }
 
 interface FormCardProps {
@@ -20,9 +22,10 @@ interface FormCardProps {
   fields: FormField[];
   submitLabel?: string;
   onSubmit?: (data: Record<string, string>) => void;
+  infoBox?: string;
 }
 
-export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit }: FormCardProps) {
+export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit, infoBox }: FormCardProps) {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,6 +55,11 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
         transition={{ duration: 0.3 }}
         className="admin-card rounded-2xl p-6 lg:p-8"
       >
+        {infoBox && (
+          <div className="mb-6 p-4 rounded-xl bg-admin-info/5 border border-admin-info/20">
+            <p className="text-sm text-admin-info" dangerouslySetInnerHTML={{ __html: infoBox }} />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             {fields.map((field) => (
@@ -74,6 +82,12 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
                     value={formValues[field.name]}
                     onChange={(val) => updateValue(field.name, val)}
                     placeholder={field.placeholder || `Pick ${field.label.toLowerCase()}`}
+                    required={field.required}
+                  />
+                ) : field.type === "file" ? (
+                  <ModernFileUpload
+                    name={field.name}
+                    accept={field.accept || ".xls,.xlsx"}
                     required={field.required}
                   />
                 ) : field.type === "textarea" ? (

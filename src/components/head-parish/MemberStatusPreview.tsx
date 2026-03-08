@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Target, TrendingUp, Wallet } from "lucide-react";
+import { Target, TrendingUp, Wallet } from "lucide-react";
 
 export interface StatusItem {
   label: string;

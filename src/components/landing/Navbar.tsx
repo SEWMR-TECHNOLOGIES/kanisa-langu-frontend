@@ -36,12 +36,12 @@ export default function Navbar() {
         className="fixed top-0 left-0 right-0 z-50"
       >
         {/* Outer container with padding for floating effect */}
-        <div className={`transition-all duration-500 ${scrolled ? "pt-0" : "pt-4 px-4 lg:px-8"}`}>
+        <div className={`transition-all duration-500 ${scrolled ? "pt-2 px-4 lg:px-8" : "pt-4 px-4 lg:px-8"}`}>
           <div
-            className={`max-w-6xl mx-auto transition-all duration-500 ${
+            className={`max-w-6xl mx-auto transition-all duration-500 rounded-2xl ${
               scrolled
-                ? "bg-card/90 backdrop-blur-2xl border-b border-border shadow-sm rounded-none"
-                : "bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl shadow-sm"
+                ? "bg-card/90 backdrop-blur-2xl border border-border shadow-md"
+                : "bg-card/60 backdrop-blur-xl border border-border/50 shadow-sm"
             }`}
           >
             <div className="flex items-center justify-between h-16 px-6">

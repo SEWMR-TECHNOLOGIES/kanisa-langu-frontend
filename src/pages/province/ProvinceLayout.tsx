@@ -1,6 +1,6 @@
 import AdminLayout from "../../components/elct/AdminLayout";
 import {
-  LayoutDashboard, Building2, Users, Shield, LogOut, Church
+  LayoutDashboard, Building2, Users, Shield, LogOut, Church, CreditCard, FileText
 } from "lucide-react";
 import type { NavSection } from "../../components/elct/AdminSidebar";
 
@@ -15,6 +15,13 @@ const navigation: NavSection[] = [
     title: "Administration",
     items: [
       {
+        label: "Province Admins", icon: Shield,
+        children: [
+          { label: "Create Admin", href: `${BASE}/create-province-admin` },
+          { label: "Admins List", href: `${BASE}/province-admins` },
+        ],
+      },
+      {
         label: "Head Parishes", icon: Church,
         children: [
           { label: "All Head Parishes", href: `${BASE}/head-parishes` },
@@ -22,10 +29,16 @@ const navigation: NavSection[] = [
           { label: "HP Admins List", href: `${BASE}/hp-admins` },
         ],
       },
+    ],
+  },
+  {
+    title: "Payments",
+    items: [
       {
-        label: "Province Admins", icon: Shield,
+        label: "Payments", icon: CreditCard,
         children: [
-          { label: "Manage Admins", href: `${BASE}/admins` },
+          { label: "Manage Payments", href: `${BASE}/manage-payments` },
+          { label: "Payment Reports", href: `${BASE}/payment-reports` },
         ],
       },
     ],
@@ -44,6 +57,13 @@ const navigation: NavSection[] = [
         label: "Members", icon: Users,
         children: [
           { label: "Members Overview", href: `${BASE}/members-overview` },
+        ],
+      },
+      {
+        label: "Reports", icon: FileText,
+        children: [
+          { label: "Sales Report", href: `${BASE}/sales-report` },
+          { label: "SMS Usage", href: `${BASE}/sms-usage-report` },
         ],
       },
     ],

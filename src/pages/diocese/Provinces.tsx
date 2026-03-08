@@ -8,8 +8,12 @@ export default function DioceseProvinces() {
       description="View and manage all provinces under this diocese"
       columns={[
         { key: "name", label: "Province Name" },
-        { key: "head_parishes", label: "Head Parishes" },
-        { key: "total_members", label: "Total Members", render: (r: any) => <span className="tabular-nums">{Number(r.total_members).toLocaleString()}</span> },
+        { key: "diocese", label: "Diocese" },
+        { key: "region", label: "Region" },
+        { key: "district", label: "District" },
+        { key: "phone", label: "Phone" },
+        { key: "email", label: "Email" },
+        { key: "address", label: "Address" },
         { key: "status", label: "Status", render: (r: any) => (
           <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${r.status === "Active" ? "bg-admin-success/10 text-admin-success" : "bg-admin-text/10 text-admin-text"}`}>
             {r.status}
@@ -18,7 +22,7 @@ export default function DioceseProvinces() {
       ]}
       data={mockProvinces}
       searchPlaceholder="Search provinces..."
-      searchKeys={["name"]}
+      searchKeys={["name", "diocese", "region"]}
       actions={["view", "edit", "delete"]}
     />
   );

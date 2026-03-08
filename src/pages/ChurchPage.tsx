@@ -232,26 +232,36 @@ export default function ChurchPage() {
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="flex flex-col items-center gap-0">
               {elctLevels.map((level, i) => (
                 <motion.div
                   key={level.name}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
+                  transition={{ delay: i * 0.1 }}
+                  className="flex flex-col items-center"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                  {/* Connector line from previous node */}
+                  {i > 0 && (
+                    <div className="w-px h-8 bg-gradient-to-b from-secondary/40 to-secondary/10" />
+                  )}
+
+                  {/* Node card */}
+                  <div className="relative flex items-center gap-5 px-7 py-5 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300 w-full max-w-xl">
+                    {/* Level indicator dot */}
+                    <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-secondary/10 border-2 border-secondary flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-secondary">{i + 1}</span>
+                    </div>
+
+                    <div className="w-11 h-11 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
                       <level.icon className="w-5 h-5 text-secondary" />
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Level {i + 1}</span>
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-base font-bold text-foreground">{level.name}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
                 </motion.div>
               ))}
             </div>

@@ -911,3 +911,895 @@ def attendance_summary(year: Optional[int] = None, db: Session = Depends(get_db)
         "total_male": int(male or 0), "total_female": int(female or 0),
         "total_children": int(children or 0), "total_records": int(count or 0),
     })
+
+
+# ═══════════════════════════════════════════════════════════════
+# REVENUES & EXPENSES LISTING
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/revenues")
+def list_revenues(
+    management_level: Optional[str] = None,
+    revenue_stream_id: Optional[int] = None,
+    from_date: Optional[date_type] = None,
+    to_date: Optional[date_type] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=500),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    q = db.query(Revenue).filter(Revenue.head_parish_id == hpid)
+    if management_level:
+        q = q.filter(Revenue.management_level == management_level)
+    if revenue_stream_id:
+        q = q.filter(Revenue.revenue_stream_id == revenue_stream_id)
+    if from_date:
+        q = q.filter(Revenue.revenue_date >= from_date)
+    if to_date:
+        q = q.filter(Revenue.revenue_date <= to_date)
+    total = q.count()
+    rows = q.order_by(Revenue.revenue_date.desc()).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "revenues": [{
+            "id": r.id, "revenue_stream_id": r.revenue_stream_id, "amount": float(r.amount),
+            "payment_method": r.payment_method, "revenue_date": str(r.revenue_date),
+            "description": r.description, "management_level": r.management_level,
+            "is_verified": r.is_verified if hasattr(r, "is_verified") else True,
+        } for r in rows],
+        "total": total, "page": page, "total_pages": -(-total // limit),
+    })
+
+
+@router.get("/expenses")
+def list_expenses(
+    management_level: Optional[str] = None,
+    from_date: Optional[date_type] = None,
+    to_date: Optional[date_type] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=500),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    q = db.query(Expense).filter(Expense.head_parish_id == hpid)
+    if management_level:
+        q = q.filter(Expense.management_level == management_level)
+    if from_date:
+        q = q.filter(Expense.expense_date >= from_date)
+    if to_date:
+        q = q.filter(Expense.expense_date <= to_date)
+    total = q.count()
+    rows = q.order_by(Expense.expense_date.desc()).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "expenses": [{
+            "id": e.id, "expense_name_id": e.expense_name_id, "amount": float(e.amount),
+            "payment_method": e.payment_method, "expense_date": str(e.expense_date),
+            "description": e.description, "management_level": e.management_level,
+        } for e in rows],
+        "total": total, "page": page, "total_pages": -(-total // limit),
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# VERIFY REVENUES
+# ═══════════════════════════════════════════════════════════════
+
+class VerifyRevenueBody(BaseModel):
+    revenue_ids: List[int]
+    verified: bool = True
+
+@router.post("/verify-revenues")
+def verify_revenues(body: VerifyRevenueBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    updated = 0
+    for rid in body.revenue_ids:
+        rev = db.query(Revenue).filter(Revenue.id == rid, Revenue.head_parish_id == hpid).first()
+        if rev and hasattr(rev, "is_verified"):
+            rev.is_verified = body.verified
+            updated += 1
+    db.commit()
+    return success_response(f"{updated} revenue(s) verified")
+
+
+# ═══════════════════════════════════════════════════════════════
+# UPLOAD / BULK IMPORT
+# ═══════════════════════════════════════════════════════════════
+
+from fastapi import UploadFile, File, Form
+import csv, io
+
+@router.post("/upload-members")
+def upload_church_members(
+    file: UploadFile = File(...),
+    sub_parish_id: int = Form(...),
+    community_id: int = Form(...),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    content = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+    created = 0
+    errors = []
+    for i, row in enumerate(reader, start=2):
+        try:
+            fname = row.get("first_name", "").strip()
+            lname = row.get("last_name", "").strip()
+            if not fname or not lname:
+                errors.append(f"Row {i}: Missing name")
+                continue
+            member = ChurchMember(
+                first_name=fname.capitalize(), last_name=lname.capitalize(),
+                middle_name=row.get("middle_name", "").strip().capitalize() or None,
+                gender=row.get("gender", "M"), member_type=row.get("member_type", "Mwenyeji"),
+                phone=row.get("phone", "").strip() or None,
+                envelope_number=row.get("envelope_number", "").strip() or None,
+                head_parish_id=hpid, sub_parish_id=sub_parish_id, community_id=community_id,
+                date_of_birth=date_type.fromisoformat(row["date_of_birth"]) if row.get("date_of_birth") else date_type(2000, 1, 1),
+                recorded_by=admin.id,
+            )
+            db.add(member)
+            created += 1
+        except Exception as e:
+            errors.append(f"Row {i}: {str(e)}")
+    db.commit()
+    return success_response(f"{created} members imported", {"errors": errors[:20]})
+
+
+@router.post("/upload-envelope-data")
+def upload_envelope_data(
+    file: UploadFile = File(...),
+    year: int = Form(...),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    _require_hp_admin(admin)
+    content = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+    processed = 0
+    for row in reader:
+        member_id = int(row.get("member_id", 0))
+        target = float(row.get("target", 0))
+        if not member_id or not target:
+            continue
+        existing = db.query(EnvelopeTarget).filter(
+            EnvelopeTarget.member_id == member_id,
+            func.extract("year", EnvelopeTarget.from_date) == year,
+        ).first()
+        if existing:
+            existing.target = target
+        else:
+            db.add(EnvelopeTarget(
+                member_id=member_id, target=target,
+                from_date=date_type(year, 1, 1), end_date=date_type(year, 12, 31),
+            ))
+        processed += 1
+    db.commit()
+    return success_response(f"{processed} envelope targets set")
+
+
+@router.post("/upload-harambee-targets")
+def upload_harambee_targets(
+    file: UploadFile = File(...),
+    harambee_id: int = Form(...),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    from models.harambee import HarambeeTarget as HT
+    _require_hp_admin(admin)
+    content = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+    processed = 0
+    for row in reader:
+        member_id = int(row.get("member_id", 0))
+        target = float(row.get("target", 0))
+        if not member_id or not target:
+            continue
+        existing = db.query(HT).filter(HT.harambee_id == harambee_id, HT.member_id == member_id).first()
+        if existing:
+            existing.target = target
+        else:
+            member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
+            db.add(HT(
+                harambee_id=harambee_id, member_id=member_id, target=target,
+                sub_parish_id=member.sub_parish_id if member else None,
+                community_id=member.community_id if member else None,
+            ))
+        processed += 1
+    db.commit()
+    return success_response(f"{processed} harambee targets set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# PAYMENT GATEWAY WALLETS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/payment-wallets")
+def list_payment_wallets(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(PaymentGatewayWallet).filter(PaymentGatewayWallet.head_parish_id == hpid).all()
+    return success_response(data=[{
+        "id": w.id, "wallet_name": w.wallet_name, "wallet_number": w.wallet_number, "provider": w.provider,
+    } for w in rows])
+
+class PaymentWalletBody(BaseModel):
+    wallet_name: str
+    wallet_number: str
+    provider: str
+
+@router.post("/payment-wallets")
+def create_payment_wallet(body: PaymentWalletBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    db.add(PaymentGatewayWallet(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Payment wallet added")
+
+@router.delete("/payment-wallets/{wallet_id}")
+def delete_payment_wallet(wallet_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    db.query(PaymentGatewayWallet).filter(PaymentGatewayWallet.id == wallet_id, PaymentGatewayWallet.head_parish_id == hpid).delete()
+    db.commit()
+    return success_response("Wallet removed")
+
+
+# ═══════════════════════════════════════════════════════════════
+# DEBITS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/debits")
+def list_debits(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(HeadParishDebit).filter(HeadParishDebit.head_parish_id == hpid).order_by(HeadParishDebit.date_debited.desc()).all()
+    return success_response(data=[{
+        "id": d.id, "description": d.description, "amount": float(d.amount),
+        "date_debited": str(d.date_debited), "return_before_date": str(d.return_before_date),
+        "purpose": d.purpose, "is_paid": d.is_paid,
+    } for d in rows])
+
+class DebitBody(BaseModel):
+    description: str
+    amount: float
+    date_debited: date_type
+    return_before_date: date_type
+    purpose: str
+
+@router.post("/debits")
+def record_debit(body: DebitBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    db.add(HeadParishDebit(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Debit recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# EXPENSE REQUESTS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/expense-requests")
+def list_expense_requests(
+    status: Optional[str] = None,
+    management_level: Optional[str] = None,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    q = db.query(ExpenseRequest).filter(ExpenseRequest.head_parish_id == hpid)
+    if status:
+        q = q.filter(ExpenseRequest.status == status)
+    if management_level:
+        q = q.filter(ExpenseRequest.management_level == management_level)
+    rows = q.order_by(ExpenseRequest.created_at.desc()).all()
+    result = []
+    for r in rows:
+        items = db.query(ExpenseRequestItem).filter(ExpenseRequestItem.request_id == r.id).all()
+        result.append({
+            "id": r.id, "management_level": r.management_level,
+            "total_amount": float(r.total_amount), "status": r.status,
+            "notes": r.notes, "created_at": str(r.created_at),
+            "items": [{"expense_name_id": it.expense_name_id, "amount": float(it.amount), "description": it.description} for it in items],
+        })
+    return success_response(data=result)
+
+class ExpenseRequestBody(BaseModel):
+    management_level: str = "head_parish"
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+    notes: Optional[str] = None
+    items: List[dict]
+
+@router.post("/expense-requests")
+def submit_expense_request(body: ExpenseRequestBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    total = sum(item.get("amount", 0) for item in body.items)
+    req = ExpenseRequest(
+        management_level=body.management_level, head_parish_id=hpid,
+        sub_parish_id=body.sub_parish_id, community_id=body.community_id,
+        group_id=body.group_id, total_amount=total, notes=body.notes,
+    )
+    db.add(req); db.flush()
+    for item in body.items:
+        db.add(ExpenseRequestItem(
+            request_id=req.id, expense_name_id=item["expense_name_id"],
+            amount=item["amount"], description=item.get("description"),
+        ))
+    db.commit()
+    return success_response("Expense request submitted", {"id": req.id})
+
+class RespondExpenseBody(BaseModel):
+    status: str  # approved / rejected
+
+@router.put("/expense-requests/{request_id}")
+def respond_expense_request(request_id: int, body: RespondExpenseBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    req = db.query(ExpenseRequest).filter(ExpenseRequest.id == request_id, ExpenseRequest.head_parish_id == hpid).first()
+    if not req:
+        raise HTTPException(404, "Request not found")
+    from datetime import datetime
+    req.status = body.status
+    req.responded_by = admin.id
+    req.responded_at = datetime.utcnow()
+    db.commit()
+    return success_response(f"Request {body.status}")
+
+
+# ═══════════════════════════════════════════════════════════════
+# EXCLUDED MEMBERS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/excluded-members")
+def list_excluded_members(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    members = db.query(ChurchMember).filter(
+        ChurchMember.head_parish_id == hpid, ChurchMember.status == "Excluded"
+    ).order_by(ChurchMember.first_name).all()
+    result = []
+    for m in members:
+        excl = db.query(MemberExclusion).filter(MemberExclusion.member_id == m.id).order_by(MemberExclusion.id.desc()).first()
+        result.append({
+            "id": m.id, "first_name": m.first_name, "last_name": m.last_name,
+            "envelope_number": m.envelope_number, "phone": m.phone,
+            "reason": excl.reason if excl else None,
+        })
+    return success_response(data=result)
+
+
+# ═══════════════════════════════════════════════════════════════
+# FINANCIAL STATEMENT (detailed monthly breakdown)
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/financial-statement")
+def financial_statement(
+    year: int = Query(...),
+    management_level: Optional[str] = None,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    months = []
+    for month in range(1, 13):
+        rev_q = db.query(func.coalesce(func.sum(Revenue.amount), 0)).filter(
+            Revenue.head_parish_id == hpid,
+            func.extract("year", Revenue.revenue_date) == year,
+            func.extract("month", Revenue.revenue_date) == month,
+        )
+        exp_q = db.query(func.coalesce(func.sum(Expense.amount), 0)).filter(
+            Expense.head_parish_id == hpid,
+            func.extract("year", Expense.expense_date) == year,
+            func.extract("month", Expense.expense_date) == month,
+        )
+        if management_level:
+            rev_q = rev_q.filter(Revenue.management_level == management_level)
+            exp_q = exp_q.filter(Expense.management_level == management_level)
+        rev = float(rev_q.scalar() or 0)
+        exp = float(exp_q.scalar() or 0)
+        months.append({"month": month, "revenue": rev, "expense": exp, "balance": rev - exp})
+
+    total_rev = sum(m["revenue"] for m in months)
+    total_exp = sum(m["expense"] for m in months)
+    return success_response(data={
+        "year": year,
+        "months": months,
+        "total_revenue": total_rev,
+        "total_expense": total_exp,
+        "net_balance": total_rev - total_exp,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# ADMIN PROFILE
+# ═══════════════════════════════════════════════════════════════
+
+class ProfileUpdateBody(BaseModel):
+    fullname: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+@router.get("/profile")
+def get_profile(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    hp = db.query(HeadParish).filter(HeadParish.id == admin.head_parish_id).first()
+    return success_response(data={
+        "admin_id": admin.id, "fullname": admin.fullname,
+        "email": admin.email, "phone": admin.phone,
+        "role": admin.role, "admin_level": admin.admin_level,
+        "head_parish": {"id": hp.id, "name": hp.name} if hp else None,
+    })
+
+@router.put("/profile")
+def update_profile(body: ProfileUpdateBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    for field, value in body.dict(exclude_unset=True).items():
+        if value is not None:
+            setattr(admin, field, value)
+    db.commit()
+    return success_response("Profile updated")
+
+
+# ═══════════════════════════════════════════════════════════════
+# PUSH NOTIFICATIONS
+# ═══════════════════════════════════════════════════════════════
+
+class PushNotificationBody(BaseModel):
+    title: str
+    body: str
+    topic: Optional[str] = None
+
+@router.post("/push-notification")
+def send_push_notification(body: PushNotificationBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    # TODO: Integrate FCM push notification using utils
+    return success_response("Push notification queued")
+
+
+# ═══════════════════════════════════════════════════════════════
+# EVENTS LISTING
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/events")
+def list_events(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(ChurchEvent).filter(ChurchEvent.head_parish_id == hpid).order_by(ChurchEvent.event_date.desc()).all()
+    return success_response(data=[{
+        "id": e.id, "title": e.title, "description": e.description,
+        "event_date": str(e.event_date), "event_time": str(e.event_time) if e.event_time else None,
+        "location": e.location,
+    } for e in rows])
+
+
+# ═══════════════════════════════════════════════════════════════
+# ENVELOPE TARGETS & CONTRIBUTIONS LISTING
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/envelope-targets")
+def list_envelope_targets(year: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    q = db.query(EnvelopeTarget).join(ChurchMember).filter(ChurchMember.head_parish_id == hpid)
+    if year:
+        q = q.filter(func.extract("year", EnvelopeTarget.from_date) == year)
+    rows = q.all()
+    return success_response(data=[{
+        "id": t.id, "member_id": t.member_id, "target": float(t.target),
+        "from_date": str(t.from_date), "end_date": str(t.end_date),
+    } for t in rows])
+
+@router.get("/envelope-contributions")
+def list_envelope_contributions(
+    member_id: Optional[int] = None,
+    year: Optional[int] = None,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    hpid = _require_hp_admin(admin)
+    q = db.query(EnvelopeContribution).filter(EnvelopeContribution.head_parish_id == hpid)
+    if member_id:
+        q = q.filter(EnvelopeContribution.member_id == member_id)
+    if year:
+        q = q.filter(func.extract("year", EnvelopeContribution.contribution_date) == year)
+    rows = q.order_by(EnvelopeContribution.contribution_date.desc()).limit(200).all()
+    return success_response(data=[{
+        "id": c.id, "member_id": c.member_id, "amount": float(c.amount),
+        "contribution_date": str(c.contribution_date), "payment_method": c.payment_method,
+    } for c in rows])
+
+
+# ═══════════════════════════════════════════════════════════════
+# HARAMBEE DETAILED VIEWS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/harambees/{harambee_id}")
+def get_harambee_detail(harambee_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    h = db.query(Harambee).filter(Harambee.id == harambee_id, Harambee.head_parish_id == hpid).first()
+    if not h:
+        raise HTTPException(404, "Harambee not found")
+    total_contrib = float(db.query(func.coalesce(func.sum(HarambeeContribution.amount), 0)).filter(
+        HarambeeContribution.harambee_id == harambee_id
+    ).scalar() or 0)
+    contributor_count = db.query(func.count(func.distinct(HarambeeContribution.member_id))).filter(
+        HarambeeContribution.harambee_id == harambee_id
+    ).scalar()
+    return success_response(data={
+        "id": h.id, "name": h.name, "description": h.description,
+        "from_date": str(h.from_date), "to_date": str(h.to_date),
+        "amount": float(h.amount), "total_contributions": total_contrib,
+        "contributor_count": contributor_count, "management_level": h.management_level,
+    })
+
+@router.get("/harambees/{harambee_id}/contributions")
+def list_harambee_contributions(
+    harambee_id: int,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=500),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin),
+):
+    _require_hp_admin(admin)
+    q = db.query(HarambeeContribution).filter(HarambeeContribution.harambee_id == harambee_id)
+    total = q.count()
+    rows = q.order_by(HarambeeContribution.contribution_date.desc()).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "contributions": [{
+            "id": c.id, "member_id": c.member_id, "amount": float(c.amount),
+            "contribution_date": str(c.contribution_date), "payment_method": c.payment_method,
+        } for c in rows],
+        "total": total, "page": page,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# BANK POSTINGS & CLOSING BALANCES
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/bank-postings")
+def list_bank_postings(account_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    rows = db.query(BankPosting).filter(BankPosting.account_id == account_id).order_by(BankPosting.id.desc()).limit(100).all()
+    return success_response(data=[{
+        "id": p.id, "amount": float(p.amount), "posting_type": p.posting_type,
+        "description": p.description, "reference_type": p.reference_type,
+    } for p in rows])
+
+class PostToBankBody(BaseModel):
+    account_id: int
+    amount: float
+    posting_type: str = "credit"
+    description: Optional[str] = None
+
+@router.post("/bank-postings")
+def post_to_bank(body: PostToBankBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    db.add(BankPosting(**body.dict()))
+    account = db.query(BankAccount).filter(BankAccount.id == body.account_id).first()
+    if account:
+        if body.posting_type == "credit":
+            account.balance += Decimal(str(body.amount))
+        else:
+            account.balance -= Decimal(str(body.amount))
+    db.commit()
+    return success_response("Posted to bank")
+
+class ClosingBalanceBody(BaseModel):
+    account_id: int
+    closing_balance: float
+    balance_date: date_type
+
+@router.post("/bank-closing-balance")
+def record_closing_balance(body: ClosingBalanceBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    db.add(BankClosingBalance(**body.dict()))
+    db.commit()
+    return success_response("Closing balance recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# EXCLUSION REASONS MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/member-exclusion-reasons")
+def list_member_exclusion_reasons(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(MemberExclusionReason).filter(MemberExclusionReason.head_parish_id == hpid).all()
+    return success_response(data=[{"id": r.id, "reason": r.reason} for r in rows])
+
+@router.get("/harambee-exclusion-reasons")
+def list_harambee_exclusion_reasons(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(HarambeeExclusionReason).filter(HarambeeExclusionReason.head_parish_id == hpid).all()
+    return success_response(data=[{"id": r.id, "reason": r.reason} for r in rows])
+
+
+# ═══════════════════════════════════════════════════════════════
+# ANNUAL TARGETS & BUDGETS
+# ═══════════════════════════════════════════════════════════════
+
+class AnnualRevenueTargetBody(BaseModel):
+    revenue_stream_id: int
+    year: int
+    target_amount: float
+
+@router.post("/revenue-targets")
+def set_revenue_target(body: AnnualRevenueTargetBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    existing = db.query(AnnualRevenueTarget).filter(
+        AnnualRevenueTarget.revenue_stream_id == body.revenue_stream_id,
+        AnnualRevenueTarget.head_parish_id == hpid,
+        AnnualRevenueTarget.year == body.year,
+    ).first()
+    if existing:
+        existing.target_amount = body.target_amount
+    else:
+        db.add(AnnualRevenueTarget(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Revenue target set")
+
+@router.get("/revenue-targets")
+def list_revenue_targets(year: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    q = db.query(AnnualRevenueTarget).filter(AnnualRevenueTarget.head_parish_id == hpid)
+    if year:
+        q = q.filter(AnnualRevenueTarget.year == year)
+    return success_response(data=[{
+        "id": t.id, "revenue_stream_id": t.revenue_stream_id, "year": t.year,
+        "target_amount": float(t.target_amount),
+    } for t in q.all()])
+
+class AnnualExpenseBudgetBody(BaseModel):
+    expense_name_id: int
+    year: int
+    budget_amount: float
+
+@router.post("/expense-budgets")
+def set_expense_budget(body: AnnualExpenseBudgetBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    existing = db.query(AnnualExpenseBudget).filter(
+        AnnualExpenseBudget.expense_name_id == body.expense_name_id,
+        AnnualExpenseBudget.head_parish_id == hpid,
+        AnnualExpenseBudget.year == body.year,
+    ).first()
+    if existing:
+        existing.budget_amount = body.budget_amount
+    else:
+        db.add(AnnualExpenseBudget(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Budget set")
+
+@router.get("/expense-budgets")
+def list_expense_budgets(year: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    q = db.query(AnnualExpenseBudget).filter(AnnualExpenseBudget.head_parish_id == hpid)
+    if year:
+        q = q.filter(AnnualExpenseBudget.year == year)
+    return success_response(data=[{
+        "id": b.id, "expense_name_id": b.expense_name_id, "year": b.year,
+        "budget_amount": float(b.budget_amount),
+    } for b in q.all()])
+
+
+# ═══════════════════════════════════════════════════════════════
+# HARAMBEE EXCLUSIONS & DISTRIBUTIONS (scoped)
+# ═══════════════════════════════════════════════════════════════
+
+class HarambeeExclusionBody(BaseModel):
+    harambee_id: int
+    member_id: int
+    reason: str
+
+@router.post("/harambee-exclusions")
+def exclude_from_harambee(body: HarambeeExclusionBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    db.add(HarambeeExclusion(**body.dict()))
+    db.commit()
+    return success_response("Member excluded from harambee")
+
+@router.get("/harambees/{harambee_id}/exclusions")
+def list_harambee_exclusions(harambee_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    rows = db.query(HarambeeExclusion).filter(HarambeeExclusion.harambee_id == harambee_id).all()
+    return success_response(data=[{
+        "id": e.id, "member_id": e.member_id, "reason": e.reason,
+    } for e in rows])
+
+class HarambeeDistributionBody(BaseModel):
+    harambee_id: int
+    member_id: int
+    amount: float
+    distribution_date: date_type
+
+@router.post("/harambee-distributions")
+def record_distribution(body: HarambeeDistributionBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    db.add(HarambeeDistribution(**body.dict()))
+    db.commit()
+    return success_response("Distribution recorded")
+
+class HarambeeExpenseBody(BaseModel):
+    target: str
+    harambee_id: int
+    expense_name_id: int
+    amount: float
+    description: str
+    expense_date: date_type
+
+@router.post("/harambee-expenses")
+def record_harambee_expense(body: HarambeeExpenseBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    db.add(HarambeeExpense(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Harambee expense recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# SMS CONFIG
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/sms-config")
+def get_sms_config(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    cfg = db.query(SmsApiConfig).filter(SmsApiConfig.head_parish_id == hpid).first()
+    if not cfg:
+        return success_response(data=None)
+    return success_response(data={
+        "id": cfg.id, "account_name": cfg.account_name,
+        "api_username": cfg.api_username, "sender_id": cfg.sender_id,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# REVENUE GROUP MAPPING & PROGRAM REVENUE MAP
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/revenue-groups")
+def list_revenue_groups(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(RevenueGroupModel).filter(RevenueGroupModel.head_parish_id == hpid).all()
+    return success_response(data=[{"id": r.id, "name": r.name} for r in rows])
+
+class RevenueGroupBody(BaseModel):
+    name: str
+
+@router.post("/revenue-groups")
+def create_revenue_group(body: RevenueGroupBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    db.add(RevenueGroupModel(head_parish_id=hpid, name=body.name))
+    db.commit()
+    return success_response("Revenue group created")
+
+@router.get("/program-revenue-map")
+def list_program_revenue_map(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(ProgramRevenueMap).filter(ProgramRevenueMap.head_parish_id == hpid).all()
+    return success_response(data=[{
+        "id": r.id, "program_name": r.program_name, "revenue_stream_id": r.revenue_stream_id,
+    } for r in rows])
+
+class ProgramRevenueMapBody(BaseModel):
+    program_name: str
+    revenue_stream_id: int
+
+@router.post("/program-revenue-map")
+def map_program_revenue(body: ProgramRevenueMapBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    existing = db.query(ProgramRevenueMap).filter(
+        ProgramRevenueMap.head_parish_id == hpid,
+        ProgramRevenueMap.program_name == body.program_name,
+    ).first()
+    if existing:
+        existing.revenue_stream_id = body.revenue_stream_id
+    else:
+        db.add(ProgramRevenueMap(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Program mapped")
+
+
+# ═══════════════════════════════════════════════════════════════
+# HARAMBEE GROUPS, CLASSES, LETTER STATUS (scoped)
+# ═══════════════════════════════════════════════════════════════
+
+class HarambeeGroupBody(BaseModel):
+    harambee_id: int
+    name: str
+    target: float = 0
+
+@router.post("/harambee-groups")
+def create_harambee_group(body: HarambeeGroupBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    db.add(HarambeeGroup(**body.dict()))
+    db.commit()
+    return success_response("Group created")
+
+@router.get("/harambees/{harambee_id}/groups")
+def list_harambee_groups(harambee_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    groups = db.query(HarambeeGroup).filter(HarambeeGroup.harambee_id == harambee_id).all()
+    return success_response(data=[{
+        "id": g.id, "name": g.name, "target": float(g.target),
+    } for g in groups])
+
+class HarambeeClassBody(BaseModel):
+    harambee_id: int
+    class_name: str
+    min_amount: float = 0
+    max_amount: Optional[float] = None
+
+@router.post("/harambee-classes")
+def create_harambee_class(body: HarambeeClassBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    _require_hp_admin(admin)
+    from models.harambee import HarambeeClass
+    db.add(HarambeeClass(**body.dict()))
+    db.commit()
+    return success_response("Class created")
+
+class HarambeeLetterBody(BaseModel):
+    member_id: int
+    status: str = "Yes"
+
+@router.post("/harambee-letter-status")
+def set_letter_status(body: HarambeeLetterBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    existing = db.query(HarambeeLetterStatus).filter(
+        HarambeeLetterStatus.member_id == body.member_id,
+        HarambeeLetterStatus.head_parish_id == hpid,
+    ).first()
+    if existing:
+        existing.status = body.status
+    else:
+        db.add(HarambeeLetterStatus(head_parish_id=hpid, **body.dict()))
+    db.commit()
+    return success_response("Letter status set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# SERVICES COUNT & TIME CONFIG
+# ═══════════════════════════════════════════════════════════════
+
+class ServicesCountBody(BaseModel):
+    services_count: int
+
+@router.post("/services-count")
+def set_services_count(body: ServicesCountBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    existing = db.query(HeadParishServicesCount).filter(HeadParishServicesCount.head_parish_id == hpid).first()
+    if existing:
+        existing.services_count = body.services_count
+    else:
+        db.add(HeadParishServicesCount(head_parish_id=hpid, services_count=body.services_count))
+    db.commit()
+    return success_response("Services count set")
+
+@router.get("/services-count")
+def get_services_count(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    row = db.query(HeadParishServicesCount).filter(HeadParishServicesCount.head_parish_id == hpid).first()
+    return success_response(data={"services_count": row.services_count if row else 1})
+
+class ServiceTimeBody(BaseModel):
+    service_number: int
+    start_time: str
+    end_time: Optional[str] = None
+
+@router.post("/service-times")
+def set_service_time(body: ServiceTimeBody, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    start = time_type.fromisoformat(body.start_time)
+    end = time_type.fromisoformat(body.end_time) if body.end_time else None
+    existing = db.query(HeadParishServiceTime).filter(
+        HeadParishServiceTime.head_parish_id == hpid,
+        HeadParishServiceTime.service_number == body.service_number,
+    ).first()
+    if existing:
+        existing.start_time = start
+        existing.end_time = end
+    else:
+        db.add(HeadParishServiceTime(head_parish_id=hpid, service_number=body.service_number, start_time=start, end_time=end))
+    db.commit()
+    return success_response("Service time set")
+
+@router.get("/service-times")
+def list_service_times(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    hpid = _require_hp_admin(admin)
+    rows = db.query(HeadParishServiceTime).filter(HeadParishServiceTime.head_parish_id == hpid).order_by(HeadParishServiceTime.service_number).all()
+    return success_response(data=[{
+        "service_number": t.service_number, "start_time": str(t.start_time), "end_time": str(t.end_time) if t.end_time else None,
+    } for t in rows])

@@ -156,20 +156,6 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Mobile stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.85 }}
-          className="flex gap-10 mt-14 pt-10 border-t border-white/[0.05] lg:hidden"
-        >
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <div className="text-2xl font-bold text-white font-display">{stat.value}</div>
-              <div className="text-[10px] text-white/20 mt-0.5 uppercase tracking-wider">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );

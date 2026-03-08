@@ -118,9 +118,6 @@ export default function Footer() {
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} SEWMR Technologies. All rights reserved.
           </p>
-          <p className="text-xs text-muted-foreground">
-            Built with care in Tanzania
-          </p>
         </div>
       </div>
     </footer>

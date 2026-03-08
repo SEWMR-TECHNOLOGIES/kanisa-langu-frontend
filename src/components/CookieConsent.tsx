@@ -36,10 +36,7 @@ export default function CookieConsent() {
         >
           <div className="max-w-lg mx-auto sm:ml-auto sm:mr-6 p-5 rounded-2xl bg-card border border-border shadow-2xl shadow-black/10">
             <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2.5">
-                <Cookie className="w-4 h-4 text-secondary shrink-0" />
-                <h3 className="text-sm font-bold text-foreground">We use cookies</h3>
-              </div>
+              <h3 className="text-sm font-bold text-foreground">We use cookies</h3>
               <button onClick={decline} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-4 h-4" />
               </button>

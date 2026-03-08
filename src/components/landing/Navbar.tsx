@@ -63,7 +63,7 @@ export default function Navbar() {
                     <button
                       key={link.href}
                       onClick={() => scrollTo(link.href)}
-                      className="relative px-4 py-1.5 text-[13px] font-medium text-white/50 hover:text-white rounded-lg transition-all duration-200 hover:bg-white/[0.06]"
+                      className="relative px-4 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 hover:bg-muted"
                     >
                       {link.label}
                     </button>

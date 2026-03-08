@@ -941,25 +941,13 @@ export const headParishPages: Record<string, PageConfig> = {
     ],
   },
   "envelope-usage-summary": {
-    title: "Envelope Usage Summary",
-    description: "Overview of envelope usage across the parish",
-    type: "table",
-    columns: [
-      { key: "sub_parish", label: "Sub Parish" },
-      { key: "total_envelopes", label: "Envelopes" },
-      { key: "active", label: "Active" },
-      { key: "target", label: "Target" },
-      { key: "collected", label: "Collected" },
+    title: "Download Envelope Usage Summary",
+    description: "Download envelope usage summary report for a specific date",
+    type: "form",
+    submitLabel: "Download Report",
+    fields: [
+      { name: "report_date", label: "Select Date", type: "date", required: true },
     ],
-    data: genData(4, i => ({
-      sub_parish: subParishOptions[i].label,
-      total_envelopes: [120, 85, 150, 95][i],
-      active: [98, 72, 130, 80][i],
-      target: `TZS ${[15, 10, 18, 12][i]}M`,
-      collected: `TZS ${[9, 7, 12, 8][i]}M`,
-    })),
-    searchKeys: ["sub_parish"],
-    actions: ["view"],
   },
   // Reports
   "download-revenue-breakdown": {

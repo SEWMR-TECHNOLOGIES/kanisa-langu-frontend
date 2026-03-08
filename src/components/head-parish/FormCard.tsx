@@ -135,6 +135,13 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
             ))}
           </div>
 
+          {statusPreview && (
+            <MemberStatusPreview
+              items={statusPreview.watchFields.every(f => formValues[f]) ? statusPreview.getStatus(formValues) : []}
+              visible={statusPreview.watchFields.every(f => !!formValues[f])}
+            />
+          )}
+
           <div className="pt-2">
             <button
               type="submit"

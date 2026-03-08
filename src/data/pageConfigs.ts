@@ -961,6 +961,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Record a member's envelope contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },

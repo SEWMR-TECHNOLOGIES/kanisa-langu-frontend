@@ -73,7 +73,8 @@ export default function MakeExpenseRequest() {
     const form = getForm(tabId);
     if (!form.expense_group_id || !form.expense_name_id || !form.budgeted_amount) return;
     const groupLabel = expenseGroupOptions.find(o => o.value === form.expense_group_id)?.label || "";
-    const nameLabel = (expenseNameOptions[form.expense_group_id] || []).find(o => o.value === form.expense_name_id)?.label || "";
+    const names = expenseNameOptions[form.expense_group_id || ""] || [];
+    const nameLabel = names.find(o => o.value === form.expense_name_id)?.label || "";
     const newItem: ExpenseItem = {
       id: Date.now(),
       expense_group: groupLabel,
@@ -82,8 +83,7 @@ export default function MakeExpenseRequest() {
       description: form.budget_description || "",
       request_date: form.request_date || new Date().toISOString().split("T")[0],
     };
-    setContainers(prev => ({ ...prev, [tabId]: [...prev[tabId], newItem] }));
-    // Clear amount and description
+    setContainers(prev => ({ ...prev, [tabId]: [...(prev[tabId] || []), newItem] }));
     setFormState(prev => ({
       ...prev,
       [tabId]: { ...(prev[tabId] || {}), budgeted_amount: "", budget_description: "" },
@@ -91,7 +91,7 @@ export default function MakeExpenseRequest() {
   };
 
   const removeItem = (tabId: string, id: number) => {
-    setContainers(prev => ({ ...prev, [tabId]: prev[tabId].filter(i => i.id !== id) }));
+    setContainers(prev => ({ ...prev, [tabId]: (prev[tabId] || []).filter(i => i.id !== id) }));
   };
 
   const showContainerModal = (tabId: string) => {

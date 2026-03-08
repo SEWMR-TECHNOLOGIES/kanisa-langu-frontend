@@ -981,7 +981,81 @@ CREATE TABLE app_versions (
 );
 
 -- ──────────────────────────────────────────────────────────────
--- 24. BIBLE REFERENCE (for scripture lookups)
+-- 24. HARAMBEE LETTER STATUSES
+-- ──────────────────────────────────────────────────────────────
+
+CREATE TABLE harambee_letter_statuses (
+    id              SERIAL PRIMARY KEY,
+    member_id       INT          NOT NULL REFERENCES church_members(id) ON DELETE CASCADE,
+    head_parish_id  INT          NOT NULL REFERENCES head_parishes(id) ON DELETE CASCADE,
+    status          VARCHAR(10)  NOT NULL DEFAULT 'No' CHECK (status IN ('Yes', 'No')),
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    UNIQUE (member_id, head_parish_id)
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- 25. HARAMBEE EXPENSES
+-- ──────────────────────────────────────────────────────────────
+
+CREATE TABLE harambee_expenses (
+    id              SERIAL PRIMARY KEY,
+    target          VARCHAR(20)  NOT NULL CHECK (target IN ('head_parish', 'sub_parish', 'community', 'group')),
+    harambee_id     INT          NOT NULL REFERENCES harambees(id) ON DELETE CASCADE,
+    head_parish_id  INT          NOT NULL REFERENCES head_parishes(id) ON DELETE CASCADE,
+    expense_name_id INT          NOT NULL REFERENCES expense_names(id) ON DELETE RESTRICT,
+    amount          NUMERIC(15,2) NOT NULL CHECK (amount > 0),
+    description     TEXT         NOT NULL,
+    expense_date    DATE         NOT NULL,
+    recorded_by     INT          REFERENCES admins(id) ON DELETE SET NULL,
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_harambee_expenses_harambee ON harambee_expenses(harambee_id);
+
+-- ──────────────────────────────────────────────────────────────
+-- 26. HEAD PARISH DEBITS (Loans)
+-- ──────────────────────────────────────────────────────────────
+
+CREATE TABLE head_parish_debits (
+    id                  SERIAL PRIMARY KEY,
+    head_parish_id      INT          NOT NULL REFERENCES head_parishes(id) ON DELETE CASCADE,
+    description         TEXT         NOT NULL,
+    amount              NUMERIC(15,2) NOT NULL CHECK (amount > 0),
+    date_debited        DATE         NOT NULL,
+    return_before_date  DATE         NOT NULL,
+    purpose             TEXT         NOT NULL,
+    is_paid             BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- 27. UNIT OF MEASURE (Lookup)
+-- ──────────────────────────────────────────────────────────────
+
+CREATE TABLE unit_of_measure (
+    id          SERIAL PRIMARY KEY,
+    unit        VARCHAR(50)  NOT NULL UNIQUE,
+    meaning     VARCHAR(200),
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- 28. MEMBER OTP CODES (Registration & Password Reset)
+-- ──────────────────────────────────────────────────────────────
+
+CREATE TABLE member_otp_codes (
+    id          SERIAL PRIMARY KEY,
+    member_id   INT          NOT NULL REFERENCES church_members(id) ON DELETE CASCADE,
+    otp_code    VARCHAR(10)  NOT NULL,
+    purpose     VARCHAR(30)  NOT NULL CHECK (purpose IN ('registration', 'password_reset')),
+    expires_at  TIMESTAMPTZ  NOT NULL,
+    used        BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- ──────────────────────────────────────────────────────────────
+-- 29. BIBLE REFERENCE (for scripture lookups)
 -- ──────────────────────────────────────────────────────────────
 
 CREATE TABLE bible_books (

@@ -373,25 +373,15 @@ export const headParishPages: Record<string, PageConfig> = {
     actions: ["view", "edit"],
   },
   "envelope-usage": {
-    title: "Envelope Usage",
-    description: "Track envelope usage across the parish",
-    type: "table",
-    columns: [
-      { key: "envelope_number", label: "Envelope #" },
-      { key: "member", label: "Member" },
-      { key: "sub_parish", label: "Sub Parish" },
-      { key: "usage_count", label: "Times Used" },
-      { key: "total_amount", label: "Total Amount" },
+    title: "Envelope Usage Report",
+    description: "Generate envelope usage report for a specific date",
+    type: "form",
+    submitLabel: "Generate Report",
+    infoBox: "<strong>Note:</strong> The <strong>Benchmark</strong> is the standard measure of how real attendance compares to it. If not set, the default benchmark is 1000.",
+    fields: [
+      { name: "usage_date", label: "Select Date", type: "date", required: true },
+      { name: "benchmark", label: "Benchmark (Optional)", type: "number", placeholder: "Enter Benchmark (default: 1000)" },
     ],
-    data: genData(20, i => ({
-      envelope_number: `Y${String(i + 1).padStart(3, "0")}`,
-      member: memberOptions[i % 10].label,
-      sub_parish: subParishOptions[i % 4].label,
-      usage_count: 8 + (i % 5),
-      total_amount: `TZS ${(i + 1) * 85},000`,
-    })),
-    searchKeys: ["member", "envelope_number"],
-    actions: ["view"],
   },
   "set-annual-revenue-target": {
     title: "Set Annual Revenue Target",

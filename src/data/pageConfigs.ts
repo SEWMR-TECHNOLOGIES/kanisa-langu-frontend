@@ -143,6 +143,33 @@ function genData(count: number, generator: (i: number) => Record<string, any>) {
   return Array.from({ length: count }, (_, i) => ({ id: i + 1, ...generator(i) }));
 }
 
+// Mock member status data for previews
+const mockHarambeeStatus = (values: Record<string, string>): StatusItem[] => {
+  const memberId = Number(values.member || values.member_id || 0);
+  const targets = [500000, 400000, 300000, 600000, 250000, 350000, 450000, 200000, 550000, 380000];
+  const contribs = [320000, 280000, 150000, 600000, 100000, 350000, 200000, 50000, 400000, 190000];
+  const idx = (memberId - 1) % 10;
+  return getHarambeeStatusItems(targets[idx] || 0, contribs[idx] || 0);
+};
+
+const mockEnvelopeStatus = (values: Record<string, string>): StatusItem[] => {
+  const memberId = Number(values.member || values.member_id || 0);
+  const targets = [120000, 96000, 84000, 150000, 72000, 108000, 60000, 132000, 90000, 100000];
+  const contribs = [80000, 96000, 40000, 100000, 72000, 50000, 30000, 132000, 45000, 60000];
+  const idx = (memberId - 1) % 10;
+  return getEnvelopeStatusItems(targets[idx] || 0, contribs[idx] || 0);
+};
+
+const harambeeStatusPreview = {
+  watchFields: ["harambee", "member"],
+  getStatus: mockHarambeeStatus,
+};
+
+const envelopeStatusPreview = {
+  watchFields: ["member"],
+  getStatus: mockEnvelopeStatus,
+};
+
 // ============ HEAD PARISH PAGE CONFIGS ============
 export const headParishPages: Record<string, PageConfig> = {
   // Church Members

@@ -1,0 +1,1165 @@
+# api/routes/records.py
+"""Record creation routes — admin operations.
+Replaces ALL files in legacy/api/records/: record_*, set_*, upload_*, distribute_*,
+exclude_*, assign_*, link_*, map_*, post_to_bank, submit_expense_request, notify_members, etc.
+Also replaces legacy/api/registration/ files."""
+
+from datetime import date as date_type
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from sqlalchemy import text, func
+from typing import Optional, List
+
+from core.database import get_db
+from models.admins import Admin
+from models.members import ChurchMember, MemberExclusion, ChurchLeader, ChurchChoir
+from models.harambee import (
+    Harambee, HarambeeGroup, HarambeeGroupMember, HarambeeTarget,
+    HarambeeContribution, HarambeeClass, HarambeeDistribution,
+    HarambeeExclusion, HarambeeExpense, HarambeeLetterStatus, DelayedHarambeeNotification,
+)
+from models.envelope import EnvelopeTarget, EnvelopeContribution
+from models.finance import (
+    BankAccount, RevenueStream, Revenue, ExpenseGroup, ExpenseName,
+    Expense, ExpenseRequest, ExpenseRequestItem, AnnualRevenueTarget, AnnualExpenseBudget,
+)
+from models.operations import (
+    Attendance, AttendanceBenchmark, Meeting, MeetingAgenda,
+    MeetingMinutes, MeetingNotes, ChurchEvent, Asset, AssetRevenue, AssetExpense, AssetStatusLog,
+)
+from models.sunday_service import (
+    SundayService, SundayServiceScripture, SundayServiceSong,
+    SundayServiceChoir, SundayServiceOffering, SundayServiceLeader,
+    SundayServiceElder, SundayServicePreacher, HeadParishServiceTime, HeadParishServicesCount,
+)
+from models.payments import PaymentGatewayWallet
+from models.banking import BankPosting, BankClosingBalance
+from models.config import SmsApiConfig, RevenueGroupModel, ProgramRevenueMap
+from models.misc import HeadParishDebit, MemberExclusionReason, HarambeeExclusionReason, Feedback
+from utils.auth import hash_password, get_current_admin
+from utils.validation import is_valid_email, is_valid_phone, normalize_phone, validate_age
+from utils.response import success_response, error_response
+
+router = APIRouter(prefix="/records", tags=["Records"])
+
+
+# ═══════════════════════════════════════════════════════════════
+# REGISTRATION — Replaces legacy/api/registration/*
+# ═══════════════════════════════════════════════════════════════
+
+class RegisterMemberRequest(BaseModel):
+    first_name: str
+    middle_name: Optional[str] = None
+    last_name: str
+    date_of_birth: date_type
+    gender: str
+    member_type: str = "Mwenyeji"
+    head_parish_id: int
+    sub_parish_id: int
+    community_id: int
+    envelope_number: Optional[str] = None
+    occupation_id: Optional[int] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    title_id: Optional[int] = None
+
+@router.post("/register-member")
+def register_member(body: RegisterMemberRequest, db: Session = Depends(get_db)):
+    phone = normalize_phone(body.phone) if body.phone else None
+    if phone and db.query(ChurchMember).filter(ChurchMember.phone == phone).first():
+        return error_response("Phone already exists")
+    if body.email and db.query(ChurchMember).filter(ChurchMember.email == body.email).first():
+        return error_response("Email already exists")
+    if body.envelope_number and db.query(ChurchMember).filter(ChurchMember.envelope_number == body.envelope_number).first():
+        return error_response("Envelope number already exists")
+
+    member = ChurchMember(
+        title_id=body.title_id, first_name=body.first_name.capitalize(),
+        middle_name=body.middle_name.capitalize() if body.middle_name else None,
+        last_name=body.last_name.capitalize(), date_of_birth=body.date_of_birth,
+        gender=body.gender, member_type=body.member_type,
+        head_parish_id=body.head_parish_id, sub_parish_id=body.sub_parish_id,
+        community_id=body.community_id, envelope_number=body.envelope_number,
+        occupation_id=body.occupation_id, phone=phone, email=body.email,
+    )
+    db.add(member); db.commit(); db.refresh(member)
+    return success_response("Church member registered", {"id": member.id})
+
+
+class RegisterLeaderRequest(BaseModel):
+    title_id: Optional[int] = None
+    first_name: str
+    middle_name: Optional[str] = None
+    last_name: str
+    gender: str
+    leader_type: str
+    head_parish_id: int
+    role_id: int
+    appointment_date: date_type
+    end_date: Optional[date_type] = None
+
+@router.post("/register-leader")
+def register_leader(body: RegisterLeaderRequest, db: Session = Depends(get_db)):
+    leader = ChurchLeader(**body.dict())
+    db.add(leader); db.commit(); db.refresh(leader)
+    return success_response("Leader registered", {"id": leader.id})
+
+
+class RegisterChoirRequest(BaseModel):
+    name: str
+    head_parish_id: int
+    description: Optional[str] = None
+
+@router.post("/register-choir")
+def register_choir(body: RegisterChoirRequest, db: Session = Depends(get_db)):
+    if db.query(ChurchChoir).filter(ChurchChoir.name == body.name, ChurchChoir.head_parish_id == body.head_parish_id).first():
+        return error_response("Choir already exists")
+    c = ChurchChoir(**body.dict())
+    db.add(c); db.commit(); db.refresh(c)
+    return success_response("Choir registered", {"id": c.id})
+
+
+class RegisterAdminRequest(BaseModel):
+    fullname: str
+    email: Optional[str] = ""
+    phone: str
+    role: str
+    admin_level: str
+    diocese_id: Optional[int] = None
+    province_id: Optional[int] = None
+    head_parish_id: Optional[int] = None
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+
+@router.post("/create-admin")
+def create_admin(body: RegisterAdminRequest, db: Session = Depends(get_db)):
+    admin = Admin(
+        fullname=body.fullname, email=body.email or None, phone=body.phone,
+        role=body.role, password=hash_password("KanisaLangu"), admin_level=body.admin_level,
+        diocese_id=body.diocese_id, province_id=body.province_id,
+        head_parish_id=body.head_parish_id, sub_parish_id=body.sub_parish_id,
+        community_id=body.community_id, group_id=body.group_id,
+    )
+    db.add(admin); db.commit(); db.refresh(admin)
+    return success_response("Admin registered", {"id": admin.id})
+
+
+# ═══════════════════════════════════════════════════════════════
+# HARAMBEE RECORDS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordHarambeeRequest(BaseModel):
+    management_level: str
+    head_parish_id: int
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+    account_id: int
+    name: str
+    description: str
+    from_date: date_type
+    to_date: date_type
+    amount: float
+
+@router.post("/record-harambee")
+def record_harambee(body: RecordHarambeeRequest, db: Session = Depends(get_db)):
+    h = Harambee(**body.dict())
+    db.add(h); db.commit(); db.refresh(h)
+    return success_response("Harambee recorded", {"id": h.id})
+
+
+class RecordHarambeeContributionRequest(BaseModel):
+    harambee_id: int
+    member_id: int
+    amount: float
+    contribution_date: date_type
+    head_parish_id: int
+    payment_method: str = "Cash"
+    target_table: str = "head-parish"
+
+@router.post("/record-harambee-contribution")
+def record_harambee_contribution(body: RecordHarambeeContributionRequest, db: Session = Depends(get_db)):
+    if body.amount <= 0:
+        return error_response("Amount must be > 0")
+    member = db.query(ChurchMember).filter(ChurchMember.id == body.member_id).first()
+    if not member:
+        return error_response("Member not found")
+
+    contrib = HarambeeContribution(
+        harambee_id=body.harambee_id, member_id=body.member_id,
+        amount=body.amount, contribution_date=body.contribution_date,
+        head_parish_id=body.head_parish_id, sub_parish_id=member.sub_parish_id,
+        community_id=member.community_id, payment_method=body.payment_method,
+    )
+    db.add(contrib); db.commit(); db.refresh(contrib)
+    return success_response("Contribution recorded", {"id": contrib.id})
+
+
+class RecordHarambeeTargetRequest(BaseModel):
+    harambee_id: int
+    member_id: int
+    target: float
+    target_type: str = "individual"
+
+@router.post("/record-harambee-target")
+def record_harambee_target(body: RecordHarambeeTargetRequest, db: Session = Depends(get_db)):
+    existing = db.query(HarambeeTarget).filter(
+        HarambeeTarget.harambee_id == body.harambee_id, HarambeeTarget.member_id == body.member_id
+    ).first()
+    if existing:
+        existing.target = body.target; existing.target_type = body.target_type
+    else:
+        member = db.query(ChurchMember).filter(ChurchMember.id == body.member_id).first()
+        db.add(HarambeeTarget(
+            harambee_id=body.harambee_id, member_id=body.member_id,
+            target=body.target, target_type=body.target_type,
+            sub_parish_id=member.sub_parish_id if member else None,
+            community_id=member.community_id if member else None,
+        ))
+    db.commit()
+    return success_response("Target set")
+
+
+class CreateHarambeeGroupRequest(BaseModel):
+    harambee_id: int
+    name: str
+    target: float = 0
+
+@router.post("/create-harambee-group")
+def create_harambee_group(body: CreateHarambeeGroupRequest, db: Session = Depends(get_db)):
+    g = HarambeeGroup(**body.dict())
+    db.add(g); db.commit(); db.refresh(g)
+    return success_response("Group created", {"id": g.id})
+
+
+class AssignGroupMemberRequest(BaseModel):
+    harambee_group_id: int
+    member_id: int
+    responsibility: Optional[str] = None
+
+@router.post("/assign-group-member")
+def assign_group_member(body: AssignGroupMemberRequest, db: Session = Depends(get_db)):
+    db.add(HarambeeGroupMember(**body.dict()))
+    db.commit()
+    return success_response("Member assigned to group")
+
+
+class RecordHarambeeClassRequest(BaseModel):
+    harambee_id: int
+    class_name: str
+    min_amount: float = 0
+    max_amount: Optional[float] = None
+
+@router.post("/record-harambee-class")
+def record_harambee_class(body: RecordHarambeeClassRequest, db: Session = Depends(get_db)):
+    db.add(HarambeeClass(**body.dict())); db.commit()
+    return success_response("Class recorded")
+
+
+class RecordHarambeeDistributionRequest(BaseModel):
+    harambee_id: int
+    member_id: int
+    amount: float
+    distribution_date: date_type
+
+@router.post("/record-harambee-distribution")
+def record_harambee_distribution(body: RecordHarambeeDistributionRequest, db: Session = Depends(get_db)):
+    db.add(HarambeeDistribution(**body.dict())); db.commit()
+    return success_response("Distribution recorded")
+
+
+class RecordHarambeeExpenseRequest(BaseModel):
+    target: str
+    harambee_id: int
+    head_parish_id: int
+    expense_name_id: int
+    amount: float
+    description: str
+    expense_date: date_type
+
+@router.post("/record-harambee-expense")
+def record_harambee_expense(body: RecordHarambeeExpenseRequest, db: Session = Depends(get_db)):
+    db.add(HarambeeExpense(**body.dict())); db.commit()
+    return success_response("Harambee expense recorded")
+
+
+class ExcludeFromHarambeeRequest(BaseModel):
+    harambee_id: int
+    member_id: int
+    reason: str
+
+@router.post("/exclude-from-harambee")
+def exclude_from_harambee(body: ExcludeFromHarambeeRequest, db: Session = Depends(get_db)):
+    db.add(HarambeeExclusion(**body.dict())); db.commit()
+    return success_response("Member excluded from harambee")
+
+
+class HarambeeLetterStatusRequest(BaseModel):
+    member_id: int
+    head_parish_id: int
+    status: str = "Yes"
+
+@router.post("/record-harambee-letter-status")
+def record_harambee_letter_status(body: HarambeeLetterStatusRequest, db: Session = Depends(get_db)):
+    existing = db.query(HarambeeLetterStatus).filter(
+        HarambeeLetterStatus.member_id == body.member_id, HarambeeLetterStatus.head_parish_id == body.head_parish_id
+    ).first()
+    if existing:
+        existing.status = body.status
+    else:
+        db.add(HarambeeLetterStatus(**body.dict()))
+    db.commit()
+    return success_response("Letter status recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# ENVELOPE RECORDS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordEnvelopeContributionRequest(BaseModel):
+    member_id: int
+    amount: float
+    contribution_date: date_type
+    head_parish_id: int
+    payment_method: str = "Cash"
+
+@router.post("/record-envelope-contribution")
+def record_envelope_contribution(body: RecordEnvelopeContributionRequest, db: Session = Depends(get_db)):
+    if body.amount <= 0:
+        return error_response("Amount must be > 0")
+    member = db.query(ChurchMember).filter(ChurchMember.id == body.member_id).first()
+    if not member:
+        return error_response("Member not found")
+    contrib = EnvelopeContribution(
+        member_id=body.member_id, amount=body.amount,
+        contribution_date=body.contribution_date,
+        head_parish_id=body.head_parish_id,
+        sub_parish_id=member.sub_parish_id,
+        community_id=member.community_id,
+        payment_method=body.payment_method,
+    )
+    db.add(contrib); db.commit(); db.refresh(contrib)
+    return success_response("Contribution recorded", {"id": contrib.id})
+
+
+class SetEnvelopeTargetRequest(BaseModel):
+    member_id: int
+    target: float
+    year: int
+
+@router.post("/set-envelope-target")
+def set_envelope_target(body: SetEnvelopeTargetRequest, db: Session = Depends(get_db)):
+    existing = db.query(EnvelopeTarget).filter(
+        EnvelopeTarget.member_id == body.member_id,
+        func.extract("year", EnvelopeTarget.from_date) == body.year,
+    ).first()
+    if existing:
+        existing.target = body.target
+    else:
+        db.add(EnvelopeTarget(
+            member_id=body.member_id, target=body.target,
+            from_date=date_type(body.year, 1, 1), end_date=date_type(body.year, 12, 31),
+        ))
+    db.commit()
+    return success_response("Target set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# REVENUE & EXPENSE RECORDS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordRevenueRequest(BaseModel):
+    management_level: str
+    revenue_stream_id: int
+    head_parish_id: int
+    sub_parish_id: Optional[int] = None
+    service_number: Optional[int] = None
+    amount: float
+    payment_method: str = "Cash"
+    description: Optional[str] = None
+    revenue_date: date_type
+
+@router.post("/record-revenue")
+def record_revenue(body: RecordRevenueRequest, db: Session = Depends(get_db)):
+    rev = Revenue(**body.dict())
+    db.add(rev); db.commit(); db.refresh(rev)
+    return success_response("Revenue recorded", {"id": rev.id})
+
+
+class RecordExpenseRequest(BaseModel):
+    management_level: str
+    expense_name_id: int
+    head_parish_id: int
+    amount: float
+    payment_method: str = "Cash"
+    description: Optional[str] = None
+    expense_date: date_type
+
+@router.post("/record-expense")
+def record_expense_route(body: RecordExpenseRequest, db: Session = Depends(get_db)):
+    exp = Expense(**body.dict())
+    db.add(exp); db.commit(); db.refresh(exp)
+    return success_response("Expense recorded", {"id": exp.id})
+
+
+class CreateExpenseGroupRequest(BaseModel):
+    name: str
+    management_level: str
+    head_parish_id: int
+
+@router.post("/create-expense-group")
+def create_expense_group(body: CreateExpenseGroupRequest, db: Session = Depends(get_db)):
+    db.add(ExpenseGroup(**body.dict())); db.commit()
+    return success_response("Expense group created")
+
+
+class CreateExpenseNameRequest(BaseModel):
+    expense_group_id: int
+    name: str
+    management_level: str
+
+@router.post("/record-expense-name")
+def record_expense_name(body: CreateExpenseNameRequest, db: Session = Depends(get_db)):
+    db.add(ExpenseName(**body.dict())); db.commit()
+    return success_response("Expense name created")
+
+
+class CreateRevenueGroupRequest(BaseModel):
+    name: str
+    head_parish_id: int
+
+@router.post("/create-revenue-group")
+def create_revenue_group(body: CreateRevenueGroupRequest, db: Session = Depends(get_db)):
+    db.add(RevenueGroupModel(**body.dict())); db.commit()
+    return success_response("Revenue group created")
+
+
+class SubmitExpenseRequestBody(BaseModel):
+    management_level: str
+    head_parish_id: int
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+    notes: Optional[str] = None
+    items: List[dict]  # [{expense_name_id, amount, description}]
+
+@router.post("/submit-expense-request")
+def submit_expense_request(body: SubmitExpenseRequestBody, db: Session = Depends(get_db)):
+    total = sum(item.get("amount", 0) for item in body.items)
+    req = ExpenseRequest(
+        management_level=body.management_level, head_parish_id=body.head_parish_id,
+        sub_parish_id=body.sub_parish_id, community_id=body.community_id,
+        group_id=body.group_id, total_amount=total, notes=body.notes,
+    )
+    db.add(req); db.flush()
+    for item in body.items:
+        db.add(ExpenseRequestItem(
+            request_id=req.id, expense_name_id=item["expense_name_id"],
+            amount=item["amount"], description=item.get("description"),
+        ))
+    db.commit()
+    return success_response("Expense request submitted", {"id": req.id})
+
+
+class RespondExpenseRequestBody(BaseModel):
+    request_id: int
+    status: str  # approved / rejected
+    responded_by: int
+
+@router.post("/respond-expense-request")
+def respond_expense_request(body: RespondExpenseRequestBody, db: Session = Depends(get_db)):
+    req = db.query(ExpenseRequest).filter(ExpenseRequest.id == body.request_id).first()
+    if not req:
+        return error_response("Request not found")
+    req.status = body.status
+    req.responded_by = body.responded_by
+    from datetime import datetime
+    req.responded_at = datetime.utcnow()
+    db.commit()
+    return success_response(f"Request {body.status}")
+
+
+# ═══════════════════════════════════════════════════════════════
+# ANNUAL TARGETS & BUDGETS
+# ═══════════════════════════════════════════════════════════════
+
+class SetAnnualRevenueTargetRequest(BaseModel):
+    revenue_stream_id: int
+    head_parish_id: int
+    year: int
+    target_amount: float
+
+@router.post("/set-annual-revenue-target")
+def set_annual_revenue_target(body: SetAnnualRevenueTargetRequest, db: Session = Depends(get_db)):
+    existing = db.query(AnnualRevenueTarget).filter(
+        AnnualRevenueTarget.revenue_stream_id == body.revenue_stream_id,
+        AnnualRevenueTarget.head_parish_id == body.head_parish_id,
+        AnnualRevenueTarget.year == body.year,
+    ).first()
+    if existing:
+        existing.target_amount = body.target_amount
+    else:
+        db.add(AnnualRevenueTarget(**body.dict()))
+    db.commit()
+    return success_response("Revenue target set")
+
+
+class SetAnnualExpenseBudgetRequest(BaseModel):
+    expense_name_id: int
+    head_parish_id: int
+    year: int
+    budget_amount: float
+
+@router.post("/set-annual-expense-budget")
+def set_annual_expense_budget(body: SetAnnualExpenseBudgetRequest, db: Session = Depends(get_db)):
+    existing = db.query(AnnualExpenseBudget).filter(
+        AnnualExpenseBudget.expense_name_id == body.expense_name_id,
+        AnnualExpenseBudget.head_parish_id == body.head_parish_id,
+        AnnualExpenseBudget.year == body.year,
+    ).first()
+    if existing:
+        existing.budget_amount = body.budget_amount
+    else:
+        db.add(AnnualExpenseBudget(**body.dict()))
+    db.commit()
+    return success_response("Budget set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# ATTENDANCE & MEETINGS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordAttendanceRequest(BaseModel):
+    management_level: str
+    event_title: str
+    head_parish_id: int
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+    service_number: Optional[int] = None
+    male_attendance: int = 0
+    female_attendance: int = 0
+    children_attendance: int = 0
+    attendance_date: date_type
+
+@router.post("/record-attendance")
+def record_attendance(body: RecordAttendanceRequest, db: Session = Depends(get_db)):
+    db.add(Attendance(**body.dict())); db.commit()
+    return success_response("Attendance recorded")
+
+
+class SetBenchmarkRequest(BaseModel):
+    head_parish_id: int
+    benchmark: int
+    year: int
+
+@router.post("/set-attendance-benchmark")
+def set_attendance_benchmark(body: SetBenchmarkRequest, db: Session = Depends(get_db)):
+    existing = db.query(AttendanceBenchmark).filter(
+        AttendanceBenchmark.head_parish_id == body.head_parish_id,
+        AttendanceBenchmark.year == body.year,
+    ).first()
+    if existing:
+        existing.benchmark = body.benchmark
+    else:
+        db.add(AttendanceBenchmark(**body.dict()))
+    db.commit()
+    return success_response("Benchmark set")
+
+
+class RecordMeetingRequest(BaseModel):
+    head_parish_id: int
+    title: str
+    description: Optional[str] = None
+    meeting_date: date_type
+    meeting_time: str
+    meeting_place: str
+
+@router.post("/record-meeting")
+def record_meeting(body: RecordMeetingRequest, db: Session = Depends(get_db)):
+    from datetime import time as time_type
+    m = Meeting(
+        head_parish_id=body.head_parish_id, title=body.title,
+        description=body.description, meeting_date=body.meeting_date,
+        meeting_time=time_type.fromisoformat(body.meeting_time), meeting_place=body.meeting_place,
+    )
+    db.add(m); db.commit(); db.refresh(m)
+    return success_response("Meeting created", {"id": m.id})
+
+
+class RecordMeetingMinutesRequest(BaseModel):
+    meeting_id: int
+    content: str
+
+@router.post("/record-meeting-minutes")
+def record_meeting_minutes(body: RecordMeetingMinutesRequest, db: Session = Depends(get_db)):
+    db.add(MeetingMinutes(meeting_id=body.meeting_id, content=body.content)); db.commit()
+    return success_response("Minutes recorded")
+
+
+class RecordMeetingAgendaRequest(BaseModel):
+    meeting_id: int
+    agenda_item: str
+    sort_order: int = 0
+
+@router.post("/set-meeting-agenda")
+def set_meeting_agenda(body: RecordMeetingAgendaRequest, db: Session = Depends(get_db)):
+    db.add(MeetingAgenda(**body.dict())); db.commit()
+    return success_response("Agenda added")
+
+
+class AddMeetingNotesRequest(BaseModel):
+    meeting_id: int
+    note: str
+
+@router.post("/add-meeting-notes")
+def add_meeting_notes(body: AddMeetingNotesRequest, db: Session = Depends(get_db)):
+    db.add(MeetingNotes(**body.dict())); db.commit()
+    return success_response("Notes added")
+
+
+# ═══════════════════════════════════════════════════════════════
+# SUNDAY SERVICE RECORDS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordSundayServiceRequest(BaseModel):
+    head_parish_id: int
+    service_date: date_type
+    service_color_id: Optional[int] = None
+    base_scripture_text: Optional[str] = None
+    large_liturgy_page_number: Optional[int] = None
+    small_liturgy_page_number: Optional[int] = None
+    large_antiphony_page_number: Optional[int] = None
+    small_antiphony_page_number: Optional[int] = None
+    large_praise_page_number: Optional[int] = None
+    small_praise_page_number: Optional[int] = None
+
+@router.post("/record-sunday-service")
+def record_sunday_service(body: RecordSundayServiceRequest, db: Session = Depends(get_db)):
+    existing = db.query(SundayService).filter(
+        SundayService.head_parish_id == body.head_parish_id,
+        SundayService.service_date == body.service_date,
+    ).first()
+    if existing:
+        for field, value in body.dict(exclude={"head_parish_id", "service_date"}).items():
+            if value is not None:
+                setattr(existing, field, value)
+        db.commit()
+        return success_response("Service updated", {"id": existing.id})
+    s = SundayService(**body.dict())
+    db.add(s); db.commit(); db.refresh(s)
+    return success_response("Service created", {"id": s.id})
+
+
+class SetServiceOfferingsRequest(BaseModel):
+    service_id: int
+    offerings: List[dict]  # [{service_number, revenue_stream_id, amount}]
+
+@router.post("/set-sunday-service-offerings")
+def set_service_offerings(body: SetServiceOfferingsRequest, db: Session = Depends(get_db)):
+    db.query(SundayServiceOffering).filter(SundayServiceOffering.service_id == body.service_id).delete()
+    for o in body.offerings:
+        db.add(SundayServiceOffering(service_id=body.service_id, **o))
+    db.commit()
+    return success_response("Offerings set")
+
+
+class SetServiceScripturesRequest(BaseModel):
+    service_id: int
+    scriptures: List[dict]  # [{service_number, book, chapter, verse_from, verse_to}]
+
+@router.post("/set-sunday-service-scriptures")
+def set_service_scriptures(body: SetServiceScripturesRequest, db: Session = Depends(get_db)):
+    db.query(SundayServiceScripture).filter(SundayServiceScripture.service_id == body.service_id).delete()
+    for s in body.scriptures:
+        db.add(SundayServiceScripture(service_id=body.service_id, **s))
+    db.commit()
+    return success_response("Scriptures set")
+
+
+class SetServiceSongsRequest(BaseModel):
+    service_id: int
+    songs: List[dict]  # [{service_number, song_id}]
+
+@router.post("/set-sunday-service-songs")
+def set_service_songs(body: SetServiceSongsRequest, db: Session = Depends(get_db)):
+    db.query(SundayServiceSong).filter(SundayServiceSong.service_id == body.service_id).delete()
+    for s in body.songs:
+        db.add(SundayServiceSong(service_id=body.service_id, **s))
+    db.commit()
+    return success_response("Songs set")
+
+
+class SetServiceChoirsRequest(BaseModel):
+    service_id: int
+    choirs: List[dict]  # [{service_number, choir_id}]
+
+@router.post("/set-sunday-service-choirs")
+def set_service_choirs(body: SetServiceChoirsRequest, db: Session = Depends(get_db)):
+    db.query(SundayServiceChoir).filter(SundayServiceChoir.service_id == body.service_id).delete()
+    for c in body.choirs:
+        db.add(SundayServiceChoir(service_id=body.service_id, **c))
+    db.commit()
+    return success_response("Choirs set")
+
+
+class SetServiceLeaderRequest(BaseModel):
+    service_id: int
+    service_number: int
+    leader_name: str
+    role: Optional[str] = None
+
+@router.post("/set-sunday-service-leader")
+def set_service_leader(body: SetServiceLeaderRequest, db: Session = Depends(get_db)):
+    existing = db.query(SundayServiceLeader).filter(
+        SundayServiceLeader.service_id == body.service_id,
+        SundayServiceLeader.service_number == body.service_number,
+    ).first()
+    if existing:
+        existing.leader_name = body.leader_name
+    else:
+        db.add(SundayServiceLeader(**body.dict()))
+    db.commit()
+    return success_response("Leader set")
+
+
+class SetServicePreacherRequest(BaseModel):
+    service_id: int
+    service_number: int
+    preacher_name: str
+
+@router.post("/set-sunday-service-preacher")
+def set_service_preacher(body: SetServicePreacherRequest, db: Session = Depends(get_db)):
+    existing = db.query(SundayServicePreacher).filter(
+        SundayServicePreacher.service_id == body.service_id,
+        SundayServicePreacher.service_number == body.service_number,
+    ).first()
+    if existing:
+        existing.preacher_name = body.preacher_name
+    else:
+        db.add(SundayServicePreacher(**body.dict()))
+    db.commit()
+    return success_response("Preacher set")
+
+
+class SetServiceEldersRequest(BaseModel):
+    service_id: int
+    elders: List[dict]  # [{service_number, elder_name}]
+
+@router.post("/set-sunday-service-elders")
+def set_service_elders(body: SetServiceEldersRequest, db: Session = Depends(get_db)):
+    db.query(SundayServiceElder).filter(SundayServiceElder.service_id == body.service_id).delete()
+    for e in body.elders:
+        db.add(SundayServiceElder(service_id=body.service_id, **e))
+    db.commit()
+    return success_response("Elders set")
+
+
+class SetServiceTimesRequest(BaseModel):
+    service_id: int
+    times: List[dict]  # [{service_number, time}]
+
+@router.post("/set-sunday-service-times")
+def set_service_times(body: SetServiceTimesRequest, db: Session = Depends(get_db)):
+    # Stored in head_parish_service_times
+    for t in body.times:
+        from datetime import time as time_type
+        sn = t["service_number"]
+        st = time_type.fromisoformat(t["time"])
+        service = db.query(SundayService).filter(SundayService.id == body.service_id).first()
+        if not service:
+            return error_response("Service not found")
+        existing = db.query(HeadParishServiceTime).filter(
+            HeadParishServiceTime.head_parish_id == service.head_parish_id,
+            HeadParishServiceTime.service_number == sn,
+        ).first()
+        if existing:
+            existing.start_time = st
+        else:
+            db.add(HeadParishServiceTime(
+                head_parish_id=service.head_parish_id, service_number=sn, start_time=st
+            ))
+    db.commit()
+    return success_response("Service times set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# ASSETS
+# ═══════════════════════════════════════════════════════════════
+
+class AddAssetRequest(BaseModel):
+    head_parish_id: int
+    name: str
+    generates_revenue: bool = False
+
+@router.post("/add-asset")
+def add_asset(body: AddAssetRequest, db: Session = Depends(get_db)):
+    db.add(Asset(**body.dict())); db.commit()
+    return success_response("Asset added")
+
+
+class RecordAssetRevenueRequest(BaseModel):
+    asset_id: int
+    amount: float
+    revenue_date: date_type
+    description: Optional[str] = None
+
+@router.post("/record-asset-revenue")
+def record_asset_revenue(body: RecordAssetRevenueRequest, db: Session = Depends(get_db)):
+    db.add(AssetRevenue(**body.dict())); db.commit()
+    return success_response("Asset revenue recorded")
+
+
+class RecordAssetExpenseRequest(BaseModel):
+    asset_id: int
+    amount: float
+    expense_date: date_type
+    description: Optional[str] = None
+
+@router.post("/record-asset-expense")
+def record_asset_expense(body: RecordAssetExpenseRequest, db: Session = Depends(get_db)):
+    db.add(AssetExpense(**body.dict())); db.commit()
+    return success_response("Asset expense recorded")
+
+
+class RecordAssetStatusRequest(BaseModel):
+    asset_id: int
+    status: str
+    notes: Optional[str] = None
+
+@router.post("/record-asset-status")
+def record_asset_status(body: RecordAssetStatusRequest, db: Session = Depends(get_db)):
+    asset = db.query(Asset).filter(Asset.id == body.asset_id).first()
+    if asset:
+        asset.status = body.status
+    db.add(AssetStatusLog(asset_id=body.asset_id, status=body.status, notes=body.notes))
+    db.commit()
+    return success_response("Asset status updated")
+
+
+# ═══════════════════════════════════════════════════════════════
+# EVENTS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordChurchEventRequest(BaseModel):
+    head_parish_id: int
+    title: str
+    description: Optional[str] = None
+    event_date: date_type
+    event_time: Optional[str] = None
+    location: Optional[str] = None
+
+@router.post("/record-church-event")
+def record_church_event(body: RecordChurchEventRequest, db: Session = Depends(get_db)):
+    from datetime import time as time_type
+    evt = ChurchEvent(
+        head_parish_id=body.head_parish_id, title=body.title,
+        description=body.description, event_date=body.event_date,
+        event_time=time_type.fromisoformat(body.event_time) if body.event_time else None,
+        location=body.location,
+    )
+    db.add(evt); db.commit(); db.refresh(evt)
+    return success_response("Event created", {"id": evt.id})
+
+
+# ═══════════════════════════════════════════════════════════════
+# MEMBER EXCLUSION
+# ═══════════════════════════════════════════════════════════════
+
+class ExcludeMemberRequest(BaseModel):
+    member_id: int
+    reason: str
+
+@router.post("/exclude-church-member")
+def exclude_church_member(body: ExcludeMemberRequest, db: Session = Depends(get_db)):
+    member = db.query(ChurchMember).filter(ChurchMember.id == body.member_id).first()
+    if not member:
+        return error_response("Member not found")
+    member.status = "Excluded"
+    db.add(MemberExclusion(member_id=body.member_id, reason=body.reason))
+    db.commit()
+    return success_response("Member excluded")
+
+
+class RecordExclusionReasonRequest(BaseModel):
+    head_parish_id: int
+    reason: str
+    reason_type: str = "member"  # member | harambee
+
+@router.post("/record-exclusion-reason")
+def record_exclusion_reason(body: RecordExclusionReasonRequest, db: Session = Depends(get_db)):
+    if body.reason_type == "harambee":
+        db.add(HarambeeExclusionReason(head_parish_id=body.head_parish_id, reason=body.reason))
+    else:
+        db.add(MemberExclusionReason(head_parish_id=body.head_parish_id, reason=body.reason))
+    db.commit()
+    return success_response("Exclusion reason recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# BANK OPERATIONS
+# ═══════════════════════════════════════════════════════════════
+
+class PostToBankRequest(BaseModel):
+    account_id: int
+    amount: float
+    posting_type: str = "credit"
+    reference_type: Optional[str] = None
+    reference_id: Optional[int] = None
+    description: Optional[str] = None
+
+@router.post("/post-to-bank")
+def post_to_bank(body: PostToBankRequest, db: Session = Depends(get_db)):
+    db.add(BankPosting(**body.dict()))
+    account = db.query(BankAccount).filter(BankAccount.id == body.account_id).first()
+    if account:
+        from decimal import Decimal
+        if body.posting_type == "credit":
+            account.balance += Decimal(str(body.amount))
+        else:
+            account.balance -= Decimal(str(body.amount))
+    db.commit()
+    return success_response("Posted to bank")
+
+
+class RecordClosingBalanceRequest(BaseModel):
+    account_id: int
+    closing_balance: float
+    balance_date: date_type
+
+@router.post("/record-bank-closing-balance")
+def record_closing_balance(body: RecordClosingBalanceRequest, db: Session = Depends(get_db)):
+    db.add(BankClosingBalance(**body.dict())); db.commit()
+    return success_response("Closing balance recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# DEBITS
+# ═══════════════════════════════════════════════════════════════
+
+class RecordDebitRequest(BaseModel):
+    head_parish_id: int
+    description: str
+    amount: float
+    date_debited: date_type
+    return_before_date: date_type
+    purpose: str
+
+@router.post("/record-debit")
+def record_debit(body: RecordDebitRequest, db: Session = Depends(get_db)):
+    db.add(HeadParishDebit(**body.dict())); db.commit()
+    return success_response("Debit recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# CONFIG: SMS, Revenue Mapping, Services
+# ═══════════════════════════════════════════════════════════════
+
+class RecordSmsApiRequest(BaseModel):
+    head_parish_id: int
+    account_name: str
+    api_username: str
+    api_password: str
+    sender_id: Optional[str] = None
+
+@router.post("/record-sms-api-info")
+def record_sms_api(body: RecordSmsApiRequest, db: Session = Depends(get_db)):
+    existing = db.query(SmsApiConfig).filter(SmsApiConfig.head_parish_id == body.head_parish_id).first()
+    if existing:
+        for k, v in body.dict(exclude_unset=True).items():
+            setattr(existing, k, v)
+    else:
+        db.add(SmsApiConfig(**body.dict()))
+    db.commit()
+    return success_response("SMS API info saved")
+
+
+class MapProgramToRevenueRequest(BaseModel):
+    head_parish_id: int
+    program_name: str
+    revenue_stream_id: int
+
+@router.post("/map-program-to-revenue")
+def map_program_to_revenue(body: MapProgramToRevenueRequest, db: Session = Depends(get_db)):
+    existing = db.query(ProgramRevenueMap).filter(
+        ProgramRevenueMap.head_parish_id == body.head_parish_id,
+        ProgramRevenueMap.program_name == body.program_name,
+    ).first()
+    if existing:
+        existing.revenue_stream_id = body.revenue_stream_id
+    else:
+        db.add(ProgramRevenueMap(**body.dict()))
+    db.commit()
+    return success_response("Program mapped to revenue stream")
+
+
+class SetServicesCountRequest(BaseModel):
+    head_parish_id: int
+    services_count: int
+
+@router.post("/set-services-count")
+def set_services_count(body: SetServicesCountRequest, db: Session = Depends(get_db)):
+    existing = db.query(HeadParishServicesCount).filter(HeadParishServicesCount.head_parish_id == body.head_parish_id).first()
+    if existing:
+        existing.services_count = body.services_count
+    else:
+        db.add(HeadParishServicesCount(**body.dict()))
+    db.commit()
+    return success_response("Services count set")
+
+
+class SetServiceTimeRequest(BaseModel):
+    head_parish_id: int
+    service_number: int
+    start_time: str
+
+@router.post("/set-service-time")
+def set_service_time(body: SetServiceTimeRequest, db: Session = Depends(get_db)):
+    from datetime import time as time_type
+    st = time_type.fromisoformat(body.start_time)
+    existing = db.query(HeadParishServiceTime).filter(
+        HeadParishServiceTime.head_parish_id == body.head_parish_id,
+        HeadParishServiceTime.service_number == body.service_number,
+    ).first()
+    if existing:
+        existing.start_time = st
+    else:
+        db.add(HeadParishServiceTime(
+            head_parish_id=body.head_parish_id, service_number=body.service_number, start_time=st
+        ))
+    db.commit()
+    return success_response("Service time set")
+
+
+# ═══════════════════════════════════════════════════════════════
+# REGISTRATION ROUTES
+# ═══════════════════════════════════════════════════════════════
+
+class RegisterBankRequest(BaseModel):
+    name: str
+
+@router.post("/register-bank")
+def register_bank(body: RegisterBankRequest, db: Session = Depends(get_db)):
+    from models.banking import BankPosting  # already imported above
+    db.execute(text("INSERT INTO banks (name) VALUES (:name)"), {"name": body.name.upper()})
+    db.commit()
+    return success_response("Bank registered")
+
+
+class RegisterBankAccountRequest(BaseModel):
+    account_name: str
+    account_number: str
+    bank_id: int
+    entity_type: str
+    entity_id: int
+    balance: float = 0.0
+
+@router.post("/register-bank-account")
+def register_bank_account(body: RegisterBankAccountRequest, db: Session = Depends(get_db)):
+    db.add(BankAccount(**body.dict())); db.commit()
+    return success_response("Bank account registered")
+
+
+class RegisterRevenueStreamRequest(BaseModel):
+    name: str
+    account_id: int
+    entity_type: str
+    entity_id: int
+
+@router.post("/register-revenue-stream")
+def register_revenue_stream(body: RegisterRevenueStreamRequest, db: Session = Depends(get_db)):
+    db.add(RevenueStream(**body.dict())); db.commit()
+    return success_response("Revenue stream registered")
+
+
+class RegisterOccupationRequest(BaseModel):
+    name: str
+
+@router.post("/register-occupation")
+def register_occupation(body: RegisterOccupationRequest, db: Session = Depends(get_db)):
+    db.execute(text("INSERT INTO occupations (name) VALUES (:name)"), {"name": body.name})
+    db.commit()
+    return success_response("Occupation registered")
+
+
+class RegisterTitleRequest(BaseModel):
+    name: str
+
+@router.post("/register-title")
+def register_title(body: RegisterTitleRequest, db: Session = Depends(get_db)):
+    db.execute(text("INSERT INTO titles (name) VALUES (:name)"), {"name": body.name})
+    db.commit()
+    return success_response("Title registered")
+
+
+class RegisterPraiseSongRequest(BaseModel):
+    song_number: int
+    name: str
+
+@router.post("/register-praise-song")
+def register_praise_song(body: RegisterPraiseSongRequest, db: Session = Depends(get_db)):
+    db.execute(text("INSERT INTO praise_songs (song_number, name) VALUES (:sn, :name)"),
+               {"sn": body.song_number, "name": body.name})
+    db.commit()
+    return success_response("Praise song registered")
+
+
+class RegisterPaymentGatewayWalletRequest(BaseModel):
+    head_parish_id: int
+    wallet_name: str
+    wallet_number: str
+    provider: str
+
+@router.post("/register-payment-gateway-wallet")
+def register_payment_wallet(body: RegisterPaymentGatewayWalletRequest, db: Session = Depends(get_db)):
+    db.add(PaymentGatewayWallet(**body.dict())); db.commit()
+    return success_response("Wallet registered")
+
+
+# ═══════════════════════════════════════════════════════════════
+# DELETE OPERATIONS
+# Replaces: legacy/api/delete/*
+# ═══════════════════════════════════════════════════════════════
+
+@router.delete("/exclusion-reason/{reason_id}")
+def delete_exclusion_reason(reason_id: int, reason_type: str = "member", db: Session = Depends(get_db)):
+    if reason_type == "harambee":
+        db.query(HarambeeExclusionReason).filter(HarambeeExclusionReason.id == reason_id).delete()
+    else:
+        db.query(MemberExclusionReason).filter(MemberExclusionReason.id == reason_id).delete()
+    db.commit()
+    return success_response("Reason deleted")
+
+@router.delete("/excluded-member/{member_id}")
+def reinstate_member(member_id: int, db: Session = Depends(get_db)):
+    member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
+    if member:
+        member.status = "Active"
+        db.commit()
+    return success_response("Member reinstated")
+
+@router.delete("/harambee-excluded-member")
+def delete_harambee_exclusion(harambee_id: int, member_id: int, db: Session = Depends(get_db)):
+    db.query(HarambeeExclusion).filter(
+        HarambeeExclusion.harambee_id == harambee_id, HarambeeExclusion.member_id == member_id
+    ).delete()
+    db.commit()
+    return success_response("Harambee exclusion removed")
+
+@router.delete("/harambee-group/{group_id}")
+def delete_harambee_group(group_id: int, db: Session = Depends(get_db)):
+    db.query(HarambeeGroupMember).filter(HarambeeGroupMember.harambee_group_id == group_id).delete()
+    db.query(HarambeeGroup).filter(HarambeeGroup.id == group_id).delete()
+    db.commit()
+    return success_response("Group deleted")
+
+@router.delete("/harambee-group-member")
+def delete_harambee_group_member(harambee_group_id: int, member_id: int, db: Session = Depends(get_db)):
+    db.query(HarambeeGroupMember).filter(
+        HarambeeGroupMember.harambee_group_id == harambee_group_id,
+        HarambeeGroupMember.member_id == member_id,
+    ).delete()
+    db.commit()
+    return success_response("Member removed from group")

@@ -1,7 +1,6 @@
 # api/routes/__init__.py
 """Kanisa Langu API Routes."""
 from .auth import router as auth_router
-from .references import router as references_router
 from .hierarchy import router as hierarchy_router
 from .admins import router as admins_router
 from .members import router as members_router
@@ -14,10 +13,13 @@ from .meetings import router as meetings_router
 from .assets import router as assets_router
 from .payments import router as payments_router
 from .reports import router as reports_router
+from .church_member_api import router as church_member_router
+from .data import router as data_router
+from .records import router as records_router
+from .notifications import router as notifications_router
 
 all_routers = [
     auth_router,             # /auth/...
-    references_router,       # /references/...
     hierarchy_router,        # /dioceses, /provinces, /head-parishes, etc.
     admins_router,           # /admins/...
     members_router,          # /members/...
@@ -30,4 +32,8 @@ all_routers = [
     assets_router,           # /assets/...
     payments_router,         # /payments/...
     reports_router,          # /reports/...
+    church_member_router,    # /church-member/... (mobile app APIs)
+    data_router,             # /data/... (reference data & lookups)
+    records_router,          # /records/... (admin record operations)
+    notifications_router,    # /notifications/... (push, SMS, delayed)
 ]

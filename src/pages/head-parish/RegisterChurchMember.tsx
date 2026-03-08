@@ -21,7 +21,7 @@ export default function RegisterChurchMember() {
         { name: "type", label: "Type", type: "select", required: true, options: [
           { value: "Mgeni", label: "Mgeni" }, { value: "Mwenyeji", label: "Mwenyeji" }
         ]},
-        { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: mockSubParishes.map(s => ({ value: String(s.id), label: s.name })) },
+        { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: mockSubParishes.map(s => ({ value: String(s.id), label: s.name || "" })) },
         { name: "community_id", label: "Community", type: "select", required: true, options: [
           { value: "1", label: "Mwika" }, { value: "2", label: "Marangu" }, { value: "3", label: "Machame" }
         ]},

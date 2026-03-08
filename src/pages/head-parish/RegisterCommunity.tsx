@@ -9,7 +9,7 @@ export default function RegisterCommunity() {
       submitLabel="Register Community"
       fields={[
         { name: "name", label: "Community Name", type: "text", placeholder: "Enter community name", required: true },
-        { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: mockSubParishes.map(s => ({ value: String(s.id), label: s.name })) },
+        { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: mockSubParishes.map(s => ({ value: String(s.id), label: s.name || "" })) },
         { name: "description", label: "Description", type: "textarea", placeholder: "Enter description", colSpan: 2 },
       ]}
     />

@@ -1359,6 +1359,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Record a member's harambee contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions.slice(0, 3) },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },

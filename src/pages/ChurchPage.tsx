@@ -7,7 +7,7 @@ import elctIcon from "../assets/elct-icon.png";
 import rcIcon from "../assets/rc-icon.png";
 import sdaIcon from "../assets/sda-icon.png";
 import pentecostalIcon from "../assets/pentecostal-icon.png";
-import appMockup from "../assets/app-mockup.png";
+
 
 const elctLevels = [
   { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },
@@ -152,98 +152,65 @@ export default function ChurchPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden min-h-[85vh] flex items-center">
+      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden min-h-[80vh] flex items-center">
         {/* Layered background */}
         <div className="absolute inset-0">
-          {/* Radial gradient base */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,hsl(220,72%,20%,0.3),transparent)]" />
-          {/* Accent orb */}
-          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-[0.12]" style={{ background: church.accent }} />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-[200px] opacity-[0.1]" style={{ background: church.accent }} />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[200px]" />
-          {/* Noise texture overlay */}
           <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.5\'/%3E%3C/svg%3E")' }} />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 relative z-10 w-full">
+        <div className="max-w-5xl mx-auto px-6 pt-36 pb-24 relative z-10 w-full text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors mb-16 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
 
-          <div className="grid lg:grid-cols-[1fr,420px] gap-12 lg:gap-20 items-center">
-            {/* Left: Content */}
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <div className="flex items-center gap-3 mb-10">
-                <img src={church.icon} alt={church.name} className="w-12 h-12 rounded-2xl bg-white/[0.06] p-2 border border-white/[0.06]" />
-                <div className="h-px w-8 bg-white/10" />
-                <span className="text-xs font-bold text-white/25 uppercase tracking-[0.2em]">{church.fullName}</span>
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white font-display tracking-tight leading-[1.1] mb-5">
-                {church.tagline}
-              </h1>
-
-              <p className="text-base text-white/35 leading-relaxed max-w-lg mb-10">
-                {church.description}
-              </p>
-
-              {/* Inline stats */}
-              <div className="flex items-center gap-6 mb-10">
-                {[
-                  { value: "500+", label: "Churches" },
-                  { value: "50K+", label: "Members" },
-                  { value: "6", label: "Features" },
-                ].map((stat, i) => (
-                  <div key={stat.label} className="flex items-center gap-6">
-                    {i > 0 && <div className="h-8 w-px bg-white/[0.08]" />}
-                    <div>
-                      <div className="text-2xl font-bold text-white font-display">{stat.value}</div>
-                      <div className="text-[11px] font-medium text-white/25 uppercase tracking-wider">{stat.label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-7 py-3.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-secondary/20"
-                >
-                  Get on Google Play
-                </a>
-                <a
-                  href="https://apps.apple.com/app/id6741481584"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-7 py-3.5 text-white/50 border border-white/[0.08] rounded-xl font-medium text-sm hover:text-white hover:border-white/20 transition-all duration-300"
-                >
-                  Download on App Store
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Right: App Mockup */}
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            {/* Church badge */}
             <motion.div
-              initial={{ opacity: 0, y: 40, rotateY: -8 }}
-              animate={{ opacity: 1, y: 0, rotateY: 0 }}
-              transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden lg:flex justify-center relative"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/[0.06] bg-white/[0.03] mb-10"
             >
-              {/* Glow behind phone */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-64 h-64 rounded-full blur-[100px] opacity-20" style={{ background: church.accent }} />
-              </div>
-              <motion.img
-                src={appMockup}
-                alt="Kanisa Langu App"
-                className="relative z-10 w-[340px] drop-shadow-2xl"
-                animate={{ y: [0, -12, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              />
+              <img src={church.icon} alt={church.name} className="w-8 h-8 rounded-xl" />
+              <span className="text-xs font-bold text-white/40 uppercase tracking-[0.2em]">{church.fullName}</span>
             </motion.div>
-          </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white font-display tracking-tight leading-[1.05] mb-6 max-w-4xl mx-auto">
+              {church.tagline}
+            </h1>
+
+            <p className="text-base sm:text-lg text-white/35 leading-relaxed max-w-2xl mx-auto mb-12">
+              {church.description}
+            </p>
+
+            {/* Feature pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap justify-center gap-3"
+            >
+              {church.features.slice(0, 4).map((feat, i) => (
+                <motion.div
+                  key={feat.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.06] bg-white/[0.03] text-white/50 text-sm font-medium"
+                >
+                  <feat.icon className="w-3.5 h-3.5 opacity-60" style={{ color: church.accent }} />
+                  {feat.title}
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
+
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* ELCT Church Structure Levels */}

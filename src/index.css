@@ -102,23 +102,22 @@
     box-shadow: 0 0 80px -20px hsla(220, 72%, 20%, 0.3);
   }
   .admin-glow {
-    box-shadow: 0 4px 24px -4px hsla(220, 25%, 0%, 0.5);
+    box-shadow: 0 1px 3px 0 hsla(220, 20%, 0%, 0.06), 0 1px 2px -1px hsla(220, 20%, 0%, 0.06);
   }
   .admin-glow-gold {
-    box-shadow: 0 0 40px -10px hsla(42, 92%, 56%, 0.15);
+    box-shadow: 0 0 40px -10px hsla(42, 92%, 50%, 0.1);
   }
   .admin-card {
-    background: hsla(220, 25%, 8%, 0.8);
-    border: 1px solid hsla(220, 20%, 14%, 0.6);
-    backdrop-filter: blur(12px);
+    background: hsl(0, 0%, 100%);
+    border: 1px solid hsl(220, 14%, 90%);
   }
   .admin-input {
-    background: hsla(220, 25%, 6%, 0.8);
-    border: 1px solid hsla(220, 20%, 14%, 0.5);
-    color: hsl(220, 10%, 92%);
+    background: hsl(220, 20%, 97%);
+    border: 1px solid hsl(220, 14%, 90%);
+    color: hsl(220, 30%, 12%);
   }
   .admin-input:focus {
-    border-color: hsl(42, 92%, 56%);
-    box-shadow: 0 0 0 2px hsla(42, 92%, 56%, 0.15);
+    border-color: hsl(42, 92%, 50%);
+    box-shadow: 0 0 0 2px hsla(42, 92%, 50%, 0.15);
   }
 }

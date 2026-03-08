@@ -691,6 +691,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Record a member's harambee contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },

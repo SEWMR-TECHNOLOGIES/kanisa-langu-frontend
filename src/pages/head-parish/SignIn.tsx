@@ -75,7 +75,7 @@ export default function SignIn() {
               { label: "Revenue Tracked", value: "TZS 15.2M" },
               { label: "Sub Parishes", value: "8" },
               { label: "Communities", value: "15" },
-            ].map((stat, i) => (
+            ].map((stat) => (
               <div key={stat.label} className="p-4 rounded-2xl" style={{ background: "hsla(220, 25%, 8%, 0.8)", border: "1px solid hsla(220, 20%, 14%, 0.5)" }}>
                 <p className="text-2xl font-bold font-display" style={{ color: "hsl(42, 92%, 56%)" }}>{stat.value}</p>
                 <p className="text-xs mt-1" style={{ color: "hsl(220, 10%, 50%)" }}>{stat.label}</p>

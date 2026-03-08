@@ -40,8 +40,8 @@ export default function Navbar() {
           <div
             className={`max-w-6xl mx-auto transition-all duration-500 ${
               scrolled
-                ? "bg-[hsl(220,30%,6%)]/80 backdrop-blur-2xl border-b border-white/[0.06] rounded-none"
-                : "bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl"
+                ? "bg-card/90 backdrop-blur-2xl border-b border-border shadow-sm rounded-none"
+                : "bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl shadow-sm"
             }`}
           >
             <div className="flex items-center justify-between h-16 px-6">

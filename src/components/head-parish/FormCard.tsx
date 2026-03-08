@@ -78,6 +78,12 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
                     placeholder={field.placeholder || `Pick ${field.label.toLowerCase()}`}
                     required={field.required}
                   />
+                ) : field.type === "file" ? (
+                  <ModernFileUpload
+                    name={field.name}
+                    accept={field.accept || ".xls,.xlsx"}
+                    required={field.required}
+                  />
                 ) : field.type === "textarea" ? (
                   <textarea
                     id={field.name}

@@ -1,5 +1,5 @@
 import FormCard from "../../components/head-parish/FormCard";
-import { mockBankAccounts, mockSubParishes } from "../../data/headParishMockData";
+import { mockBankAccounts } from "../../data/headParishMockData";
 
 export default function FinancialStatement() {
   return (

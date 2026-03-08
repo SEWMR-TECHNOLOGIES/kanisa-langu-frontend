@@ -1,5 +1,4 @@
 import FormCard from "../../components/head-parish/FormCard";
-import { mockBankAccounts } from "../../data/headParishMockData";
 
 export default function RegisterBankAccount() {
   return (

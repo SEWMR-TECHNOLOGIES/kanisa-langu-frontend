@@ -63,26 +63,6 @@ export default function Hero() {
               Finances, members, and communications for ELCT, Roman Catholic, SDA, and Pentecostal churches. All in one place.
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap gap-3 mt-8"
-            >
-              <button
-                onClick={() => scrollTo("#churches")}
-                className="px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/20"
-              >
-                Get Started
-              </button>
-              <button
-                onClick={() => scrollTo("#features")}
-                className="px-7 py-3.5 text-foreground border border-border rounded-xl font-medium text-sm hover:bg-muted transition-all duration-300"
-              >
-                Learn More
-              </button>
-            </motion.div>
-
             {/* Denomination cards */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}

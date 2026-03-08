@@ -40,8 +40,8 @@ export default function Navbar() {
           <div
             className={`max-w-6xl mx-auto transition-all duration-500 ${
               scrolled
-                ? "bg-[hsl(220,30%,6%)]/80 backdrop-blur-2xl border-b border-white/[0.06] rounded-none"
-                : "bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl"
+                ? "bg-card/90 backdrop-blur-2xl border-b border-border shadow-sm rounded-none"
+                : "bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl shadow-sm"
             }`}
           >
             <div className="flex items-center justify-between h-16 px-6">
@@ -51,19 +51,19 @@ export default function Navbar() {
                   <img src={logo} alt="Kanisa Langu" className="h-8 w-8 relative z-10" />
                   <div className="absolute inset-0 bg-secondary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <span className="text-[15px] font-semibold tracking-tight text-white">
+                <span className="text-[15px] font-semibold tracking-tight text-foreground">
                   Kanisa Langu
                 </span>
               </Link>
 
               {/* Center nav - pill style */}
               <nav className="hidden md:flex items-center">
-                <div className="flex items-center gap-0.5 px-1 py-1 rounded-xl bg-white/[0.04]">
+                <div className="flex items-center gap-0.5 px-1 py-1 rounded-xl bg-muted/50">
                   {navLinks.map((link) => (
                     <button
                       key={link.href}
                       onClick={() => scrollTo(link.href)}
-                      className="relative px-4 py-1.5 text-[13px] font-medium text-white/50 hover:text-white rounded-lg transition-all duration-200 hover:bg-white/[0.06]"
+                      className="relative px-4 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 hover:bg-muted"
                     >
                       {link.label}
                     </button>
@@ -77,7 +77,7 @@ export default function Navbar() {
                   href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2 px-5 py-2 text-[13px] font-semibold bg-white text-[hsl(220,30%,6%)] rounded-xl hover:bg-white/90 transition-all duration-200"
+                  className="group flex items-center gap-2 px-5 py-2 text-[13px] font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all duration-200"
                 >
                   Get Started
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -87,7 +87,7 @@ export default function Navbar() {
               {/* Mobile toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+                className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <AnimatePresence mode="wait">
                   {mobileOpen ? (

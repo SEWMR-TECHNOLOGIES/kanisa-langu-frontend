@@ -221,73 +221,39 @@ export default function ChurchPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="mb-14"
             >
               <span className="text-sm font-bold text-secondary uppercase tracking-widest">Full hierarchy support</span>
               <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">
                 Every level of the ELCT structure
               </h2>
-              <p className="mt-4 text-muted-foreground text-lg max-w-2xl mx-auto">
-                Kanisa Langu manages the complete ELCT organizational hierarchy, from Diocese down to individual members.
+              <p className="mt-4 text-muted-foreground text-lg max-w-2xl">
+                Kanisa Langu manages the complete ELCT organizational hierarchy, giving each level the tools it needs while maintaining seamless data flow across the entire structure.
               </p>
             </motion.div>
 
-            {/* Horizontal hierarchy flow */}
-            <div className="relative">
-              {/* Desktop: horizontal flow */}
-              <div className="hidden lg:flex items-start justify-between relative">
-                {/* Connecting line */}
-                <div className="absolute top-10 left-[calc(8.33%+24px)] right-[calc(8.33%+24px)] h-px bg-gradient-to-r from-secondary/10 via-secondary/30 to-secondary/10 z-0" />
-
-                {elctLevels.map((level, i) => (
-                  <motion.div
-                    key={level.name}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex flex-col items-center text-center relative z-10 flex-1 px-2"
-                  >
-                    {/* Node circle */}
-                    <div className="w-20 h-20 rounded-2xl bg-card border-2 border-secondary/20 flex items-center justify-center mb-4 shadow-sm hover:border-secondary/50 hover:shadow-md hover:shadow-secondary/10 transition-all duration-300">
-                      <level.icon className="w-8 h-8 text-secondary" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {elctLevels.map((level, i) => (
+                <motion.div
+                  key={level.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  className="p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                      <level.icon className="w-5 h-5 text-secondary" />
                     </div>
-
-                    {/* Arrow indicator (except last) */}
-                    {i < elctLevels.length - 1 && (
-                      <div className="absolute top-10 -right-1 text-secondary/30 hidden lg:block" style={{ transform: 'translateX(50%)' }}>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6H10M10 6L6 2M10 6L6 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    )}
-
-                    <span className="text-[10px] font-bold text-secondary/60 uppercase tracking-widest mb-1">Level {i + 1}</span>
-                    <h3 className="text-sm font-bold text-foreground mb-1.5">{level.name}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed max-w-[150px]">{level.description}</p>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Mobile/Tablet: 2-col grid with flow */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 lg:hidden">
-                {elctLevels.map((level, i) => (
-                  <motion.div
-                    key={level.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.08 }}
-                    className="flex flex-col items-center text-center p-5 rounded-2xl bg-card border border-border"
-                  >
-                    <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center mb-3">
-                      <level.icon className="w-6 h-6 text-secondary" />
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Level {i + 1}</span>
+                      <h3 className="text-base font-bold text-foreground">{level.name}</h3>
                     </div>
-                    <span className="text-[9px] font-bold text-secondary/50 uppercase tracking-widest mb-1">Level {i + 1}</span>
-                    <h3 className="text-sm font-bold text-foreground">{level.name}</h3>
-                  </motion.div>
-                ))}
-              </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>

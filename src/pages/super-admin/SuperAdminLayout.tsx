@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Globe, MapPin, Building2, Database, Tag, Briefcase, Music,
-  CreditCard, BarChart3, LogOut, ChevronDown, Menu, X, User, Bell
+  CreditCard, BarChart3, LogOut, ChevronDown, Menu, X, Bell
 } from "lucide-react";
 import logo from "../../assets/kanisa-logo.png";
 

@@ -2,16 +2,18 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import ModernSelect from "./ModernSelect";
 import ModernDatePicker from "./ModernDatePicker";
+import ModernFileUpload from "./ModernFileUpload";
 
 interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number";
+  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number" | "file" | "time";
   placeholder?: string;
   required?: boolean;
   readOnly?: boolean;
   options?: { value: string; label: string }[];
   colSpan?: 1 | 2;
+  accept?: string;
 }
 
 interface FormCardProps {

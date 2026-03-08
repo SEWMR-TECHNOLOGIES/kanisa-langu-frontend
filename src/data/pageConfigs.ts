@@ -1721,6 +1721,18 @@ export const groupPages: Record<string, PageConfig> = {
       { name: "amount", label: "Budget (TZS)", type: "number", placeholder: "Enter budget", required: true },
     ],
   },
+  "make-expense-request": {
+    title: "Make Expense Request",
+    description: "Submit a new expense request",
+    type: "form",
+    submitLabel: "Submit Request",
+    fields: [
+      { name: "group", label: "Expense Group", type: "select", required: true, options: expenseGroupOptions },
+      { name: "description", label: "Description", type: "text", placeholder: "Enter description", required: true },
+      { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
+      { name: "notes", label: "Notes", type: "textarea", placeholder: "Additional notes", colSpan: 2 },
+    ],
+  },
   "expense-requests": {
     title: "Expense Requests",
     description: "All expense requests",

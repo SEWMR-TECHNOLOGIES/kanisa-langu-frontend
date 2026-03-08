@@ -13,15 +13,16 @@ export default function AutoPage({ configs }: AutoPageProps) {
   const config = configs[slug];
 
   if (!config) {
-    // Should never happen if routing is correct
     const pageName = slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-xl font-bold text-admin-text-bright font-display">{pageName}</h1>
-          <p className="text-sm text-admin-text mt-1">This page is loading...</p>
-        </div>
-      </div>
+      <FormCard
+        title={pageName}
+        description={`Manage ${pageName.toLowerCase()}`}
+        submitLabel="Submit"
+        fields={[
+          { name: "name", label: "Name", type: "text" as const, placeholder: "Enter value", required: true },
+        ]}
+      />
     );
   }
 

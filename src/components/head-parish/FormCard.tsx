@@ -75,7 +75,7 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             {fields.map((field) => (
-              <div key={field.name} className={field.colSpan === 2 ? "md:col-span-2" : ""}>
+              <div key={field.name} className={(field.colSpan === 2 || field.type === "file") ? "md:col-span-2" : ""}>
                 <label htmlFor={field.name} className="block text-xs font-medium text-admin-text mb-2 uppercase tracking-wider">
                   {field.label} {field.required && <span className="text-admin-accent">*</span>}
                 </label>

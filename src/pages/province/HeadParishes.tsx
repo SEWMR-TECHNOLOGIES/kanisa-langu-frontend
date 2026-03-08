@@ -8,15 +8,17 @@ export default function ProvinceHeadParishes() {
       description="View and manage head parishes in this province"
       columns={[
         { key: "name", label: "Head Parish" },
-        { key: "sub_parishes", label: "Sub Parishes" },
-        { key: "members", label: "Members", render: (r: any) => <span className="tabular-nums">{Number(r.members).toLocaleString()}</span> },
+        { key: "province", label: "Province" },
+        { key: "phone", label: "Phone" },
+        { key: "email", label: "Email" },
+        { key: "address", label: "Address" },
         { key: "status", label: "Status", render: (r: any) => (
           <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-admin-success/10 text-admin-success">{r.status}</span>
         )},
       ]}
       data={mockHeadParishes}
       searchPlaceholder="Search head parishes..."
-      searchKeys={["name"]}
+      searchKeys={["name", "province"]}
       actions={["view", "edit", "delete"]}
     />
   );

@@ -3,17 +3,18 @@ import FormCard from "../../components/head-parish/FormCard";
 export default function ProvinceAdmins() {
   return (
     <FormCard
-      title="Manage Province Admins"
-      description="Update province administrator settings"
-      submitLabel="Save Changes"
+      title="Create Province Admin"
+      description="Register a new province administrator"
+      submitLabel="Register Admin"
       fields={[
-        { name: "name", label: "Admin Name", type: "text", placeholder: "Enter name", required: true },
-        { name: "email", label: "Email", type: "email", placeholder: "Enter email", required: true },
-        { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone" },
-        { name: "role", label: "Role", type: "select", options: [
-          { value: "admin", label: "Administrator" },
-          { value: "moderator", label: "Moderator" },
-          { value: "viewer", label: "Viewer" },
+        { name: "province_admin_fullname", label: "Full Name", type: "text", placeholder: "Enter full name", required: true },
+        { name: "province_admin_email", label: "Email Address", type: "email", placeholder: "Enter email", required: true },
+        { name: "province_admin_phone", label: "Phone Number", type: "tel", placeholder: "Enter phone number", required: true },
+        { name: "province_admin_role", label: "Admin Role", type: "select", required: true, options: [
+          { value: "admin", label: "Admin" },
+          { value: "bishop", label: "Bishop" },
+          { value: "secretary", label: "Secretary" },
+          { value: "chairperson", label: "Chairperson" },
         ]},
       ]}
     />

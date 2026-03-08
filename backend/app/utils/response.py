@@ -1,6 +1,6 @@
 # utils/response.py
 """Standardized API response helpers."""
-from typing import Any, Optional
+from typing import Any
 
 
 def success_response(message: str = "Success", data: Any = None) -> dict:

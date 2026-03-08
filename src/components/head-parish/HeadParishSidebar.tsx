@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Users, Shield, UserCheck, Music, BookOpen,
   CalendarDays, CalendarPlus, Bell, CreditCard, Coins, Receipt, Wallet,
-  Flag, Mail, BarChart3, Settings, LogOut, ChevronDown, ChevronRight,
+  Flag, Mail, BarChart3, Settings, LogOut, ChevronDown,
   X, Ban, Building, TrendingUp, Package, FileText
 } from "lucide-react";
 

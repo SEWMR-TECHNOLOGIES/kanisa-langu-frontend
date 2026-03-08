@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, ChevronLeft, ChevronRight, Edit2, Trash2, Eye, MoreHorizontal } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit2, Trash2, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 
 export interface Column<T> {

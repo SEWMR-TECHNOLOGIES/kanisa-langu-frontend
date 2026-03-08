@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Users, Shield, UserCheck, Music, BookOpen,

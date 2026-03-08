@@ -1347,6 +1347,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Set harambee target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions.slice(0, 3) },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },

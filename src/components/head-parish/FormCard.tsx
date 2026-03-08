@@ -22,9 +22,10 @@ interface FormCardProps {
   fields: FormField[];
   submitLabel?: string;
   onSubmit?: (data: Record<string, string>) => void;
+  infoBox?: string;
 }
 
-export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit }: FormCardProps) {
+export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit, infoBox }: FormCardProps) {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

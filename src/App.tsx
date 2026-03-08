@@ -68,6 +68,7 @@ import ChurchEvents from "./pages/head-parish/ChurchEvents";
 import NewChurchEvent from "./pages/head-parish/NewChurchEvent";
 import ExpenseRequests from "./pages/head-parish/ExpenseRequests";
 import MakeExpenseRequest from "./pages/head-parish/MakeExpenseRequest";
+import GroupedRequests from "./pages/head-parish/GroupedRequests";
 import ExcludedChurchMembers from "./pages/head-parish/ExcludedChurchMembers";
 import PaymentGatewayWallets from "./pages/head-parish/PaymentGatewayWallets";
 import AssetsManagement from "./pages/head-parish/AssetsManagement";
@@ -179,6 +180,7 @@ export default function App() {
           <Route path="debits" element={<Debits />} />
           <Route path="expense-requests" element={<ExpenseRequests />} />
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />
+          <Route path="grouped-requests" element={<GroupedRequests />} />
           <Route path="harambee" element={<Harambee />} />
           <Route path="record-harambee" element={<RecordHarambee />} />
           <Route path="record-harambee-contribution" element={<RecordHarambeeContribution />} />

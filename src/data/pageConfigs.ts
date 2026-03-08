@@ -433,12 +433,11 @@ export const headParishPages: Record<string, PageConfig> = {
     type: "form",
     submitLabel: "Record Debit",
     fields: [
-      { name: "description", label: "Description", type: "text", placeholder: "e.g. Building Material Loan", required: true },
+      { name: "description", label: "Description", type: "text", placeholder: "Enter description", required: true },
       { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
-      { name: "creditor", label: "Creditor", type: "text", placeholder: "e.g. CRDB Bank", required: true },
-      { name: "date", label: "Date", type: "date", required: true },
-      { name: "account", label: "Bank Account", type: "select", options: bankAccountOptions },
-      { name: "notes", label: "Notes", type: "textarea", placeholder: "Additional details", colSpan: 2 },
+      { name: "date_debited", label: "Date Debited", type: "date", required: true },
+      { name: "return_before_date", label: "Return Before Date", type: "date" },
+      { name: "purpose", label: "Purpose", type: "textarea", placeholder: "Enter purpose...", colSpan: 2 },
     ],
   },
   // Budgeting

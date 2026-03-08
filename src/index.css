@@ -63,6 +63,52 @@
   }
 }
 
+/* Modern minimal scrollbar — no arrows, thin track */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsla(220, 14%, 70%, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: hsla(220, 14%, 60%, 0.25);
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: hsla(220, 14%, 50%, 0.45);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Hide scrollbar arrows/buttons */
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Scrollbar-none utility */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border;

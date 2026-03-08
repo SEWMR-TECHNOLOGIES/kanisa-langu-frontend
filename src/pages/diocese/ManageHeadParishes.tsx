@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import DataTable from "../../components/head-parish/DataTable";
 
 const columns = [

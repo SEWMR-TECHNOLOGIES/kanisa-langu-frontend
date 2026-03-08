@@ -667,6 +667,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Set a harambee target for a specific member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },

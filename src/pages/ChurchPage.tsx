@@ -1,11 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell } from "lucide-react";
+import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound } from "lucide-react";
 import logo from "../assets/logo.png";
 import elctIcon from "../assets/elct-icon.png";
 import rcIcon from "../assets/rc-icon.png";
 import sdaIcon from "../assets/sda-icon.png";
 import pentecostalIcon from "../assets/pentecostal-icon.png";
+
+const elctLevels = [
+  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },
+  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting." },
+  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area." },
+  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities." },
+  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement." },
+  { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history." },
+];
 
 const churchData: Record<string, {
   name: string;
@@ -25,7 +34,7 @@ const churchData: Record<string, {
     color: "from-blue-900 to-blue-700",
     gradient: "from-blue-900/10 to-blue-700/5",
     tagline: "Streamline Diocese & Parish Operations",
-    description: "Kanisa Langu for ELCT provides comprehensive tools tailored to the Lutheran church structure — from Diocese management to individual parish tracking, offering full visibility into financial operations and member engagement across all levels.",
+    description: "Kanisa Langu for ELCT provides comprehensive tools tailored to the Lutheran church structure, from Diocese management to individual parish tracking, offering full visibility into financial operations and member engagement across all levels.",
     features: [
       { icon: TrendingUp, title: "Diocese Revenue Tracking", desc: "Monitor income across all parishes under a diocese with real-time dashboards and aggregated reporting." },
       { icon: Users, title: "Parish Member Registry", desc: "Manage congregation records with baptism, confirmation, and membership tracking across all parishes." },
@@ -50,7 +59,7 @@ const churchData: Record<string, {
     color: "from-red-900 to-red-700",
     gradient: "from-red-900/10 to-red-700/5",
     tagline: "Empower Parish & Diocese Administration",
-    description: "Kanisa Langu for Roman Catholic churches provides purpose-built tools for managing parish operations, sacramental records, and diocesan oversight — from small parishes to large archdioceses.",
+    description: "Kanisa Langu for Roman Catholic churches provides purpose-built tools for managing parish operations, sacramental records, and diocesan oversight, from small parishes to large archdioceses.",
     features: [
       { icon: TrendingUp, title: "Parish Financial Management", desc: "Track all parish income streams including collections, donations, and special fundraising campaigns." },
       { icon: Users, title: "Sacramental Records", desc: "Maintain comprehensive records of baptisms, confirmations, marriages, and other sacraments." },
@@ -75,7 +84,7 @@ const churchData: Record<string, {
     color: "from-blue-800 to-cyan-700",
     gradient: "from-blue-800/10 to-cyan-700/5",
     tagline: "Strengthen Conference & Church Operations",
-    description: "Kanisa Langu for SDA churches supports the unique organizational structure — from local churches to conferences and unions — with tools designed for Sabbath operations, tithe management, and member care.",
+    description: "Kanisa Langu for SDA churches supports the unique organizational structure, from local churches to conferences and unions, with tools designed for Sabbath operations, tithe management, and member care.",
     features: [
       { icon: TrendingUp, title: "Tithe & Offering Management", desc: "Track tithes, offerings, and special funds with automatic allocation to conference and union levels." },
       { icon: Users, title: "Church Membership System", desc: "Manage member records including baptism dates, transfer letters, and Sabbath School class assignments." },
@@ -100,7 +109,7 @@ const churchData: Record<string, {
     color: "from-orange-700 to-amber-600",
     gradient: "from-orange-700/10 to-amber-600/5",
     tagline: "Amplify Ministry Impact & Growth",
-    description: "Kanisa Langu for Pentecostal churches provides dynamic tools for fast-growing ministries — from seed offering management to cell group tracking, crusade planning, and multi-branch operations.",
+    description: "Kanisa Langu for Pentecostal churches provides dynamic tools for fast-growing ministries, from seed offering management to cell group tracking, crusade planning, and multi-branch operations.",
     features: [
       { icon: TrendingUp, title: "Ministry Fund Tracking", desc: "Monitor all ministry income including tithes, seed offerings, building funds, and mission contributions." },
       { icon: Users, title: "Cell Group Management", desc: "Organize and track cell groups, home fellowships, and ministry teams with leader assignments." },
@@ -123,13 +132,14 @@ const churchData: Record<string, {
 export default function ChurchPage() {
   const { slug } = useParams<{ slug: string }>();
   const church = slug ? churchData[slug] : null;
+  const isELCT = slug === "elct";
 
   if (!church) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Church not found</h1>
-          <Link to="/" className="text-secondary hover:underline font-medium">← Back to home</Link>
+          <Link to="/" className="text-secondary hover:underline font-medium">Back to home</Link>
         </div>
       </div>
     );
@@ -158,6 +168,68 @@ export default function ChurchPage() {
         </div>
       </section>
 
+      {/* ELCT Church Structure Levels */}
+      {isELCT && (
+        <section className="py-24 border-b border-border">
+          <div className="max-w-7xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-14"
+            >
+              <span className="text-sm font-bold text-secondary uppercase tracking-widest">
+                Full hierarchy support
+              </span>
+              <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">
+                Every level of the ELCT structure
+              </h2>
+              <p className="mt-4 text-muted-foreground text-lg max-w-2xl">
+                Kanisa Langu manages the complete ELCT organizational hierarchy, giving each level the tools it needs while maintaining seamless data flow across the entire structure.
+              </p>
+            </motion.div>
+
+            <div className="relative">
+              {/* Connecting line */}
+              <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2" />
+
+              <div className="grid gap-6">
+                {elctLevels.map((level, i) => (
+                  <motion.div
+                    key={level.name}
+                    initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`flex items-center gap-6 ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}
+                  >
+                    <div className={`flex-1 ${i % 2 === 0 ? 'lg:text-right' : 'lg:text-left'}`}>
+                      <div className={`p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300 inline-block max-w-md ${i % 2 === 0 ? 'lg:ml-auto' : ''}`}>
+                        <div className={`flex items-center gap-3 mb-3 ${i % 2 === 0 ? 'lg:flex-row-reverse' : ''}`}>
+                          <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                            <level.icon className="w-5 h-5 text-secondary" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Level {i + 1}</span>
+                            <h3 className="text-lg font-bold text-foreground">{level.name}</h3>
+                          </div>
+                        </div>
+                        <p className={`text-sm text-muted-foreground leading-relaxed ${i % 2 === 0 ? 'lg:text-right' : ''}`}>{level.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Center dot */}
+                    <div className="hidden lg:flex w-4 h-4 rounded-full bg-secondary border-4 border-background shrink-0 z-10" />
+
+                    <div className="flex-1 hidden lg:block" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Features */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6">
@@ -167,7 +239,7 @@ export default function ChurchPage() {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl font-bold text-foreground font-display mb-14"
           >
-            What Kanisa Langu offers for <span className="text-gradient-gold">{church.name}</span>
+            What Kanisa Langu offers for {church.name}
           </motion.h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {church.features.map((feat, i) => (
@@ -258,7 +330,7 @@ export default function ChurchPage() {
             <img src={logo} alt="Kanisa Langu" className="h-8 w-8" />
             <span className="font-bold text-foreground">Kanisa Langu</span>
           </Link>
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} SEWMR Technologies</p>
+          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} SEWMR Technologies</p>
         </div>
       </footer>
     </div>

@@ -38,7 +38,7 @@ export default function Hero() {
             className="mt-7 text-lg sm:text-xl text-white/50 leading-relaxed max-w-xl"
           >
             One platform for ELCT, Roman Catholic, SDA, and Pentecostal churches. 
-            Manage finances, members, and communications — all in one place.
+            Manage finances, members, and communications, all in one place.
           </motion.p>
 
           <motion.div

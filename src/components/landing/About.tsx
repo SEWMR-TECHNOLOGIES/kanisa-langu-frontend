@@ -25,7 +25,7 @@ export default function About() {
               Built by people who understand the church
             </h2>
             <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-              We know the unique challenges of managing church operations in Tanzania. Kanisa Langu was built in partnership with church leaders to solve real problems — not hypothetical ones.
+              We know the unique challenges of managing church operations in Tanzania. Kanisa Langu was built in partnership with church leaders to solve real problems, not hypothetical ones.
             </p>
             <p className="mt-4 text-base text-muted-foreground leading-relaxed">
               Whether you're managing a single parish or overseeing an entire diocese, our platform adapts to your church's structure and grows with your congregation.

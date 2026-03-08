@@ -6,7 +6,7 @@ const faqs = [
   { q: "Which church denominations does Kanisa Langu support?", a: "We support ELCT (Evangelical Lutheran Church in Tanzania), Roman Catholic, SDA (Seventh-Day Adventist), and Pentecostal churches. Each denomination gets tailored features for their specific structure and needs." },
   { q: "How do I get started?", a: "Download the app from Google Play or App Store, create an account, and follow the setup wizard. You can configure your church structure and start managing in minutes." },
   { q: "What payment methods are supported?", a: "We support M-Pesa, Tigo Pesa, Airtel Money, credit/debit cards, and bank transfers for seamless donation and offering processing." },
-  { q: "Can multiple users access the system?", a: "Yes. Kanisa Langu supports role-based access with roles like admin, pastor, secretary, accountant, and evangelist — each with customizable permissions." },
+  { q: "Can multiple users access the system?", a: "Yes. Kanisa Langu supports role-based access with roles like admin, pastor, secretary, accountant, and evangelist, each with customizable permissions." },
   { q: "Is my church data secure?", a: "Absolutely. We use enterprise-grade encryption, automated daily backups, and strict access controls to ensure your data is always protected." },
   { q: "Can I manage multiple parishes or branches?", a: "Yes. Whether you're managing a single parish or an entire diocese with multiple branches, our platform scales with your structure." },
   { q: "Is customer support available?", a: "Our support team is available via email, phone, and in-app support portal. We typically respond within 24 hours." },

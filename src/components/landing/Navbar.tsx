@@ -58,7 +58,7 @@ export default function Navbar() {
 
               {/* Center nav - pill style */}
               <nav className="hidden md:flex items-center">
-                <div className="flex items-center gap-0.5 px-1 py-1 rounded-xl bg-white/[0.04]">
+                <div className="flex items-center gap-0.5 px-1 py-1 rounded-xl bg-muted/50">
                   {navLinks.map((link) => (
                     <button
                       key={link.href}

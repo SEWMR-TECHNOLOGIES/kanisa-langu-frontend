@@ -74,7 +74,7 @@ export default function Navbar() {
               {/* CTA */}
               <div className="hidden md:flex items-center gap-3">
                 <a
-                  href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
+                  href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2 px-5 py-2 text-[13px] font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all duration-200"

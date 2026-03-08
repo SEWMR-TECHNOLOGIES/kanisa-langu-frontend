@@ -39,7 +39,7 @@ export default function TabbedDataTable<T extends Record<string, any>>({
       {/* Tabs - matching TabbedFormCard style */}
       <div className="admin-card rounded-2xl overflow-hidden">
         <div className="px-6 pt-6 border-b border-admin-border/30">
-          <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-none">
+          <div className="flex gap-1 overflow-x-auto pt-2 pb-0 scrollbar-none">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

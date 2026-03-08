@@ -101,6 +101,32 @@ import CommunityScheduleMeeting from "./pages/community/ScheduleMeeting";
 import CommunityMeetings from "./pages/community/Meetings";
 import CommunitySendNotification from "./pages/community/SendNotification";
 
+// Super Admin
+import SuperAdminLayout from "./pages/super-admin/SuperAdminLayout";
+import SuperAdminDashboard from "./pages/super-admin/Dashboard";
+import SuperAdminSignIn from "./pages/super-admin/SignIn";
+import SARegisterDiocese from "./pages/super-admin/RegisterDiocese";
+import SAManageDioceses from "./pages/super-admin/ManageDioceses";
+import SACreateDioceseAdmin from "./pages/super-admin/CreateDioceseAdmin";
+import SADioceseAdminsList from "./pages/super-admin/DioceseAdminsList";
+import SARegisterProvince from "./pages/super-admin/RegisterProvince";
+import SAManageProvinces from "./pages/super-admin/ManageProvinces";
+import SARegisterHeadParish from "./pages/super-admin/RegisterHeadParish";
+import SAManageHeadParishes from "./pages/super-admin/ManageHeadParishes";
+import SARegisterBank from "./pages/super-admin/RegisterBank";
+import SAManageBanks from "./pages/super-admin/ManageBanks";
+import SARegisterRegion from "./pages/super-admin/RegisterRegion";
+import SAManageRegions from "./pages/super-admin/ManageRegions";
+import SARegisterDistrict from "./pages/super-admin/RegisterDistrict";
+import SAManageDistricts from "./pages/super-admin/ManageDistricts";
+import SAAddTitle from "./pages/super-admin/AddTitle";
+import SAManageTitles from "./pages/super-admin/ManageTitles";
+import SAAddOccupation from "./pages/super-admin/AddOccupation";
+import SAManageOccupations from "./pages/super-admin/ManageOccupations";
+import SARegisterPraiseSong from "./pages/super-admin/RegisterPraiseSong";
+import SAManagePraiseSongs from "./pages/super-admin/ManagePraiseSongs";
+import SAProfile from "./pages/super-admin/Profile";
+
 function HPAutoPage() {
   return <AutoPage configs={headParishPages} />;
 }
@@ -219,6 +245,33 @@ export default function App() {
           <Route path="schedule-meeting" element={<CommunityScheduleMeeting />} />
           <Route path="meetings" element={<CommunityMeetings />} />
           <Route path="send-notification" element={<CommunitySendNotification />} />
+        </Route>
+
+        {/* Super Admin */}
+        <Route path="/app/sign-in" element={<SuperAdminSignIn />} />
+        <Route path="/app" element={<SuperAdminLayout />}>
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="register-diocese" element={<SARegisterDiocese />} />
+          <Route path="manage-dioceses" element={<SAManageDioceses />} />
+          <Route path="create-diocese-admin" element={<SACreateDioceseAdmin />} />
+          <Route path="diocese-admins-list" element={<SADioceseAdminsList />} />
+          <Route path="register-province" element={<SARegisterProvince />} />
+          <Route path="manage-provinces" element={<SAManageProvinces />} />
+          <Route path="register-head-parish" element={<SARegisterHeadParish />} />
+          <Route path="manage-head-parishes" element={<SAManageHeadParishes />} />
+          <Route path="register-bank" element={<SARegisterBank />} />
+          <Route path="manage-banks" element={<SAManageBanks />} />
+          <Route path="register-region" element={<SARegisterRegion />} />
+          <Route path="manage-regions" element={<SAManageRegions />} />
+          <Route path="register-district" element={<SARegisterDistrict />} />
+          <Route path="manage-districts" element={<SAManageDistricts />} />
+          <Route path="add-title" element={<SAAddTitle />} />
+          <Route path="manage-titles" element={<SAManageTitles />} />
+          <Route path="add-occupation" element={<SAAddOccupation />} />
+          <Route path="manage-occupations" element={<SAManageOccupations />} />
+          <Route path="register-praise-song" element={<SARegisterPraiseSong />} />
+          <Route path="manage-praise-songs" element={<SAManagePraiseSongs />} />
+          <Route path="profile" element={<SAProfile />} />
         </Route>
       </Routes>
       <CookieConsent />

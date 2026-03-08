@@ -101,7 +101,32 @@ import CommunityScheduleMeeting from "./pages/community/ScheduleMeeting";
 import CommunityMeetings from "./pages/community/Meetings";
 import CommunitySendNotification from "./pages/community/SendNotification";
 
-function HPAutoPage() {
+// Super Admin
+import SuperAdminLayout from "./pages/super-admin/SuperAdminLayout";
+import SuperAdminDashboard from "./pages/super-admin/Dashboard";
+import SuperAdminSignIn from "./pages/super-admin/SignIn";
+import SARegisterDiocese from "./pages/super-admin/RegisterDiocese";
+import SAManageDioceses from "./pages/super-admin/ManageDioceses";
+import SACreateDioceseAdmin from "./pages/super-admin/CreateDioceseAdmin";
+import SADioceseAdminsList from "./pages/super-admin/DioceseAdminsList";
+import SARegisterProvince from "./pages/super-admin/RegisterProvince";
+import SAManageProvinces from "./pages/super-admin/ManageProvinces";
+import SARegisterHeadParish from "./pages/super-admin/RegisterHeadParish";
+import SAManageHeadParishes from "./pages/super-admin/ManageHeadParishes";
+import SARegisterBank from "./pages/super-admin/RegisterBank";
+import SAManageBanks from "./pages/super-admin/ManageBanks";
+import SARegisterRegion from "./pages/super-admin/RegisterRegion";
+import SAManageRegions from "./pages/super-admin/ManageRegions";
+import SARegisterDistrict from "./pages/super-admin/RegisterDistrict";
+import SAManageDistricts from "./pages/super-admin/ManageDistricts";
+import SAAddTitle from "./pages/super-admin/AddTitle";
+import SAManageTitles from "./pages/super-admin/ManageTitles";
+import SAAddOccupation from "./pages/super-admin/AddOccupation";
+import SAManageOccupations from "./pages/super-admin/ManageOccupations";
+import SARegisterPraiseSong from "./pages/super-admin/RegisterPraiseSong";
+import SAManagePraiseSongs from "./pages/super-admin/ManagePraiseSongs";
+import SAProfile from "./pages/super-admin/Profile";
+
   return <AutoPage configs={headParishPages} />;
 }
 

@@ -221,49 +221,73 @@ export default function ChurchPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mb-14"
+              className="text-center mb-16"
             >
               <span className="text-sm font-bold text-secondary uppercase tracking-widest">Full hierarchy support</span>
               <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">
                 Every level of the ELCT structure
               </h2>
-              <p className="mt-4 text-muted-foreground text-lg max-w-2xl">
-                Kanisa Langu manages the complete ELCT organizational hierarchy, giving each level the tools it needs while maintaining seamless data flow across the entire structure.
+              <p className="mt-4 text-muted-foreground text-lg max-w-2xl mx-auto">
+                Kanisa Langu manages the complete ELCT organizational hierarchy, from Diocese down to individual members.
               </p>
             </motion.div>
 
-            <div className="flex flex-col items-center gap-0">
-              {elctLevels.map((level, i) => (
-                <motion.div
-                  key={level.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex flex-col items-center"
-                >
-                  {/* Connector line from previous node */}
-                  {i > 0 && (
-                    <div className="w-px h-8 bg-gradient-to-b from-secondary/40 to-secondary/10" />
-                  )}
+            {/* Horizontal hierarchy flow */}
+            <div className="relative">
+              {/* Desktop: horizontal flow */}
+              <div className="hidden lg:flex items-start justify-between relative">
+                {/* Connecting line */}
+                <div className="absolute top-10 left-[calc(8.33%+24px)] right-[calc(8.33%+24px)] h-px bg-gradient-to-r from-secondary/10 via-secondary/30 to-secondary/10 z-0" />
 
-                  {/* Node card */}
-                  <div className="relative flex items-center gap-5 px-7 py-5 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300 w-full max-w-xl">
-                    {/* Level indicator dot */}
-                    <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-secondary/10 border-2 border-secondary flex items-center justify-center">
-                      <span className="text-[9px] font-bold text-secondary">{i + 1}</span>
+                {elctLevels.map((level, i) => (
+                  <motion.div
+                    key={level.name}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex flex-col items-center text-center relative z-10 flex-1 px-2"
+                  >
+                    {/* Node circle */}
+                    <div className="w-20 h-20 rounded-2xl bg-card border-2 border-secondary/20 flex items-center justify-center mb-4 shadow-sm hover:border-secondary/50 hover:shadow-md hover:shadow-secondary/10 transition-all duration-300">
+                      <level.icon className="w-8 h-8 text-secondary" />
                     </div>
 
-                    <div className="w-11 h-11 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                      <level.icon className="w-5 h-5 text-secondary" />
+                    {/* Arrow indicator (except last) */}
+                    {i < elctLevels.length - 1 && (
+                      <div className="absolute top-10 -right-1 text-secondary/30 hidden lg:block" style={{ transform: 'translateX(50%)' }}>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6H10M10 6L6 2M10 6L6 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
+
+                    <span className="text-[10px] font-bold text-secondary/60 uppercase tracking-widest mb-1">Level {i + 1}</span>
+                    <h3 className="text-sm font-bold text-foreground mb-1.5">{level.name}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed max-w-[150px]">{level.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Mobile/Tablet: 2-col grid with flow */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 lg:hidden">
+                {elctLevels.map((level, i) => (
+                  <motion.div
+                    key={level.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08 }}
+                    className="flex flex-col items-center text-center p-5 rounded-2xl bg-card border border-border"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center mb-3">
+                      <level.icon className="w-6 h-6 text-secondary" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-foreground">{level.name}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                    <span className="text-[9px] font-bold text-secondary/50 uppercase tracking-widest mb-1">Level {i + 1}</span>
+                    <h3 className="text-sm font-bold text-foreground">{level.name}</h3>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

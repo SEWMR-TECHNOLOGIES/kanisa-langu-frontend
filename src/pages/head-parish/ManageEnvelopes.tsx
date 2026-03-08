@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Printer, Trash2 } from "lucide-react";
+import { Printer } from "lucide-react";
 import DataTable from "../../components/head-parish/DataTable";
 import { mockEnvelopes } from "../../data/headParishMockData";
 

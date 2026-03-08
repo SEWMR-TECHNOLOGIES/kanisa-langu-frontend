@@ -47,6 +47,7 @@ export default function DataTable<T extends Record<string, any>>({
   searchKeys = [],
   pageSize: defaultPageSize = 10,
   actions = ["edit", "delete"],
+  customActions = [],
   onAction,
   onEdit,
   onDelete,

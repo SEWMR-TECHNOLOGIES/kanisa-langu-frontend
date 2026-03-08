@@ -446,14 +446,14 @@ interface HeadParishSidebarProps {
 
 export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebarProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   
   // Find which item should be initially expanded based on current route
   const getInitialExpanded = useCallback(() => {
     for (let si = 0; si < navigation.length; si++) {
-      for (let ii = 0; ii < navigation[si].items.length; ii++) {
-        const item = navigation[si].items[ii];
-        if (item.children?.some(c => location.pathname === c.href)) {
+      const section = navigation[si];
+      for (let ii = 0; ii < section.items.length; ii++) {
+        const item = section.items[ii];
+        if (item?.children?.some(c => location.pathname === c.href)) {
           return getItemKey(si, ii);
         }
       }

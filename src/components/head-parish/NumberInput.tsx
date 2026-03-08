@@ -13,7 +13,7 @@ interface NumberInputProps {
 function formatNumber(val: string): string {
   const num = val.replace(/[^0-9.]/g, "");
   const parts = num.split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  parts[0] = (parts[0] || "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
 }
 

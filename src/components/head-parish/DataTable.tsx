@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit2, Trash2, Eye, Check, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit2, Trash2, Eye, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ModernSelect from "./ModernSelect";
 import EditRecordModal from "./EditRecordModal";

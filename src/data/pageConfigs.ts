@@ -27,6 +27,7 @@ export interface PageConfig {
   // Form config
   submitLabel?: string;
   fields?: FormFieldConfig[];
+  infoBox?: string;
   // Table config
   columns?: TableColumnConfig[];
   data?: Record<string, any>[];

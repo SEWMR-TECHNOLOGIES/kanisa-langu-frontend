@@ -1,15 +1,17 @@
 # api/routes/reports.py
 """Reporting & data aggregation routes."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from typing import Optional
+from datetime import date
 
 from core.database import get_db
-from models.finance import Revenue, Expense
-from models.harambee import HarambeeContribution
-from models.envelope import EnvelopeContribution
+from models.finance import Revenue, Expense, BankAccount, RevenueStream, ExpenseGroup, ExpenseName, AnnualRevenueTarget, AnnualExpenseBudget
+from models.harambee import Harambee, HarambeeContribution, HarambeeTarget, HarambeeClass, HarambeeDistribution
+from models.envelope import EnvelopeTarget, EnvelopeContribution
 from models.operations import Attendance
+from models.members import ChurchMember
 from utils.response import success_response
 
 router = APIRouter(prefix="/reports", tags=["Reports"])

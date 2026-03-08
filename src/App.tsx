@@ -76,6 +76,7 @@ import RecordHarambeeContribution from "./pages/head-parish/RecordHarambeeContri
 import UploadChurchMembers from "./pages/head-parish/UploadChurchMembers";
 import UploadEnvelopeData from "./pages/head-parish/UploadEnvelopeData";
 import UploadHarambeeTargets from "./pages/head-parish/UploadHarambeeTargets";
+import HPProfile from "./pages/head-parish/Profile";
 
 // ELCT Sub Parish Admin
 import SubParishLayout from "./pages/sub-parish/SubParishLayout";

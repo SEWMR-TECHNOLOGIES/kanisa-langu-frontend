@@ -20,9 +20,6 @@ const stats = [
 ];
 
 export default function Hero() {
-  const scrollTo = (id: string) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section className="relative min-h-screen flex items-center bg-background overflow-hidden">

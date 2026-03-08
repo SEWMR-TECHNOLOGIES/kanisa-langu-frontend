@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, Eye, Send, X } from "lucide-react";

@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import ModernSelect from "./ModernSelect";
+import ModernDatePicker from "./ModernDatePicker";
 
 interface FormField {
   name: string;
@@ -20,12 +23,20 @@ interface FormCardProps {
 }
 
 export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit }: FormCardProps) {
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data: Record<string, string> = {};
     formData.forEach((value, key) => { data[key] = String(value); });
+    // Merge controlled values
+    Object.assign(data, formValues);
     onSubmit?.(data);
+  };
+
+  const updateValue = (name: string, value: string) => {
+    setFormValues(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -49,17 +60,22 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
                   {field.label} {field.required && <span className="text-admin-accent">*</span>}
                 </label>
                 {field.type === "select" ? (
-                  <select
-                    id={field.name}
+                  <ModernSelect
                     name={field.name}
+                    options={field.options || []}
+                    value={formValues[field.name]}
+                    onChange={(val) => updateValue(field.name, val)}
+                    placeholder={field.placeholder || `Select ${field.label}`}
                     required={field.required}
-                    className="admin-input w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-                  >
-                    <option value="">{field.placeholder || `Select ${field.label}`}</option>
-                    {field.options?.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  />
+                ) : field.type === "date" ? (
+                  <ModernDatePicker
+                    name={field.name}
+                    value={formValues[field.name]}
+                    onChange={(val) => updateValue(field.name, val)}
+                    placeholder={field.placeholder || `Pick ${field.label.toLowerCase()}`}
+                    required={field.required}
+                  />
                 ) : field.type === "textarea" ? (
                   <textarea
                     id={field.name}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, User, ArrowRight, Shield } from "lucide-react";
-import logo from "../../assets/kanisa-logo.png";
+import logo from "../../assets/logo.png";
 
 export default function SuperAdminSignIn() {
   const navigate = useNavigate();

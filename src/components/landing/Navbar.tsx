@@ -87,7 +87,7 @@ export default function Navbar() {
               {/* Mobile toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+                className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <AnimatePresence mode="wait">
                   {mobileOpen ? (

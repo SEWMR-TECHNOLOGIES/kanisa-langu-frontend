@@ -29,6 +29,10 @@ export interface PageConfig {
   submitLabel?: string;
   fields?: FormFieldConfig[];
   infoBox?: string;
+  statusPreview?: {
+    watchFields: string[];
+    getStatus: (values: Record<string, string>) => StatusItem[];
+  };
   // Table config
   columns?: TableColumnConfig[];
   data?: Record<string, any>[];

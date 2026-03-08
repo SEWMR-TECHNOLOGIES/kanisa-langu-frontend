@@ -33,6 +33,7 @@ export default function AutoPage({ configs }: AutoPageProps) {
         submitLabel={config.submitLabel || "Submit"}
         fields={config.fields || []}
         infoBox={config.infoBox}
+        statusPreview={config.statusPreview}
       />
     );
   }

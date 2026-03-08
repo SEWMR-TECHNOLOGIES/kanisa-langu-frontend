@@ -1,0 +1,24 @@
+config/
+legacy/utils/kanisa-langu-c9400-*.json
+legacy/api/church_member/*fcm*.php
+legacy/utils/FCM.php
+# Node / Vite
+node_modules/
+dist/
+.vite/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Config and secrets
+config/
+*.json
+serviceAccountKey.json
+kanisa-langu-c9400-*.json
+
+# FCM PHP files
+legacy/api/church_member/*fcm*.php
+
+# Firebase JSON in legacy/utils
+legacy/utils/*.json

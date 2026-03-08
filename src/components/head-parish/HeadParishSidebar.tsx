@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Users, Shield, UserCheck, Music, BookOpen,
   CalendarDays, CalendarPlus, Bell, CreditCard, Coins, Receipt, Wallet,
   Flag, Mail, BarChart3, Settings, LogOut, ChevronDown,
-  X, Ban, TrendingUp, Package, FileText
+  X, Ban, TrendingUp, Package, FileText, User
 } from "lucide-react";
 import logo from "../../assets/kanisa-logo.png";
 
@@ -342,13 +342,28 @@ const navigation: NavSection[] = [
   },
 ];
 
-function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {
-  const location = useLocation();
-  const [open, setOpen] = useState(() => {
-    if (!item.children) return false;
-    return item.children.some(c => location.pathname === c.href);
-  });
+// Generate a unique key for each expandable item
+function getItemKey(sectionIdx: number, itemIdx: number) {
+  return `${sectionIdx}-${itemIdx}`;
+}
 
+function NavItemComponent({ 
+  item, 
+  isCollapsed, 
+  itemKey,
+  expandedKey,
+  onToggle,
+  onNavigate,
+}: { 
+  item: NavItem; 
+  isCollapsed: boolean;
+  itemKey: string;
+  expandedKey: string | null;
+  onToggle: (key: string) => void;
+  onNavigate: () => void;
+}) {
+  const location = useLocation();
+  const isOpen = expandedKey === itemKey;
   const isActive = item.href ? location.pathname === item.href : false;
   const hasActiveChild = item.children?.some(c => location.pathname === c.href) || false;
 
@@ -356,6 +371,7 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
     return (
       <Link
         to={item.href}
+        onClick={onNavigate}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 group
           ${isActive
             ? "bg-admin-surface-active text-admin-accent"
@@ -371,7 +387,7 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
   return (
     <div>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => onToggle(itemKey)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 group
           ${hasActiveChild
             ? "text-admin-text-bright bg-admin-surface-hover"
@@ -382,14 +398,14 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
         {!isCollapsed && (
           <>
             <span className="flex-1 text-left">{item.label}</span>
-            <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronDown className="w-3.5 h-3.5 opacity-50" />
             </motion.div>
           </>
         )}
       </button>
       <AnimatePresence>
-        {open && !isCollapsed && (
+        {isOpen && !isCollapsed && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -404,6 +420,7 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
                   <Link
                     key={child.href}
                     to={child.href}
+                    onClick={onNavigate}
                     className={`block px-3 py-2 rounded-md text-[12.5px] transition-all duration-150
                       ${childActive
                         ? "text-admin-accent bg-admin-surface-active font-medium"
@@ -428,6 +445,33 @@ interface HeadParishSidebarProps {
 }
 
 export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebarProps) {
+  const location = useLocation();
+  
+  // Find which item should be initially expanded based on current route
+  const getInitialExpanded = useCallback(() => {
+    for (let si = 0; si < navigation.length; si++) {
+      const section = navigation[si]!;
+      for (let ii = 0; ii < section.items.length; ii++) {
+        const item = section.items[ii];
+        if (item?.children?.some(c => location.pathname === c.href)) {
+          return getItemKey(si, ii);
+        }
+      }
+    }
+    return null;
+  }, [location.pathname]);
+
+  const [expandedKey, setExpandedKey] = useState<string | null>(getInitialExpanded);
+
+  const handleToggle = useCallback((key: string) => {
+    setExpandedKey(prev => prev === key ? null : key);
+  }, []);
+
+  // Close sidebar on mobile when navigating
+  const handleNavigate = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
   return (
     <>
       {/* Mobile overlay */}
@@ -451,7 +495,7 @@ export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebar
       >
         {/* Brand */}
         <div className="flex items-center justify-between px-5 py-5 border-b border-admin-border/50">
-          <Link to="/elct/head-parish" className="flex items-center gap-3">
+          <Link to="/elct/head-parish" onClick={handleNavigate} className="flex items-center gap-3">
             <img src={logo} alt="Kanisa Langu" className="w-9 h-9 rounded-xl" />
             <div>
               <h2 className="text-sm font-bold text-admin-text-bright tracking-tight">Kanisa Langu</h2>
@@ -465,31 +509,44 @@ export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebar
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
-          {navigation.map((section) => (
+          {navigation.map((section, si) => (
             <div key={section.title}>
               <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-admin-text/50">
                 {section.title}
               </p>
               <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <NavItemComponent key={item.label} item={item} isCollapsed={false} />
+                {section.items.map((item, ii) => (
+                  <NavItemComponent 
+                    key={item.label} 
+                    item={item} 
+                    isCollapsed={false}
+                    itemKey={getItemKey(si, ii)}
+                    expandedKey={expandedKey}
+                    onToggle={handleToggle}
+                    onNavigate={handleNavigate}
+                  />
                 ))}
               </div>
             </div>
           ))}
         </nav>
 
-        {/* Footer */}
+        {/* Footer - Profile link */}
         <div className="p-4 border-t border-admin-border/50">
-          <div className="flex items-center gap-3 px-2">
+          <Link 
+            to={`${BASE}/profile`}
+            onClick={handleNavigate}
+            className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-admin-surface-hover transition-colors group"
+          >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-admin-accent/20 to-admin-accent/5 flex items-center justify-center">
               <span className="text-xs font-bold text-admin-accent">A</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-admin-text-bright truncate">Admin User</p>
+              <p className="text-xs font-medium text-admin-text-bright truncate group-hover:text-admin-accent transition-colors">Admin User</p>
               <p className="text-[10px] text-admin-text truncate">admin@kanisalangu.com</p>
             </div>
-          </div>
+            <User className="w-4 h-4 text-admin-text/40 group-hover:text-admin-accent transition-colors" />
+          </Link>
         </div>
       </aside>
     </>

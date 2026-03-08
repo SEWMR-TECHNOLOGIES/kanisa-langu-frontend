@@ -76,6 +76,7 @@ import RecordHarambeeContribution from "./pages/head-parish/RecordHarambeeContri
 import UploadChurchMembers from "./pages/head-parish/UploadChurchMembers";
 import UploadEnvelopeData from "./pages/head-parish/UploadEnvelopeData";
 import UploadHarambeeTargets from "./pages/head-parish/UploadHarambeeTargets";
+import HPProfile from "./pages/head-parish/Profile";
 
 // ELCT Sub Parish Admin
 import SubParishLayout from "./pages/sub-parish/SubParishLayout";
@@ -187,6 +188,7 @@ export default function App() {
           <Route path="manage-envelopes" element={<ManageEnvelopes />} />
           <Route path="add-asset" element={<AssetsManagement />} />
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />
+          <Route path="profile" element={<HPProfile />} />
           {/* All remaining HP pages rendered via AutoPage */}
           <Route path="*" element={<HPAutoPage />} />
         </Route>

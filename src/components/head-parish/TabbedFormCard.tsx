@@ -3,11 +3,12 @@ import { motion } from "framer-motion";
 import ModernSelect from "./ModernSelect";
 import ModernDatePicker from "./ModernDatePicker";
 import ModernFileUpload from "./ModernFileUpload";
+import NumberInput from "./NumberInput";
 
 interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number" | "file" | "time";
+  type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "number" | "file" | "time" | "password";
   placeholder?: string;
   required?: boolean;
   readOnly?: boolean;
@@ -31,6 +32,8 @@ interface TabbedFormCardProps {
   onSubmit?: (tabId: string, data: Record<string, string>) => void;
   infoBox?: string;
 }
+
+export type { FormField as TabbedFormField, TabConfig };
 
 export default function TabbedFormCard({ title, description, tabs, onSubmit, infoBox }: TabbedFormCardProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || "");
@@ -135,6 +138,15 @@ export default function TabbedFormCard({ title, description, tabs, onSubmit, inf
                         name={field.name}
                         accept={field.accept || ".xls,.xlsx"}
                         required={field.required}
+                      />
+                    ) : field.type === "number" ? (
+                      <NumberInput
+                        name={field.name}
+                        value={(formValues[currentTab.id] || {})[field.name]}
+                        onChange={(val) => updateValue(currentTab.id, field.name, val)}
+                        placeholder={field.placeholder}
+                        required={field.required}
+                        readOnly={field.readOnly}
                       />
                     ) : field.type === "textarea" ? (
                       <textarea

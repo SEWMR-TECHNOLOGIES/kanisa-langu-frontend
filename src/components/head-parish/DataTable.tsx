@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit2, Trash2, Eye, Check, X, Save } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit2, Trash2, Eye, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ModernSelect from "./ModernSelect";
-import ModernDatePicker from "./ModernDatePicker";
+import EditRecordModal from "./EditRecordModal";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -49,9 +49,11 @@ export default function DataTable<T extends Record<string, any>>({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<Record<string, any>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<T | null>(null);
 
   const filtered = useMemo(() => {
     if (!search || searchKeys.length === 0) return data;
@@ -83,23 +85,16 @@ export default function DataTable<T extends Record<string, any>>({
     setSelected(newSet);
   };
 
-  const startEdit = (idx: number, row: T) => {
-    setEditingRow(idx);
-    const vals: Record<string, any> = {};
-    columns.forEach(col => { vals[String(col.key)] = row[col.key as keyof T]; });
-    setEditValues(vals);
+  const openEditModal = (row: T) => {
+    setEditingRecord(row);
+    setEditModalOpen(true);
   };
 
-  const saveEdit = (row: T) => {
-    onEdit?.(row, editValues as Partial<T>);
-    onAction?.("edit", { ...row, ...editValues });
-    setEditingRow(null);
-    setEditValues({});
-  };
-
-  const cancelEdit = () => {
-    setEditingRow(null);
-    setEditValues({});
+  const handleEditSave = (updated: Partial<T>) => {
+    if (editingRecord) {
+      onEdit?.(editingRecord, updated);
+      onAction?.("edit", { ...editingRecord, ...updated });
+    }
   };
 
   const confirmDelete = (row: T) => {
@@ -189,7 +184,6 @@ export default function DataTable<T extends Record<string, any>>({
               {paged.map((row, idx) => {
                 const globalIdx = (page - 1) * pageSize + idx;
                 const isSelected = selected.has(globalIdx);
-                const isEditing = editingRow === globalIdx;
                 const isDeleting = deleteConfirm === globalIdx;
 
                 return (
@@ -200,7 +194,7 @@ export default function DataTable<T extends Record<string, any>>({
                     transition={{ delay: idx * 0.02 }}
                     className={`border-b border-admin-border/20 transition-colors group ${
                       isSelected ? "bg-admin-accent/5" : "hover:bg-admin-surface-hover/50"
-                    } ${isEditing ? "bg-admin-info/5" : ""}`}
+                    }`}
                   >
                     {selectable && (
                       <td className="px-4 lg:px-6 py-3.5 w-12">
@@ -222,50 +216,13 @@ export default function DataTable<T extends Record<string, any>>({
                     </td>
                     {columns.map((col) => (
                       <td key={String(col.key)} className={`px-4 lg:px-6 py-3.5 text-sm text-admin-text-bright ${col.className || ""}`}>
-                        {isEditing && col.editable !== false ? (
-                          col.type === "select" && col.options ? (
-                            <ModernSelect
-                              options={col.options}
-                              value={editValues[String(col.key)] || ""}
-                              onChange={(val) => setEditValues({ ...editValues, [String(col.key)]: val })}
-                              className="w-full"
-                            />
-                          ) : col.type === "date" ? (
-                            <ModernDatePicker
-                              value={editValues[String(col.key)] || ""}
-                              onChange={(val) => setEditValues({ ...editValues, [String(col.key)]: val })}
-                              className="w-full"
-                            />
-                          ) : (
-                            <input
-                              type={col.type || "text"}
-                              value={editValues[String(col.key)] || ""}
-                              onChange={e => setEditValues({ ...editValues, [String(col.key)]: e.target.value })}
-                              className="admin-input rounded-lg px-2 py-1.5 text-sm w-full outline-none"
-                            />
-                          )
-                        ) : col.render ? col.render(row) : String(row[col.key as keyof T] ?? "")}
+                        {col.render ? col.render(row) : String(row[col.key as keyof T] ?? "")}
                       </td>
                     ))}
                     {actions.length > 0 && (
                       <td className="px-4 lg:px-6 py-3.5 text-right">
                         <AnimatePresence mode="wait">
-                          {isEditing ? (
-                            <motion.div
-                              key="editing"
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                              className="flex items-center justify-end gap-1"
-                            >
-                              <button onClick={() => saveEdit(row)} className="p-2 rounded-lg bg-admin-success/10 hover:bg-admin-success/20 text-admin-success transition-colors">
-                                <Save className="w-4 h-4" />
-                              </button>
-                              <button onClick={cancelEdit} className="p-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors">
-                                <X className="w-4 h-4" />
-                              </button>
-                            </motion.div>
-                          ) : isDeleting ? (
+                          {isDeleting ? (
                             <motion.div
                               key="deleting"
                               initial={{ opacity: 0, scale: 0.9 }}
@@ -292,7 +249,7 @@ export default function DataTable<T extends Record<string, any>>({
                                 </button>
                               )}
                               {actions.includes("edit") && (
-                                <button onClick={() => startEdit(globalIdx, row)} className="p-2 rounded-lg hover:bg-admin-accent/10 text-admin-accent transition-colors" title="Edit">
+                                <button onClick={() => openEditModal(row)} className="p-2 rounded-lg hover:bg-admin-accent/10 text-admin-accent transition-colors" title="Edit">
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                               )}
@@ -361,6 +318,16 @@ export default function DataTable<T extends Record<string, any>>({
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditRecordModal
+        isOpen={editModalOpen}
+        onClose={() => { setEditModalOpen(false); setEditingRecord(null); }}
+        onSave={handleEditSave}
+        row={editingRecord}
+        columns={columns}
+        title={`Edit ${title ? title.replace(/s$/, "") : "Record"}`}
+      />
     </div>
   );
 }

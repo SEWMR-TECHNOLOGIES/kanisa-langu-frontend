@@ -121,8 +121,10 @@ export default function RecordRevenue() {
     setFormValues(prev => ({ ...prev, [tabId]: { ...(prev[tabId] || {}), [name]: value } }));
   };
 
-  const currentTab = tabs.find(t => t.id === activeTab) ?? tabs[0];
+  const currentTab = tabs.find(t => t.id === activeTab) || tabs[0];
   const currentForm = formValues[activeTab] || {};
+
+  if (!currentTab) return null;
 
   return (
     <div className="space-y-6">

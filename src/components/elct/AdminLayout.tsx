@@ -17,7 +17,7 @@ export default function AdminLayout({ navigation, levelLabel, basePath }: AdminL
 
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const breadcrumbs = pathSegments.map((seg, i) => ({
-    label: seg.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+    label: seg.toUpperCase().replace(/-/g, " "),
     path: "/" + pathSegments.slice(0, i + 1).join("/"),
   }));
 
@@ -36,7 +36,7 @@ export default function AdminLayout({ navigation, levelLabel, basePath }: AdminL
                 {breadcrumbs.map((crumb, i) => (
                   <span key={crumb.path} className="flex items-center gap-1.5">
                     {i > 0 && <ChevronRight className="w-3 h-3 text-admin-text/30" />}
-                    <span className={i === breadcrumbs.length - 1 ? "text-admin-text-bright font-medium" : "text-admin-text/60"}>
+                    <span className={`font-semibold tracking-wide ${i === breadcrumbs.length - 1 ? "text-admin-text-bright" : "text-admin-text/60"}`}>
                       {crumb.label}
                     </span>
                   </span>

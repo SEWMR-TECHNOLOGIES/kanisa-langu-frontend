@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Users, Home, CalendarDays, TrendingUp } from "lucide-react";
 import StatsCard from "../../components/head-parish/StatsCard";
 import { Link } from "react-router-dom";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const recentActivity = [
   { action: "Household visit completed", detail: "Familia ya Mwanga - Home fellowship", time: "1 hour ago", color: "bg-admin-success" },

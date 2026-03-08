@@ -1,112 +1,96 @@
 import { motion } from "framer-motion";
-import heroImage from "../../assets/hero-church.png";
+import heroPattern from "../../assets/hero-pattern.png";
 
 export default function Hero() {
+  const scrollTo = (id: string) => {
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden hero-glow pt-20">
-      {/* Decorative orbs */}
-      <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-secondary/10 blur-3xl" />
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Dark background with pattern */}
+      <div className="absolute inset-0">
+        <img src={heroPattern} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-6 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-6 items-center">
-          {/* Text */}
+      {/* Glowing orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-secondary/8 blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/10 blur-[100px]" />
+
+      <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pt-20">
+        <div className="max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-xl"
+            transition={{ duration: 0.7, delay: 0.1 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent border border-border mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm mb-8">
               <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-xs font-semibold text-accent-foreground uppercase tracking-wider">
-                Church Management Platform
+              <span className="text-xs font-semibold text-white/70 uppercase tracking-widest">
+                Trusted by 500+ churches across Tanzania
               </span>
-            </div>
-
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-foreground">
-              Simplify{" "}
-              <span className="font-serif italic text-gradient-primary">Church</span>
-              <br />
-              Management with{" "}
-              <span className="text-gradient-gold">Kanisa Langu</span>
-            </h1>
-
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-md">
-              Your comprehensive solution for managing head parish operations — from tracking revenues to engaging with church members.
-            </p>
-
-            <div className="flex flex-wrap gap-4 mt-10">
-              <a
-                href="#features"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="px-8 py-4 bg-primary text-primary-foreground rounded-full font-semibold text-sm shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
-              >
-                Explore Features
-              </a>
-              <a
-                href="#about"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="px-8 py-4 bg-card text-foreground rounded-full font-semibold text-sm border border-border hover:border-primary/30 hover:-translate-y-0.5 transition-all"
-              >
-                Learn More
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="flex gap-10 mt-14">
-              {[
-                { value: "500+", label: "Churches" },
-                { value: "50K+", label: "Members" },
-                { value: "99.9%", label: "Uptime" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-2xl font-extrabold text-foreground">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
             </div>
           </motion.div>
 
-          {/* Hero image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            className="relative flex justify-center lg:justify-end"
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white font-display leading-[0.95] tracking-tight"
           >
-            <div className="relative">
-              <img
-                src={heroImage}
-                alt="Kanisa Langu Platform"
-                className="w-full max-w-lg animate-float drop-shadow-2xl"
-              />
-              {/* Floating badge */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1, duration: 0.5 }}
-                className="absolute -left-4 bottom-1/4 glass rounded-2xl px-4 py-3 shadow-xl"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Revenue Today</div>
-                    <div className="text-sm font-bold text-foreground">TZS 2.4M</div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+            The future of
+            <br />
+            <span className="text-gradient-gold">church</span> management
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="mt-7 text-lg sm:text-xl text-white/50 leading-relaxed max-w-xl"
+          >
+            One platform for ELCT, Roman Catholic, SDA, and Pentecostal churches. 
+            Manage finances, members, and communications — all in one place.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-wrap gap-4 mt-10"
+          >
+            <button
+              onClick={() => scrollTo("#churches")}
+              className="group px-8 py-4 bg-secondary text-secondary-foreground rounded-2xl font-bold text-sm shadow-xl shadow-secondary/25 hover:shadow-2xl hover:shadow-secondary/30 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Explore Your Church →
+            </button>
+            <button
+              onClick={() => scrollTo("#features")}
+              className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm"
+            >
+              See Features
+            </button>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="flex gap-12 mt-16 pt-10 border-t border-white/10"
+          >
+            {[
+              { value: "500+", label: "Churches" },
+              { value: "50K+", label: "Members" },
+              { value: "4", label: "Denominations" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-3xl sm:text-4xl font-bold text-white font-display">{stat.value}</div>
+                <div className="text-sm text-white/40 mt-1">{stat.label}</div>
+              </div>
+            ))}
           </motion.div>
         </div>
       </div>

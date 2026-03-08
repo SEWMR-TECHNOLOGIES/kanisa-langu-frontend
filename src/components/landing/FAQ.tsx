@@ -1,93 +1,68 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 
 const faqs = [
-  {
-    q: "What features does Kanisa Langu offer?",
-    a: "Kanisa Langu includes revenue tracking, expense management, insightful reporting, member account management, SMS notifications, and integrated mobile payments.",
-  },
-  {
-    q: "How do I get started with Kanisa Langu?",
-    a: "Download the app from Google Play or the App Store, create an account, and follow the setup wizard to configure your church structure and start managing operations.",
-  },
-  {
-    q: "Can I customize my reports?",
-    a: "Yes, our platform allows you to generate and customize financial, attendance, and operational reports to meet your specific parish needs.",
-  },
-  {
-    q: "Is there a mobile app available?",
-    a: "Yes! Kanisa Langu is available on both Android (Google Play) and iOS (App Store) with full feature parity.",
-  },
-  {
-    q: "What types of payment methods are supported?",
-    a: "We support mobile money (M-Pesa, Tigo Pesa, Airtel Money), credit/debit cards, and bank transfers for seamless donation processing.",
-  },
-  {
-    q: "Can multiple users access the system?",
-    a: "Absolutely. Kanisa Langu supports multiple roles including admin, secretary, accountant, pastor, and evangelist — each with customizable permissions.",
-  },
-  {
-    q: "Is data backup included?",
-    a: "Yes, we provide automatic daily backups with enterprise-grade encryption to ensure your data is always secure and recoverable.",
-  },
-  {
-    q: "How can I contact customer support?",
-    a: "Reach our support team via email, phone, or through the in-app support portal. We typically respond within 24 hours.",
-  },
+  { q: "Which church denominations does Kanisa Langu support?", a: "We support ELCT (Evangelical Lutheran Church in Tanzania), Roman Catholic, SDA (Seventh-Day Adventist), and Pentecostal churches. Each denomination gets tailored features for their specific structure and needs." },
+  { q: "How do I get started?", a: "Download the app from Google Play or App Store, create an account, and follow the setup wizard. You can configure your church structure and start managing in minutes." },
+  { q: "What payment methods are supported?", a: "We support M-Pesa, Tigo Pesa, Airtel Money, credit/debit cards, and bank transfers for seamless donation and offering processing." },
+  { q: "Can multiple users access the system?", a: "Yes. Kanisa Langu supports role-based access with roles like admin, pastor, secretary, accountant, and evangelist — each with customizable permissions." },
+  { q: "Is my church data secure?", a: "Absolutely. We use enterprise-grade encryption, automated daily backups, and strict access controls to ensure your data is always protected." },
+  { q: "Can I manage multiple parishes or branches?", a: "Yes. Whether you're managing a single parish or an entire diocese with multiple branches, our platform scales with your structure." },
+  { q: "Is customer support available?", a: "Our support team is available via email, phone, and in-app support portal. We typically respond within 24 hours." },
 ];
 
-function FaqItem({ faq }: { faq: { q: string; a: string } }) {
+function FaqItem({ faq, index }: { faq: { q: string; a: string }; index: number }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-border last:border-0">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05 }}
+      className="border-b border-border last:border-0"
+    >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left"
+        className="w-full flex items-center justify-between py-6 text-left group"
       >
-        <span className="text-base font-semibold text-foreground pr-4">{faq.q}</span>
-        <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className="text-base font-semibold text-foreground pr-8 group-hover:text-secondary transition-colors">{faq.q}</span>
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${open ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground"}`}>
+          {open ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+        </div>
       </button>
       <motion.div
         initial={false}
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         className="overflow-hidden"
       >
-        <p className="pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+        <p className="pb-6 text-sm text-muted-foreground leading-relaxed max-w-2xl">{faq.a}</p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-28 bg-muted/40">
-      <div className="max-w-4xl mx-auto px-6">
+    <section id="faq" className="py-28">
+      <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="mb-14"
         >
-          <span className="text-sm font-semibold text-secondary uppercase tracking-widest">
-            FAQ
-          </span>
-          <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-            Frequently Asked{" "}
-            <span className="font-serif italic text-gradient-primary">Questions</span>
+          <span className="text-sm font-bold text-secondary uppercase tracking-widest">FAQ</span>
+          <h2 className="mt-4 text-4xl sm:text-5xl font-bold text-foreground font-display tracking-tight">
+            Common questions
           </h2>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-card rounded-3xl border border-border p-8 sm:p-10 shadow-sm"
-        >
-          {faqs.map((faq) => (
-            <FaqItem key={faq.q} faq={faq} />
+        <div className="bg-card rounded-3xl border border-border p-8 sm:p-10">
+          {faqs.map((faq, i) => (
+            <FaqItem key={faq.q} faq={faq} index={i} />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

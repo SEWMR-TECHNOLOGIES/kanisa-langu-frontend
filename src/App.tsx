@@ -16,11 +16,23 @@ import CommunitySignIn from "./pages/community/SignIn";
 // ELCT Diocese Admin
 import DioceseLayout from "./pages/diocese/DioceseLayout";
 import DioceseDashboard from "./pages/diocese/Dashboard";
+import DioceseProvinces from "./pages/diocese/Provinces";
+import DioceseProvinceAdmins from "./pages/diocese/ProvinceAdmins";
+import DioceseCreateProvinceAdmin from "./pages/diocese/CreateProvinceAdmin";
+import DioceseAdmins from "./pages/diocese/Admins";
+import DioceseOverview from "./pages/diocese/Overview";
 import DioceseGenericPage from "./pages/diocese/GenericPage";
 
 // ELCT Province Admin
 import ProvinceLayout from "./pages/province/ProvinceLayout";
 import ProvinceDashboard from "./pages/province/Dashboard";
+import ProvinceHeadParishes from "./pages/province/HeadParishes";
+import ProvinceCreateHPAdmin from "./pages/province/CreateHPAdmin";
+import ProvinceHPAdmins from "./pages/province/HPAdmins";
+import ProvinceAdmins from "./pages/province/Admins";
+import ProvinceOverview from "./pages/province/Overview";
+import ProvinceFinancialSummary from "./pages/province/FinancialSummary";
+import ProvinceMembersOverview from "./pages/province/MembersOverview";
 import ProvinceGenericPage from "./pages/province/GenericPage";
 
 // ELCT Head Parish Admin
@@ -65,11 +77,25 @@ import GenericPage from "./pages/head-parish/GenericPage";
 // ELCT Sub Parish Admin
 import SubParishLayout from "./pages/sub-parish/SubParishLayout";
 import SubParishDashboard from "./pages/sub-parish/Dashboard";
+import SPChurchMembers from "./pages/sub-parish/ChurchMembers";
+import SPRegisterMember from "./pages/sub-parish/RegisterChurchMember";
+import SPServices from "./pages/sub-parish/Services";
+import SPMeetings from "./pages/sub-parish/Meetings";
+import SPRevenueStreams from "./pages/sub-parish/RevenueStreams";
+import SPHarambee from "./pages/sub-parish/Harambee";
+import SPManageEnvelopes from "./pages/sub-parish/ManageEnvelopes";
+import SPExpenseRequests from "./pages/sub-parish/ExpenseRequests";
+import SPCreateAdmin from "./pages/sub-parish/CreateAdmin";
 import SubParishGenericPage from "./pages/sub-parish/GenericPage";
 
 // ELCT Community Admin
 import CommunityLayout from "./pages/community/CommunityLayout";
 import CommunityDashboard from "./pages/community/Dashboard";
+import CommunityMembersPage from "./pages/community/Members";
+import CommunityHouseholds from "./pages/community/Households";
+import CommunityScheduleMeeting from "./pages/community/ScheduleMeeting";
+import CommunityMeetings from "./pages/community/Meetings";
+import CommunitySendNotification from "./pages/community/SendNotification";
 import CommunityGenericPage from "./pages/community/GenericPage";
 
 export default function App() {
@@ -92,12 +118,24 @@ export default function App() {
         {/* ELCT Diocese */}
         <Route path="/elct/diocese" element={<DioceseLayout />}>
           <Route index element={<DioceseDashboard />} />
+          <Route path="provinces" element={<DioceseProvinces />} />
+          <Route path="province-admins" element={<DioceseProvinceAdmins />} />
+          <Route path="create-province-admin" element={<DioceseCreateProvinceAdmin />} />
+          <Route path="admins" element={<DioceseAdmins />} />
+          <Route path="overview" element={<DioceseOverview />} />
           <Route path="*" element={<DioceseGenericPage />} />
         </Route>
 
         {/* ELCT Province */}
         <Route path="/elct/province" element={<ProvinceLayout />}>
           <Route index element={<ProvinceDashboard />} />
+          <Route path="head-parishes" element={<ProvinceHeadParishes />} />
+          <Route path="create-hp-admin" element={<ProvinceCreateHPAdmin />} />
+          <Route path="hp-admins" element={<ProvinceHPAdmins />} />
+          <Route path="admins" element={<ProvinceAdmins />} />
+          <Route path="overview" element={<ProvinceOverview />} />
+          <Route path="financial-summary" element={<ProvinceFinancialSummary />} />
+          <Route path="members-overview" element={<ProvinceMembersOverview />} />
           <Route path="*" element={<ProvinceGenericPage />} />
         </Route>
 
@@ -144,12 +182,26 @@ export default function App() {
         {/* ELCT Sub Parish */}
         <Route path="/elct/sub-parish" element={<SubParishLayout />}>
           <Route index element={<SubParishDashboard />} />
+          <Route path="create-admin" element={<SPCreateAdmin />} />
+          <Route path="register-church-member" element={<SPRegisterMember />} />
+          <Route path="church-members" element={<SPChurchMembers />} />
+          <Route path="services" element={<SPServices />} />
+          <Route path="meetings" element={<SPMeetings />} />
+          <Route path="revenue-streams" element={<SPRevenueStreams />} />
+          <Route path="harambee" element={<SPHarambee />} />
+          <Route path="manage-envelopes" element={<SPManageEnvelopes />} />
+          <Route path="expense-requests" element={<SPExpenseRequests />} />
           <Route path="*" element={<SubParishGenericPage />} />
         </Route>
 
         {/* ELCT Community */}
         <Route path="/elct/community" element={<CommunityLayout />}>
           <Route index element={<CommunityDashboard />} />
+          <Route path="members" element={<CommunityMembersPage />} />
+          <Route path="households" element={<CommunityHouseholds />} />
+          <Route path="schedule-meeting" element={<CommunityScheduleMeeting />} />
+          <Route path="meetings" element={<CommunityMeetings />} />
+          <Route path="send-notification" element={<CommunitySendNotification />} />
           <Route path="*" element={<CommunityGenericPage />} />
         </Route>
       </Routes>

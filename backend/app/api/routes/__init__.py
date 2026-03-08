@@ -14,6 +14,7 @@ from .auth import router as auth_router
 # ── Shared services (used across levels) ──────────────────────
 from .hierarchy import router as hierarchy_router
 from .admins import router as admins_router
+from .bible import router as bible_router
 from .members import router as members_router
 from .finance import router as finance_router
 from .envelope import router as envelope_router

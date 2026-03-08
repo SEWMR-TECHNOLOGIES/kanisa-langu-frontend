@@ -949,6 +949,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Set envelope contribution target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "year", label: "Year", type: "select", required: true, options: [{ value: "2025", label: "2025" }, { value: "2026", label: "2026" }] },

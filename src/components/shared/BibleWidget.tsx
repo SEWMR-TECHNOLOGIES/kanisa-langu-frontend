@@ -53,7 +53,7 @@ export default function BibleWidget({ className = "" }: BibleWidgetProps) {
   const [index, setIndex] = useState(dayOfYear % DAILY_VERSES.length);
   const [lang, setLang] = useState<"sw" | "en">("sw");
 
-  const verse = DAILY_VERSES[index];
+  const verse = DAILY_VERSES[index] ?? DAILY_VERSES[0]!
 
   const prev = () => setIndex((i) => (i - 1 + DAILY_VERSES.length) % DAILY_VERSES.length);
   const next = () => setIndex((i) => (i + 1) % DAILY_VERSES.length);

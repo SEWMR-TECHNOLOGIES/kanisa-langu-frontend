@@ -16,6 +16,7 @@ interface TabbedDataTableProps<T> {
   tabs: Tab<T>[];
   searchPlaceholder?: string;
   actions?: ("view" | "edit" | "delete")[];
+  onAction?: (action: string, row: T, tabId: string) => void;
 }
 
 export default function TabbedDataTable<T extends Record<string, any>>({
@@ -24,6 +25,7 @@ export default function TabbedDataTable<T extends Record<string, any>>({
   tabs,
   searchPlaceholder,
   actions,
+  onAction,
 }: TabbedDataTableProps<T>) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id);
   const current = tabs.find((t) => t.id === activeTab) || tabs[0];
@@ -35,41 +37,41 @@ export default function TabbedDataTable<T extends Record<string, any>>({
         {description && <p className="text-sm text-admin-text mt-1">{description}</p>}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-admin-surface/60 border border-admin-border/30 w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`relative px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-              activeTab === tab.id
-                ? "text-admin-bg"
-                : "text-admin-text hover:text-admin-text-bright"
-            }`}
-          >
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="tab-indicator"
-                className="absolute inset-0 rounded-lg bg-admin-accent"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-              />
-            )}
-            <span className="relative z-10">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+      {/* Tabs - matching TabbedFormCard style */}
+      <div className="admin-card rounded-2xl overflow-hidden">
+        <div className="px-6 pt-6 border-b border-admin-border/30">
+          <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-none">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-xl transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? "text-admin-accent bg-admin-accent/5 border-b-2 border-admin-accent"
+                    : "text-admin-text hover:text-admin-text-bright hover:bg-admin-surface-hover"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {/* Table */}
-      {current && (
-        <DataTable
-          title=""
-          columns={current.columns}
-          data={current.data}
-          searchPlaceholder={searchPlaceholder}
-          searchKeys={current.searchKeys}
-          actions={actions}
-        />
-      )}
+        {/* Table inside card */}
+        {current && (
+          <div className="p-0">
+            <DataTable
+              title=""
+              columns={current.columns}
+              data={current.data}
+              searchPlaceholder={searchPlaceholder}
+              searchKeys={current.searchKeys}
+              actions={actions}
+              onAction={onAction ? (action, row) => onAction(action, row, activeTab || "") : undefined}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

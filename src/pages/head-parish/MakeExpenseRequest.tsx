@@ -100,11 +100,11 @@ export default function MakeExpenseRequest() {
     setSubmitDescription("");
   };
 
-  const getTotal = (tabId: string) => containers[tabId].reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const getTotal = (tabId: string) => (containers[tabId] || []).reduce((s, i) => s + (Number(i.amount) || 0), 0);
 
-  const currentTabConfig = tabConfigs.find(t => t.id === activeTab)!;
+  const currentTabConfig = tabConfigs.find(t => t.id === activeTab) || tabConfigs[0];
   const currentForm = getForm(activeTab);
-  const currentItems = containers[activeTab];
+  const currentItems = containers[activeTab] || [];
 
   return (
     <div className="space-y-6">

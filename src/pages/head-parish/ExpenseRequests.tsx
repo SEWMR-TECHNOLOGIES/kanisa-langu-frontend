@@ -76,7 +76,7 @@ export default function ExpenseRequests() {
         description="View, approve, or reject expense requests across levels"
         searchPlaceholder="Search expense requests..."
         actions={["view", "edit"]}
-        onAction={(action, row, tab) => {
+        onAction={(action: string, row: any, tab: string) => {
           if (action === "edit") openRespond(row, tab);
         }}
         tabs={[

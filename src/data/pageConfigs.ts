@@ -1,5 +1,7 @@
 // @ts-nocheck
 // Route configuration for auto-generating pages
+import { type StatusItem } from "../components/head-parish/MemberStatusPreview";
+import { getHarambeeStatusItems, getEnvelopeStatusItems } from "../components/head-parish/MemberStatusPreview";
 // Each route maps to either a "form" or "table" page type with full config
 
 export interface FormFieldConfig {
@@ -28,6 +30,10 @@ export interface PageConfig {
   submitLabel?: string;
   fields?: FormFieldConfig[];
   infoBox?: string;
+  statusPreview?: {
+    watchFields: string[];
+    getStatus: (values: Record<string, string>) => StatusItem[];
+  };
   // Table config
   columns?: TableColumnConfig[];
   data?: Record<string, any>[];
@@ -136,6 +142,33 @@ const statusBadge: Record<string, string> = {
 function genData(count: number, generator: (i: number) => Record<string, any>) {
   return Array.from({ length: count }, (_, i) => ({ id: i + 1, ...generator(i) }));
 }
+
+// Mock member status data for previews
+const mockHarambeeStatus = (values: Record<string, string>): StatusItem[] => {
+  const memberId = Number(values.member || values.member_id || 0);
+  const targets = [500000, 400000, 300000, 600000, 250000, 350000, 450000, 200000, 550000, 380000];
+  const contribs = [320000, 280000, 150000, 600000, 100000, 350000, 200000, 50000, 400000, 190000];
+  const idx = (memberId - 1) % 10;
+  return getHarambeeStatusItems(targets[idx] || 0, contribs[idx] || 0);
+};
+
+const mockEnvelopeStatus = (values: Record<string, string>): StatusItem[] => {
+  const memberId = Number(values.member || values.member_id || 0);
+  const targets = [120000, 96000, 84000, 150000, 72000, 108000, 60000, 132000, 90000, 100000];
+  const contribs = [80000, 96000, 40000, 100000, 72000, 50000, 30000, 132000, 45000, 60000];
+  const idx = (memberId - 1) % 10;
+  return getEnvelopeStatusItems(targets[idx] || 0, contribs[idx] || 0);
+};
+
+const harambeeStatusPreview = {
+  watchFields: ["harambee", "member"],
+  getStatus: mockHarambeeStatus,
+};
+
+const envelopeStatusPreview = {
+  watchFields: ["member"],
+  getStatus: mockEnvelopeStatus,
+};
 
 // ============ HEAD PARISH PAGE CONFIGS ============
 export const headParishPages: Record<string, PageConfig> = {
@@ -634,6 +667,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Set a harambee target for a specific member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
@@ -657,6 +691,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Record a member's harambee contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
@@ -860,6 +895,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Exclude a member from harambee participation",
     type: "form",
     submitLabel: "Exclude Member",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
@@ -913,6 +949,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Set envelope contribution target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "year", label: "Year", type: "select", required: true, options: [{ value: "2025", label: "2025" }, { value: "2026", label: "2026" }] },
@@ -924,6 +961,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Record a member's envelope contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
@@ -1309,6 +1347,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Set harambee target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions.slice(0, 3) },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
@@ -1320,6 +1359,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Record a member's harambee contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions.slice(0, 3) },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
@@ -1471,6 +1511,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Set envelope target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "amount", label: "Target (TZS)", type: "number", placeholder: "Enter target", required: true },
@@ -1481,6 +1522,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Record a member's envelope contribution",
     type: "form",
     submitLabel: "Record Contribution",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },

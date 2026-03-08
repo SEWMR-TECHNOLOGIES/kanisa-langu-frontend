@@ -1,4 +1,5 @@
 import FormCard from "../../components/head-parish/FormCard";
+import { getHarambeeStatusItems } from "../../components/head-parish/MemberStatusPreview";
 
 const typeOptions = [
   { value: "head-parish", label: "Head Parish" }, { value: "sub-parish", label: "Sub Parish" },
@@ -18,12 +19,30 @@ const paymentMethodOptions = [
   { value: "Mobile Payment", label: "Mobile Payment" }, { value: "Card", label: "Card" },
 ];
 
+// Mock status data per member+harambee combo
+const mockStatusData: Record<string, { target: number; contributed: number }> = {
+  "1-1": { target: 500000, contributed: 320000 },
+  "1-2": { target: 300000, contributed: 150000 },
+  "2-1": { target: 400000, contributed: 400000 },
+  "2-2": { target: 250000, contributed: 280000 },
+  "3-1": { target: 600000, contributed: 100000 },
+  "3-2": { target: 200000, contributed: 0 },
+};
+
 export default function RecordHarambeeContribution() {
   return (
     <FormCard
       title="Record Harambee Contribution"
       description="Record individual harambee contributions"
       submitLabel="Record Harambee Contribution"
+      statusPreview={{
+        watchFields: ["target_table", "harambee_id", "member_id"],
+        getStatus: (values) => {
+          const key = `${values.member_id}-${values.harambee_id}`;
+          const data = mockStatusData[key] || { target: 0, contributed: 0 };
+          return getHarambeeStatusItems(data.target, data.contributed);
+        },
+      }}
       fields={[
         { name: "target_table", label: "Select Type", type: "select", required: true, options: typeOptions },
         { name: "harambee_id", label: "Harambee", type: "select", required: true, options: harambeeOptions },

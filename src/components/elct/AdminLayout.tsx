@@ -2,9 +2,16 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, Search, Bell, ChevronRight } from "lucide-react";
-import HeadParishSidebar from "./HeadParishSidebar";
+import AdminSidebar from "./AdminSidebar";
+import type { NavSection } from "./AdminSidebar";
 
-export default function HeadParishLayout() {
+interface AdminLayoutProps {
+  navigation: NavSection[];
+  levelLabel: string;
+  basePath: string;
+}
+
+export default function AdminLayout({ navigation, levelLabel, basePath }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -16,7 +23,7 @@ export default function HeadParishLayout() {
 
   return (
     <div className="min-h-screen bg-admin-bg">
-      <HeadParishSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} navigation={navigation} levelLabel={levelLabel} basePath={basePath} />
 
       <div className="lg:ml-[280px] min-h-screen flex flex-col">
         <header className="sticky top-0 z-30 bg-admin-header border-b border-admin-border">
@@ -40,8 +47,7 @@ export default function HeadParishLayout() {
             <div className="flex items-center gap-3">
               <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-admin-surface-hover border border-admin-border w-64">
                 <Search className="w-4 h-4 text-admin-text/50" />
-                <input type="text" placeholder="Search..."
-                  className="bg-transparent text-xs text-admin-text-bright placeholder:text-admin-text/40 outline-none w-full" />
+                <input type="text" placeholder="Search..." className="bg-transparent text-xs text-admin-text-bright placeholder:text-admin-text/40 outline-none w-full" />
               </div>
               <button className="relative p-2.5 rounded-xl hover:bg-admin-surface-hover text-admin-text transition-colors">
                 <Bell className="w-[18px] h-[18px]" />

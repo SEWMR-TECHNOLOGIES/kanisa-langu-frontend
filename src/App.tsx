@@ -9,12 +9,22 @@ import CookieConsent from "./components/CookieConsent";
 // ELCT Sign-In Pages
 import DioceseSignIn from "./pages/diocese/SignIn";
 import ProvinceSignIn from "./pages/province/SignIn";
+import HeadParishSignIn from "./pages/head-parish/SignIn";
 import SubParishSignIn from "./pages/sub-parish/SignIn";
 import CommunitySignIn from "./pages/community/SignIn";
 
+// ELCT Diocese Admin
+import DioceseLayout from "./pages/diocese/DioceseLayout";
+import DioceseDashboard from "./pages/diocese/Dashboard";
+import DioceseGenericPage from "./pages/diocese/GenericPage";
+
+// ELCT Province Admin
+import ProvinceLayout from "./pages/province/ProvinceLayout";
+import ProvinceDashboard from "./pages/province/Dashboard";
+import ProvinceGenericPage from "./pages/province/GenericPage";
+
 // ELCT Head Parish Admin
 import HeadParishLayout from "./components/head-parish/HeadParishLayout";
-import HeadParishSignIn from "./pages/head-parish/SignIn";
 import Dashboard from "./pages/head-parish/Dashboard";
 import SubParishes from "./pages/head-parish/SubParishes";
 import RegisterSubParish from "./pages/head-parish/RegisterSubParish";
@@ -52,6 +62,16 @@ import AssetsManagement from "./pages/head-parish/AssetsManagement";
 import SendPushNotification from "./pages/head-parish/SendPushNotification";
 import GenericPage from "./pages/head-parish/GenericPage";
 
+// ELCT Sub Parish Admin
+import SubParishLayout from "./pages/sub-parish/SubParishLayout";
+import SubParishDashboard from "./pages/sub-parish/Dashboard";
+import SubParishGenericPage from "./pages/sub-parish/GenericPage";
+
+// ELCT Community Admin
+import CommunityLayout from "./pages/community/CommunityLayout";
+import CommunityDashboard from "./pages/community/Dashboard";
+import CommunityGenericPage from "./pages/community/GenericPage";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -69,19 +89,28 @@ export default function App() {
         <Route path="/elct/sub-parish/sign-in" element={<SubParishSignIn />} />
         <Route path="/elct/community/sign-in" element={<CommunitySignIn />} />
 
+        {/* ELCT Diocese */}
+        <Route path="/elct/diocese" element={<DioceseLayout />}>
+          <Route index element={<DioceseDashboard />} />
+          <Route path="*" element={<DioceseGenericPage />} />
+        </Route>
+
+        {/* ELCT Province */}
+        <Route path="/elct/province" element={<ProvinceLayout />}>
+          <Route index element={<ProvinceDashboard />} />
+          <Route path="*" element={<ProvinceGenericPage />} />
+        </Route>
+
         {/* ELCT Head Parish */}
         <Route path="/elct/head-parish" element={<HeadParishLayout />}>
           <Route index element={<Dashboard />} />
-          {/* Administration */}
           <Route path="sub-parishes" element={<SubParishes />} />
           <Route path="register-sub-parish" element={<RegisterSubParish />} />
           <Route path="communities" element={<Communities />} />
           <Route path="register-community" element={<RegisterCommunity />} />
           <Route path="groups" element={<Groups />} />
           <Route path="register-group" element={<RegisterGroup />} />
-          {/* Roles */}
           <Route path="create-admin" element={<CreateAdmin />} />
-          {/* Church Management */}
           <Route path="church-leaders" element={<ChurchLeaders />} />
           <Route path="register-church-leader" element={<RegisterChurchLeader />} />
           <Route path="church-members" element={<ChurchMembers />} />
@@ -91,34 +120,37 @@ export default function App() {
           <Route path="sunday-services" element={<SundayServices />} />
           <Route path="record-sunday-service" element={<RecordSundayService />} />
           <Route path="excluded-church-members" element={<ExcludedChurchMembers />} />
-          {/* Events */}
           <Route path="all-meetings" element={<AllMeetings />} />
           <Route path="new-meeting" element={<NewMeeting />} />
           <Route path="church-events" element={<ChurchEvents />} />
           <Route path="new-church-event" element={<NewChurchEvent />} />
           <Route path="send-push-notification" element={<SendPushNotification />} />
-          {/* Banking & Finance */}
           <Route path="bank-accounts" element={<BankAccounts />} />
           <Route path="register-bank-account" element={<RegisterBankAccount />} />
           <Route path="financial-statement" element={<FinancialStatement />} />
-          {/* Revenue */}
           <Route path="revenue-streams" element={<RevenueStreams />} />
           <Route path="record-revenue" element={<RecordRevenue />} />
           <Route path="debits" element={<Debits />} />
-          {/* Expenses */}
           <Route path="expense-requests" element={<ExpenseRequests />} />
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />
-          {/* Harambee */}
           <Route path="harambee" element={<Harambee />} />
           <Route path="record-harambee" element={<RecordHarambee />} />
-          {/* Envelope */}
           <Route path="manage-envelopes" element={<ManageEnvelopes />} />
-          {/* Assets */}
           <Route path="add-asset" element={<AssetsManagement />} />
-          {/* Payment Wallets */}
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />
-          {/* Catch-all */}
           <Route path="*" element={<GenericPage />} />
+        </Route>
+
+        {/* ELCT Sub Parish */}
+        <Route path="/elct/sub-parish" element={<SubParishLayout />}>
+          <Route index element={<SubParishDashboard />} />
+          <Route path="*" element={<SubParishGenericPage />} />
+        </Route>
+
+        {/* ELCT Community */}
+        <Route path="/elct/community" element={<CommunityLayout />}>
+          <Route index element={<CommunityDashboard />} />
+          <Route path="*" element={<CommunityGenericPage />} />
         </Route>
       </Routes>
       <CookieConsent />

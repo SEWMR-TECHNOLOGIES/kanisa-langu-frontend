@@ -12,12 +12,12 @@ const recentActivity = [
 ];
 
 const quickLinks = [
-  { label: "Register Member", href: "/head-parish/register-church-member", icon: Users },
-  { label: "Record Revenue", href: "/head-parish/record-revenue", icon: Coins },
-  { label: "Record Service", href: "/head-parish/record-sunday-service", icon: BookOpen },
-  { label: "New Meeting", href: "/head-parish/new-meeting", icon: CalendarDays },
-  { label: "Record Harambee", href: "/head-parish/record-harambee", icon: Flag },
-  { label: "Financial Statement", href: "/head-parish/financial-statement", icon: CreditCard },
+  { label: "Register Member", href: "/elct/head-parish/register-church-member", icon: Users },
+  { label: "Record Revenue", href: "/elct/head-parish/record-revenue", icon: Coins },
+  { label: "Record Service", href: "/elct/head-parish/record-sunday-service", icon: BookOpen },
+  { label: "New Meeting", href: "/elct/head-parish/new-meeting", icon: CalendarDays },
+  { label: "Record Harambee", href: "/elct/head-parish/record-harambee", icon: Flag },
+  { label: "Financial Statement", href: "/elct/head-parish/financial-statement", icon: CreditCard },
 ];
 
 export default function Dashboard() {

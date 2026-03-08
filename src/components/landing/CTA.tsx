@@ -21,7 +21,7 @@ export default function CTA() {
           <div className="relative z-10 max-w-2xl mx-auto text-center">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground font-display tracking-tight leading-[1.05]">
               Start managing your church{" "}
-              <span className="text-gradient-gold">today</span>
+              <span className="text-secondary">today</span>
             </h2>
             <p className="mt-6 text-lg text-primary-foreground/50 max-w-lg mx-auto">
               Join 500+ churches already using Kanisa Langu. Download free on Android and iOS.

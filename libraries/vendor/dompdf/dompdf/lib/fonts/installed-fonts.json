@@ -1,0 +1,10 @@
+{
+    "barlow": {
+        "normal": "\/home\/sewmrtech\/kanisalangu.sewmrtechnologies.com\/libraries\/vendor\/dompdf\/dompdf\/lib\/fonts\/barlow_normal_35ddba3a6256abb5f72c99bb3e8c0310",
+        "bold": "barlow_bold_26a8c15b95e758eaa78fb51d79747d2e"
+    },
+    "roboto": {
+        "normal": "C:\\xampp\\htdocs\\reports\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_normal_6e7e4bc6c684ec0cddc125461bc72cd7",
+        "bold": "roboto_bold_81e27a370d4b92f66e5deae1b4e9737b"
+    }
+}

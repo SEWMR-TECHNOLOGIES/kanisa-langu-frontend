@@ -1,0 +1,22 @@
+    .response-message {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .response-message .icon {
+      font-size: 1.5em;
+      margin-right: 10px;
+    }
+    .response-message.success {
+      border-color: #d4edda;
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .response-message.error {
+      border-color: #f8d7da;
+      background-color: #f8d7da;
+      color: #721c24;
+    }

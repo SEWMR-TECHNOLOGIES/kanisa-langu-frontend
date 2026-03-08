@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEWMR SMS</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f4f6f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .logo-container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+    }
+
+    .logo-container:hover {
+      transform: translateY(-6px);
+    }
+
+    svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    text {
+      letter-spacing: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <svg width="420" height="200" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="smsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f44336" />
+          <stop offset="100%" stop-color="#b71c1c" />
+        </linearGradient>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.3" />
+        </filter>
+      </defs>
+
+      <!-- Enhanced SEWMR Text -->
+      <text x="30" y="110"
+            font-family="Arial Black, Gadget, sans-serif"
+            font-size="62"
+            font-weight="900"
+            fill="#111111"
+            letter-spacing="8">
+        SEWMR
+      </text>
+
+      <!-- SMS Icon -->
+      <g transform="translate(300, 20)" filter="url(#shadow)">
+        <rect x="0" y="0" rx="20" ry="20" width="80" height="55" fill="url(#smsGradient)" />
+        <polygon points="30,55 45,55 38,68" fill="url(#smsGradient)" />
+        <text x="14" y="36" font-size="22" font-family="Arial, sans-serif" font-weight="bold" fill="white">SMS</text>
+      </g>
+    </svg>
+  </div>
+  <button onclick="downloadPNG()">Download PNG</button>
+
+<script>
+function downloadPNG() {
+  const svgElement = document.querySelector("svg");
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(svgElement);
+
+  const scale = 4;  // scale factor (4x for super crisp)
+  const width = 420 * scale;
+  const height = 200 * scale;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+
+  const img = new Image();
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+
+  img.onload = () => {
+    // draw image scaled to canvas size for high-res export
+    ctx.drawImage(img, 0, 0, width, height);
+    URL.revokeObjectURL(url);
+
+    // convert canvas to PNG data URL
+    const png = canvas.toDataURL("image/png");
+
+    // create download link and trigger download
+    const a = document.createElement("a");
+    a.download = "logo-highres.png";
+    a.href = png;
+    a.click();
+  };
+  img.src = url;
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "kanisa-langu-c9400",
+  "private_key_id": "c1be2e2656c77e156b791eeddfe999b8ba23306d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCQKk/LjDGxaktW\na0VKr+ArGwlaIBGzSomS4YFSvCRuahmdUpXGIJodhYG6IbOtDN+VwWaqBHX7Zh8J\nKsHPTZUh8+G+g47990Kr1DgPEA4Q1SpjHihUjeyvxpFLnWreW4WL87j0FbDpZ4RO\nD0XhSPxEeX/xDEW+q+Nl0YGNYgZTEPl3Lr87KsPYDVF1AOTHuW1Zsq+x9/GEz6UQ\nQUjKJtLhX0Www6jNVCmO7n84LYTXiCO7D7RklJey4wmjXWyQRsSs2Nk9RvmRh/Yx\nW/qzyLfUP6J8CK1CB2EFM4p3wuhQayWvt4/yCZbvauWND9QYUT4rT9LDWCy4kotH\nDSWN/4ZxAgMBAAECggEAAL4PCiPPL7Q17hyAT1mnhGFPw4SNwsgb/EMoCNaKM31d\nY2eE+O+7C3LgD6bTx4zc6+cCkdaTCvfkKgZr2Bb0sSeR3orL5jfrQnpFzaIOCH0o\nijkiCQlwEhmqLuMBJWMARY+8QJmJ/zG2xzYh7H6VOf8MLyAajdhRw/j3u1QpZy0Z\nuSU2COKZc4CjF+snkzl+huAienVYd+PtDRvAb35Uc0wob5lcPKFWM1j1lzJzdWk/\nwAa/I9WHC+MsA8ATRqHakVL2+ocXdsg3gOdYDFO72O4P5wSsVd2AR2ZlDJpAoyhJ\n2hYdkSAYlsLRnGZq/lVXdhqDr8JlPnGnTMfRrfnSlwKBgQDD8gwY2kaJau5DtAPU\nOVz7l4gfmfZSY5M7JjoYT8dQW5GCDlaMlpabxvXzz3h68khYJ2CM506utyy+5Moe\nSnOFxU4wS9xfPpSfVngg802wZtgatxUtGuBIaVDx9Aqk03i33FDckijvE/Xd+/Mb\ncwv/3t009yZGDlj0DgtNXwiEfwKBgQC8WZID+4cN+cJxE9ux1Trg+u7AMGmYH8yT\nm0qqCMXz0xcp1usmFO46NFFWksX8udsrUhMnDIGLXumQ92VlQAm1GTMzYN2GUaz1\nrFtakf9CFp9om+8Pe9n/Rgp03cEvE5G1+t5uKqhc31HbBwo34tXll/BPdmuLw7aP\nsAEdvlK9DwKBgBtZ4g5mCYqM/o08x3wMNcp4sGuY1iVR+O88usdB+5Rf88OvtK0T\nKBq+fv51a1/eCfMkK/n/H6CLuRc8YGoyAkYd8HgVXsF8vsovC72tuJ5y/J9eBvqw\n0bXJ3Z6obgPr8OHZQwBG9qfIpX1C+gBO4tHojgAir5j/z7Lhcvpt1YaJAoGBAKIw\n84cQav1C7QiY1B+wAbLJAx1m0xdXksAtAr+nLGdJiHHUC8xQS9C9SqmlXG7D0RLd\n63Y907QjeDgIgj0NRw6285szt6852Bn6YPR+MnRDrOPVG6iWu2OSeeCnMPsL+/bc\nX/w4KaFIAWH+DvOPFyhNjXev/u5tC2Fya5OkV/VLAoGAezsZYSio/SXcTLducaTJ\n1b2SEon06+nhis5Rvi0xm1O3boXFQ0nTjYWp2DP0OO2/RTfa7117cUebGZBneTiq\nmeMev/57cNVdRSe39ZkAA2qK+nxXhaX6KmjNW9htJI2VMCSaCWgdkkm1KxpRv23L\nGR038PG8aUtmhmH3HyQiRWk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "kanisalangu@kanisa-langu-c9400.iam.gserviceaccount.com",
+  "client_id": "116551484033846808264",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/kanisalangu%40kanisa-langu-c9400.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

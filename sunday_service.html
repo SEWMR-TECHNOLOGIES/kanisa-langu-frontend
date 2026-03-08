@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunday Service Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+        }
+        .service-card {
+            background: #fff;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .service-header {
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+        .service-header h2 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        .service-header p {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        .section {
+            padding: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        .section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .time-card, .choir-card, .elder-card {
+            background: #f8f9fa;
+            margin: 5px 0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .time-card span {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 2px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .badge-preacher { background: #3b82f6; }
+        .badge-leader { background: #f59e0b; }
+        .badge-elder { background: #10b981; }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 0;
+            padding: 0;
+        }
+        .book-card {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .book-card strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .book-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .time-card, .choir-card, .elder-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sunday Service Details</h1>
+        </div>
+        <div id="services"></div>
+    </div>
+
+    <script>
+        const fetchData = async () => {
+            try {
+                const response = await fetch('api/data/sunday_service.php?head_parish_id=2&service_date=2024-11-24');
+                const data = await response.json();
+                renderServices(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        const renderServices = (services) => {
+            const servicesContainer = document.getElementById('services');
+            services.forEach(service => {
+                const serviceHTML = `
+                    <div class="service-card">
+                        <div class="service-header" style="background-color: ${service.service_color.code}">
+                            <h2>${service.main_text}</h2>
+                            <p>${service.service_date}</p>
+                        </div>
+                        <div class="section">
+                            <h3>Books & Page Numbers</h3>
+                            <div class="book-grid">
+                                <div class="book-card">
+                                    <strong>Small Liturgy:</strong> ${service.books_page_numbers.small_liturgy}
+                                </div>
+                                <div class="book-card">
+                                    <strong>Large Liturgy:</strong> ${service.books_page_numbers.large_liturgy}
+                                </div>
+                                <div class="book-card">
+                                    <strong>Small Antiphony:</strong> ${service.books_page_numbers.small_antiphony}
+                                </div>
+                                <div class="book-card">
+                                    <strong>Large Antiphony:</strong> ${service.books_page_numbers.large_antiphony}
+                                </div>
+                                <div class="book-card">
+                                    <strong>Small Praise:</strong> ${service.books_page_numbers.small_praise}
+                                </div>
+                                <div class="book-card">
+                                    <strong>Large Praise:</strong> ${service.books_page_numbers.large_praise}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>Service Times</h3>
+                            ${service.service_times.map(time => `
+                                <div class="time-card">
+                                    <span>Service ${time.service_number}</span> ${time.start_time}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="section">
+                            <h3>Offerings</h3>
+                            ${service.offerings.map(offer => `
+                                <div class="time-card">${offer}</div>
+                            `).join('')}
+                        </div>
+
+                        <div class="section">
+                            <h3>Scriptures</h3>
+                            ${service.scriptures.map(scripture => `
+                                <div class="time-card">${scripture.book_name} ${scripture.chapter}:${scripture.starting_verse_number}${scripture.ending_verse_number ? '-' + scripture.ending_verse_number : ''}</div>
+                            `).join('')}
+                        </div>
+
+                        <div class="section">
+                            <h3>Choirs</h3>
+                            ${Object.entries(service.choirs).map(([serviceNum, choirs]) => `
+                                <div class="choir-card"><strong>Service ${serviceNum}:</strong> ${choirs.join(', ')}</div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Preachers Section -->
+                        <div class="section">
+                            <h3>Preachers</h3>
+                            ${Object.entries(service.preacher).map(([serviceNum, preacher]) => `
+                                <div class="time-card"><span class="badge badge-preacher">Service ${serviceNum}</span> ${preacher}</div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Leaders Section -->
+                        <div class="section">
+                            <h3>Leaders</h3>
+                            ${Object.entries(service.leader).map(([serviceNum, leader]) => `
+                                <div class="time-card"><span class="badge badge-leader">Service ${serviceNum}</span> ${leader}</div>
+                            `).join('')}
+                        </div>
+
+                        <div class="section">
+                            <h3>Elders</h3>
+                            ${Object.entries(service.elders).map(([serviceNum, elders]) => `
+                                <div class="elder-card"><strong>Service ${serviceNum}:</strong> ${elders.join(', ')}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                servicesContainer.innerHTML += serviceHTML;
+            });
+        };
+
+        fetchData();
+    </script>
+</body>
+</html>

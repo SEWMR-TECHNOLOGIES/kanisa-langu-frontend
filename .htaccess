@@ -1,0 +1,111 @@
+RewriteEngine On
+RewriteBase /
+
+Options -Indexes
+
+RewriteCond %{HTTP_HOST} ^www\.kanisalangu\.sewmrtechnologies\.com$ [NC]
+RewriteRule ^(.*)$ https://kanisalangu.sewmrtechnologies.com/$1 [R=301,L]
+
+# Handle static files (e.g., images, CSS, JS) - Skip rewriting for these
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Redirect requests to corresponding PHP files without affecting static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^app/([^/]+)/?$ app/$1.php [L,QSA]
+
+# Handle additional parameters for app folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^app/([^/]+)/([^/]+)/?$ app/$1.php?$2 [L,QSA]
+
+
+# Redirect requests to corresponding PHP files without affecting static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^diocese/([^/]+)/?$ diocese/$1.php [L,QSA]
+
+# Handle additional parameters for diocese folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^diocese/([^/]+)/([^/]+)/?$ diocese/$1.php?$2 [L,QSA]
+
+
+# Redirect requests to corresponding PHP files without affecting static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^province/([^/]+)/?$ province/$1.php [L,QSA]
+
+# Handle additional parameters for province folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^province/([^/]+)/([^/]+)/?$ province/$1.php?$2 [L,QSA]
+
+
+# Redirect requests to corresponding PHP files without affecting static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^head-parish/([^/]+)/?$ head-parish/$1.php [L,QSA]
+
+# Handle additional parameters for head-parish folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^head-parish/([^/]+)/([^/]+)/?$ head-parish/$1.php?$2 [L,QSA]
+
+
+
+# Redirect requests to corresponding PHP files without affecting static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^sub-parish/([^/]+)/?$ sub-parish/$1.php [L,QSA]
+
+# Handle additional parameters for sub-parish folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^sub-parish/([^/]+)/([^/]+)/?$ sub-parish/$1.php?$2 [L,QSA]
+
+
+# Community rules
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^community/([^/]+)/?$ community/$1.php [L,QSA]
+
+# Handle additional parameters for community folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^community/([^/]+)/([^/]+)/?$ community/$1.php?$2 [L,QSA]
+
+# Group rules
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^group/([^/]+)/?$ group/$1.php [L,QSA]
+
+# Handle additional parameters for group folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^group/([^/]+)/([^/]+)/?$ group/$1.php?$2 [L,QSA]
+
+
+# Handle API requests (e.g., districts.php) in the 'data' folder - Remove .php from URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/data/([^/]+)/?$ api/data/$1.php [L,QSA]
+
+# Handle API requests in the 'registration' folder - Remove .php from URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/registration/([^/]+)/?$ api/registration/$1.php [L,QSA]
+
+# Handle API requests in the 'records' folder - Remove .php from URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/records/([^/]+)/?$ api/records/$1.php [L,QSA]
+
+# Handle API requests directly in the 'api' folder - Remove .php from URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/([^/]+)/?$ api/$1.php [L,QSA]
+
+# Redirect all 404 errors to not-found.php
+ErrorDocument 404 /not-found.php

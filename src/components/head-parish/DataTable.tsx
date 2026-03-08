@@ -267,6 +267,16 @@ export default function DataTable<T extends Record<string, any>>({
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               )}
+                              {customActions.map((ca, caIdx) => (
+                                <button
+                                  key={caIdx}
+                                  onClick={() => ca.onClick(row)}
+                                  className={`p-2 rounded-lg transition-colors ${ca.className || "text-admin-text hover:bg-admin-surface-hover"}`}
+                                  title={ca.label}
+                                >
+                                  <ca.icon className="w-4 h-4" />
+                                </button>
+                              ))}
                             </motion.div>
                           )}
                         </AnimatePresence>

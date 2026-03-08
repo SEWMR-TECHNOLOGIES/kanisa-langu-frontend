@@ -79,7 +79,7 @@ export default function TabbedFormCard({ title, description, tabs, onSubmit, inf
 
         {/* Tab bar */}
         <div className="px-6 pt-6 border-b border-admin-border/30">
-          <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-none">
+          <div className="flex gap-1 overflow-x-auto pt-2 pb-0 scrollbar-none">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

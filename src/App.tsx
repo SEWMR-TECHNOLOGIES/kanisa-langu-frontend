@@ -58,6 +58,7 @@ import RegisterBankAccount from "./pages/head-parish/RegisterBankAccount";
 import FinancialStatement from "./pages/head-parish/FinancialStatement";
 import RevenueStreams from "./pages/head-parish/RevenueStreams";
 import RecordRevenue from "./pages/head-parish/RecordRevenue";
+import VerifyRevenues from "./pages/head-parish/VerifyRevenues";
 import Debits from "./pages/head-parish/Debits";
 import Harambee from "./pages/head-parish/Harambee";
 import RecordHarambee from "./pages/head-parish/RecordHarambee";

@@ -10,11 +10,11 @@ import pentecostalIcon from "../assets/pentecostal-icon.png";
 
 
 const elctLevels = [
-  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },
-  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting." },
-  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area." },
-  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities." },
-  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement." },
+  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region.", loginPath: "/elct/diocese/sign-in" },
+  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting.", loginPath: "/elct/province/sign-in" },
+  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area.", loginPath: "/elct/head-parish/sign-in" },
+  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities.", loginPath: "/elct/sub-parish/sign-in" },
+  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement.", loginPath: "/elct/community/sign-in" },
   { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history." },
 ];
 

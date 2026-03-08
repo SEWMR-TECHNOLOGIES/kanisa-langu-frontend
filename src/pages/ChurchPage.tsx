@@ -367,7 +367,7 @@ export default function ChurchPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
+                href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-secondary text-secondary-foreground rounded-2xl font-bold text-sm hover:opacity-90 transition-opacity"

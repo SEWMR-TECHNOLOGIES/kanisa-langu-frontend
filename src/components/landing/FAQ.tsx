@@ -100,26 +100,32 @@ export default function FAQ() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="flex flex-col gap-3">
-            {leftColumn.map((faq, i) => (
-              <FaqItem
-                key={faq.q}
-                faq={faq}
-                index={leftIndices[i]}
-                isOpen={openIndex === leftIndices[i]}
-                onToggle={() => setOpenIndex(openIndex === leftIndices[i] ? null : leftIndices[i])}
-              />
-            ))}
+          {leftColumn.map((faq, i) => {
+              const idx = leftIndices[i]!;
+              return (
+                <FaqItem
+                  key={faq.q}
+                  faq={faq}
+                  index={idx}
+                  isOpen={openIndex === idx}
+                  onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
+                />
+              );
+            })}
           </div>
           <div className="flex flex-col gap-3">
-            {rightColumn.map((faq, i) => (
-              <FaqItem
-                key={faq.q}
-                faq={faq}
-                index={rightIndices[i]}
-                isOpen={openIndex === rightIndices[i]}
-                onToggle={() => setOpenIndex(openIndex === rightIndices[i] ? null : rightIndices[i])}
-              />
-            ))}
+            {rightColumn.map((faq, i) => {
+              const idx = rightIndices[i]!;
+              return (
+                <FaqItem
+                  key={faq.q}
+                  faq={faq}
+                  index={idx}
+                  isOpen={openIndex === idx}
+                  onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

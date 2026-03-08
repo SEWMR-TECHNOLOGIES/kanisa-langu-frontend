@@ -6,7 +6,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import CookieConsent from "./components/CookieConsent";
 import AutoPage from "./components/head-parish/AutoPage";
-import { headParishPages, subParishPages } from "./data/pageConfigs";
+import { headParishPages, subParishPages, groupPages } from "./data/pageConfigs";
 
 // ELCT Sign-In Pages
 import DioceseSignIn from "./pages/diocese/SignIn";
@@ -14,6 +14,7 @@ import ProvinceSignIn from "./pages/province/SignIn";
 import HeadParishSignIn from "./pages/head-parish/SignIn";
 import SubParishSignIn from "./pages/sub-parish/SignIn";
 import CommunitySignIn from "./pages/community/SignIn";
+import GroupSignIn from "./pages/group/SignIn";
 
 // ELCT Diocese Admin
 import DioceseLayout from "./pages/diocese/DioceseLayout";
@@ -23,6 +24,12 @@ import DioceseProvinceAdmins from "./pages/diocese/ProvinceAdmins";
 import DioceseCreateProvinceAdmin from "./pages/diocese/CreateProvinceAdmin";
 import DioceseAdmins from "./pages/diocese/Admins";
 import DioceseOverview from "./pages/diocese/Overview";
+import DioceseRegisterHeadParish from "./pages/diocese/RegisterHeadParish";
+import DioceseManageHeadParishes from "./pages/diocese/ManageHeadParishes";
+import DioceseManagePayments from "./pages/diocese/ManagePayments";
+import DiocesePaymentReports from "./pages/diocese/PaymentReports";
+import DioceseSalesReport from "./pages/diocese/SalesReport";
+import DioceseSMSUsageReport from "./pages/diocese/SMSUsageReport";
 
 // ELCT Province Admin
 import ProvinceLayout from "./pages/province/ProvinceLayout";
@@ -34,6 +41,11 @@ import ProvinceAdmins from "./pages/province/Admins";
 import ProvinceOverview from "./pages/province/Overview";
 import ProvinceFinancialSummary from "./pages/province/FinancialSummary";
 import ProvinceMembersOverview from "./pages/province/MembersOverview";
+import ProvinceManagePayments from "./pages/province/ManagePayments";
+import ProvincePaymentReports from "./pages/province/PaymentReports";
+import ProvinceSalesReport from "./pages/province/SalesReport";
+import ProvinceSMSUsageReport from "./pages/province/SMSUsageReport";
+import ProvinceAdminsList from "./pages/province/ProvinceAdminsList";
 
 // ELCT Head Parish Admin
 import HeadParishLayout from "./components/head-parish/HeadParishLayout";
@@ -102,6 +114,10 @@ import CommunityScheduleMeeting from "./pages/community/ScheduleMeeting";
 import CommunityMeetings from "./pages/community/Meetings";
 import CommunitySendNotification from "./pages/community/SendNotification";
 
+// ELCT Group Admin
+import GroupLayout from "./pages/group/GroupLayout";
+import GroupDashboard from "./pages/group/Dashboard";
+
 // Super Admin
 import SuperAdminLayout from "./pages/super-admin/SuperAdminLayout";
 import SuperAdminDashboard from "./pages/super-admin/Dashboard";
@@ -136,6 +152,10 @@ function SPAutoPage() {
   return <AutoPage configs={subParishPages} />;
 }
 
+function GroupAutoPage() {
+  return <AutoPage configs={groupPages} />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -152,6 +172,7 @@ export default function App() {
         <Route path="/elct/head-parish/sign-in" element={<HeadParishSignIn />} />
         <Route path="/elct/sub-parish/sign-in" element={<SubParishSignIn />} />
         <Route path="/elct/community/sign-in" element={<CommunitySignIn />} />
+        <Route path="/elct/group/sign-in" element={<GroupSignIn />} />
 
         {/* ELCT Diocese */}
         <Route path="/elct/diocese" element={<DioceseLayout />}>
@@ -161,6 +182,12 @@ export default function App() {
           <Route path="create-province-admin" element={<DioceseCreateProvinceAdmin />} />
           <Route path="admins" element={<DioceseAdmins />} />
           <Route path="overview" element={<DioceseOverview />} />
+          <Route path="register-head-parish" element={<DioceseRegisterHeadParish />} />
+          <Route path="manage-head-parishes" element={<DioceseManageHeadParishes />} />
+          <Route path="manage-payments" element={<DioceseManagePayments />} />
+          <Route path="payment-reports" element={<DiocesePaymentReports />} />
+          <Route path="sales-report" element={<DioceseSalesReport />} />
+          <Route path="sms-usage-report" element={<DioceseSMSUsageReport />} />
         </Route>
 
         {/* ELCT Province */}
@@ -170,9 +197,15 @@ export default function App() {
           <Route path="create-hp-admin" element={<ProvinceCreateHPAdmin />} />
           <Route path="hp-admins" element={<ProvinceHPAdmins />} />
           <Route path="admins" element={<ProvinceAdmins />} />
+          <Route path="province-admins" element={<ProvinceAdminsList />} />
           <Route path="overview" element={<ProvinceOverview />} />
           <Route path="financial-summary" element={<ProvinceFinancialSummary />} />
           <Route path="members-overview" element={<ProvinceMembersOverview />} />
+          <Route path="manage-payments" element={<ProvinceManagePayments />} />
+          <Route path="payment-reports" element={<ProvincePaymentReports />} />
+          <Route path="sales-report" element={<ProvinceSalesReport />} />
+          <Route path="sms-usage-report" element={<ProvinceSMSUsageReport />} />
+          <Route path="create-province-admin" element={<ProvinceCreateHPAdmin />} />
         </Route>
 
         {/* ELCT Head Parish */}
@@ -219,7 +252,6 @@ export default function App() {
           <Route path="add-asset" element={<AssetsManagement />} />
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />
           <Route path="profile" element={<HPProfile />} />
-          {/* All remaining HP pages rendered via AutoPage */}
           <Route path="*" element={<HPAutoPage />} />
         </Route>
 
@@ -235,7 +267,6 @@ export default function App() {
           <Route path="harambee" element={<SPHarambee />} />
           <Route path="manage-envelopes" element={<SPManageEnvelopes />} />
           <Route path="expense-requests" element={<SPExpenseRequests />} />
-          {/* All remaining SP pages via AutoPage */}
           <Route path="*" element={<SPAutoPage />} />
         </Route>
 
@@ -247,6 +278,12 @@ export default function App() {
           <Route path="schedule-meeting" element={<CommunityScheduleMeeting />} />
           <Route path="meetings" element={<CommunityMeetings />} />
           <Route path="send-notification" element={<CommunitySendNotification />} />
+        </Route>
+
+        {/* ELCT Group */}
+        <Route path="/elct/group" element={<GroupLayout />}>
+          <Route index element={<GroupDashboard />} />
+          <Route path="*" element={<GroupAutoPage />} />
         </Route>
 
         {/* Super Admin */}

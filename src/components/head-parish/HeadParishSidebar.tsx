@@ -450,7 +450,7 @@ export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebar
   // Find which item should be initially expanded based on current route
   const getInitialExpanded = useCallback(() => {
     for (let si = 0; si < navigation.length; si++) {
-      const section = navigation[si];
+      const section = navigation[si]!;
       for (let ii = 0; ii < section.items.length; ii++) {
         const item = section.items[ii];
         if (item?.children?.some(c => location.pathname === c.href)) {

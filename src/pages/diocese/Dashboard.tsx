@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Building2, Users, MapPin, TrendingUp } from "lucide-react";
 import StatsCard from "../../components/head-parish/StatsCard";
 import { Link } from "react-router-dom";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const recentActivity = [
   { action: "New province admin created", detail: "Rev. John Mwamba - Northern Province", time: "1 hour ago", color: "bg-admin-info" },

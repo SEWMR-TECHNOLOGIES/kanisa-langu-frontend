@@ -15,7 +15,7 @@ const elctLevels = [
   { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area.", loginPath: "/elct/head-parish/sign-in" },
   { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities.", loginPath: "/elct/sub-parish/sign-in" },
   { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement.", loginPath: "/elct/community/sign-in" },
-  { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history." },
+  { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history.", isAppLevel: true },
 ];
 
 const churchData: Record<string, {

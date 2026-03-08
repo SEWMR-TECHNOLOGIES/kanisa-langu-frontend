@@ -18,7 +18,6 @@ interface ElctSignInProps {
 
 export default function ElctSignIn({
   level,
-  icon: Icon,
   accentFrom,
   accentTo,
   dashboardPath,

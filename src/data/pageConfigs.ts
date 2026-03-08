@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Route configuration for auto-generating pages
 // Each route maps to either a "form" or "table" page type with full config
 

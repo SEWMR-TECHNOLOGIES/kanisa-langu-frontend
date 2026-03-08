@@ -1,0 +1,83 @@
+import requests
+from services.SewmrSmsClient import SewmrSmsClient
+
+async def send_verification_sms(phone: str, code: str, first_name: str = ""):
+    """
+    Sends verification SMS using Sewmr SMS API.
+    Includes first name and a friendly activation message.
+    """
+    client = SewmrSmsClient()
+    message = (
+        f"Hello {first_name}, use the verification code {code} to activate your account. "
+    )
+    
+    try:
+        result = client.send_quick_sms(message=message, recipients=[phone])
+        if not result.get("success"):
+            raise Exception(result.get("error", "Failed to send verification SMS"))
+    except Exception as e:
+        print("Failed to send verification SMS:", e)
+        raise e
+
+async def send_business_phone_otp(phone: str, code: str, first_name: str = ""):
+    """
+    Sends OTP for business phone verification (not account activation).
+    """
+    client = SewmrSmsClient()
+    message = (
+        f"Hello {first_name}, use the code {code} to verify your business phone number on Nuru. "
+    )
+
+    try:
+        result = client.send_quick_sms(message=message, recipients=[phone])
+        if not result.get("success"):
+            raise Exception(result.get("error", "Failed to send business phone verification SMS"))
+    except Exception as e:
+        print("Failed to send business phone OTP:", e)
+        raise e
+
+def send_verification_email(to_email: str, code: str, first_name: str = ""):
+    """
+    Sends verification code email via PHP API.
+    Works like password reset email:
+      - completes silently on success
+      - raises exception on failure
+    """
+    payload = {
+        "to_email": to_email,
+        "code": code,
+        "first_name": first_name
+    }
+
+    try:
+        response = requests.post(
+            "https://api.sewmrtechnologies.com/mail/nuru/send-account-activation-otp.php",
+            json=payload,
+            timeout=10
+        )
+        response.raise_for_status()
+        result = response.json()
+        if not result.get("success"):
+            raise Exception(result.get("message", "Failed to send verification email"))
+    except Exception as e:
+        print("Failed to send verification email:", e)
+        raise e
+
+def send_password_reset_email(to_email: str, token: str, first_name: str = ""):
+    payload = {
+        "to_email": to_email,
+        "code": token,
+        "first_name": first_name
+    }
+
+    response = requests.post(
+        "https://api.sewmrtechnologies.com/mail/nuru/send-password-reset.php",
+        json=payload,
+        timeout=10
+    )
+
+    response.raise_for_status()
+    result = response.json()
+
+    if not result.get("success"):
+        raise Exception(result.get("message", "Failed to send reset email"))

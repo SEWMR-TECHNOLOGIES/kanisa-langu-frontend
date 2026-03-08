@@ -14,6 +14,13 @@ export interface Column<T> {
   options?: { value: string; label: string }[];
 }
 
+interface CustomAction<T> {
+  label: string;
+  icon: React.ElementType;
+  className?: string;
+  onClick: (row: T) => void;
+}
+
 interface DataTableProps<T> {
   title: string;
   description?: string;
@@ -23,6 +30,7 @@ interface DataTableProps<T> {
   searchKeys?: (keyof T)[];
   pageSize?: number;
   actions?: ("view" | "edit" | "delete")[];
+  customActions?: CustomAction<T>[];
   onAction?: (action: string, row: T) => void;
   onEdit?: (row: T, updated: Partial<T>) => void;
   onDelete?: (row: T) => void;

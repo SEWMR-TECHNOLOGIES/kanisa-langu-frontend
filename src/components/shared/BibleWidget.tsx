@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
-// Curated daily verses (Swahili + English) for church admin dashboards
 const DAILY_VERSES = [
   { ref: "Zaburi 23:1", sw: "Bwana ndiye mchungaji wangu; sitapungukiwa na kitu.", en: "The LORD is my shepherd; I shall not want." },
   { ref: "Yeremia 29:11", sw: "Maana nayajua mawazo ninayowawazia, asema Bwana; ni mawazo ya amani wala si ya mabaya.", en: "For I know the plans I have for you, declares the LORD, plans for welfare and not for evil." },
@@ -42,18 +41,16 @@ interface BibleWidgetProps {
 }
 
 export default function BibleWidget({ className = "" }: BibleWidgetProps) {
-  // Use day-of-year to determine "today's verse"
   const dayOfYear = useMemo(() => {
     const now = new Date();
     const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - start.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
+    return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }, []);
 
   const [index, setIndex] = useState(dayOfYear % DAILY_VERSES.length);
   const [lang, setLang] = useState<"sw" | "en">("sw");
 
-  const verse = DAILY_VERSES[index] ?? DAILY_VERSES[0]!
+  const verse = DAILY_VERSES[index] ?? DAILY_VERSES[0]!;
 
   const prev = () => setIndex((i) => (i - 1 + DAILY_VERSES.length) % DAILY_VERSES.length);
   const next = () => setIndex((i) => (i + 1) % DAILY_VERSES.length);
@@ -63,84 +60,112 @@ export default function BibleWidget({ className = "" }: BibleWidgetProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6 }}
-      className={`admin-card rounded-2xl overflow-hidden ${className}`}
+      className={`relative rounded-2xl overflow-hidden ${className}`}
     >
-      {/* Header gradient bar */}
-      <div className="h-1 bg-gradient-to-r from-admin-accent via-admin-warning to-admin-accent" />
+      {/* Rich background with cross pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(32,40%,12%)] via-[hsl(28,35%,10%)] to-[hsl(24,30%,8%)]" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 0v24h-24v4h24v24h4v-24h24v-4h-24v-24z' fill='%23d4a574' fill-opacity='1'/%3E%3C/svg%3E")`
+      }} />
+      {/* Warm glow */}
+      <div className="absolute top-0 right-0 w-40 h-40 bg-[hsl(38,70%,50%)] rounded-full blur-[100px] opacity-[0.08]" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-[hsl(20,60%,40%)] rounded-full blur-[80px] opacity-[0.06]" />
 
-      <div className="p-5 space-y-4">
-        {/* Title row */}
+      <div className="relative p-6 space-y-5">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-admin-accent/10 flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-admin-accent" />
+          <div className="flex items-center gap-3">
+            {/* Book icon styled like a real bible */}
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[hsl(25,50%,30%)] to-[hsl(20,45%,20%)] shadow-[0_2px_8px_rgba(0,0,0,0.3)]" />
+              <div className="absolute left-[3px] top-[2px] bottom-[2px] w-[2px] rounded-full bg-[hsl(38,60%,50%)] opacity-60" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[hsl(38,70%,65%)] text-[11px] font-bold tracking-tight">✝</span>
+              </div>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-admin-text-bright uppercase tracking-wider">Neno la Leo</h3>
-              <p className="text-[10px] text-admin-text/50">Daily Scripture</p>
+              <h3 className="text-sm font-bold text-[hsl(38,50%,80%)] tracking-wide">Biblia Takatifu</h3>
+              <p className="text-[10px] text-[hsl(30,20%,50%)] font-medium">Neno la Leo · Daily Verse</p>
             </div>
           </div>
 
           {/* Language toggle */}
-          <div className="flex items-center bg-admin-surface-hover rounded-lg p-0.5">
+          <div className="flex items-center bg-[hsl(25,20%,15%)] rounded-lg p-0.5 border border-[hsl(30,20%,18%)]">
             {(["sw", "en"] as const).map((l) => (
               <button
                 key={l}
                 onClick={() => setLang(l)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
                   lang === l
-                    ? "bg-admin-accent text-admin-bg shadow-sm"
-                    : "text-admin-text/50 hover:text-admin-text"
+                    ? "bg-gradient-to-r from-[hsl(38,60%,45%)] to-[hsl(28,55%,40%)] text-[hsl(38,30%,95%)] shadow-sm"
+                    : "text-[hsl(30,20%,45%)] hover:text-[hsl(30,30%,60%)]"
                 }`}
               >
-                {l === "sw" ? "SW" : "EN"}
+                {l === "sw" ? "Kiswahili" : "English"}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Decorative divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(38,40%,30%)] to-transparent opacity-40" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[hsl(38,50%,45%)] opacity-50" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(38,40%,30%)] to-transparent opacity-40" />
         </div>
 
         {/* Verse content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={`${index}-${lang}`}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-4 py-2"
           >
-            {/* Scripture reference badge */}
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-admin-accent" />
-              <span className="text-xs font-bold text-admin-accent">{verse.ref}</span>
+            {/* Quote mark and reference */}
+            <div className="flex items-start gap-3">
+              <Quote className="w-5 h-5 text-[hsl(38,50%,45%)] opacity-40 mt-0.5 flex-shrink-0 rotate-180" />
+              <div className="space-y-3 flex-1">
+                <p className="text-[15px] leading-[1.8] text-[hsl(35,30%,78%)] font-serif italic">
+                  {lang === "sw" ? verse.sw : verse.en}
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-px bg-[hsl(38,50%,45%)] opacity-40" />
+                  <span className="text-xs font-bold text-[hsl(38,55%,55%)] tracking-wide">{verse.ref}</span>
+                </div>
+              </div>
             </div>
-
-            {/* Verse text */}
-            <blockquote className="text-sm leading-relaxed text-admin-text-bright font-medium pl-3 border-l-2 border-admin-accent/30">
-              &ldquo;{lang === "sw" ? verse.sw : verse.en}&rdquo;
-            </blockquote>
           </motion.div>
         </AnimatePresence>
 
+        {/* Decorative divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(38,40%,30%)] to-transparent opacity-40" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[hsl(38,50%,45%)] opacity-50" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(38,40%,30%)] to-transparent opacity-40" />
+        </div>
+
         {/* Navigation */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between">
           <button
             onClick={prev}
-            className="w-7 h-7 rounded-lg bg-admin-surface-hover hover:bg-admin-accent/10 flex items-center justify-center transition-colors group"
+            className="w-8 h-8 rounded-lg bg-[hsl(25,20%,15%)] border border-[hsl(30,20%,20%)] hover:border-[hsl(38,40%,35%)] flex items-center justify-center transition-all group"
           >
-            <ChevronLeft className="w-3.5 h-3.5 text-admin-text group-hover:text-admin-accent transition-colors" />
+            <ChevronLeft className="w-4 h-4 text-[hsl(30,20%,45%)] group-hover:text-[hsl(38,50%,60%)] transition-colors" />
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {Array.from({ length: 5 }).map((_, i) => {
               const dotIndex = (index - 2 + i + DAILY_VERSES.length) % DAILY_VERSES.length;
               return (
                 <div
                   key={i}
-                  className={`rounded-full transition-all ${
+                  className={`rounded-full transition-all duration-300 ${
                     dotIndex === index
-                      ? "w-4 h-1.5 bg-admin-accent"
-                      : "w-1.5 h-1.5 bg-admin-text/15"
+                      ? "w-5 h-1.5 bg-gradient-to-r from-[hsl(38,60%,50%)] to-[hsl(28,55%,40%)]"
+                      : "w-1.5 h-1.5 bg-[hsl(30,20%,25%)]"
                   }`}
                 />
               );
@@ -149,9 +174,9 @@ export default function BibleWidget({ className = "" }: BibleWidgetProps) {
 
           <button
             onClick={next}
-            className="w-7 h-7 rounded-lg bg-admin-surface-hover hover:bg-admin-accent/10 flex items-center justify-center transition-colors group"
+            className="w-8 h-8 rounded-lg bg-[hsl(25,20%,15%)] border border-[hsl(30,20%,20%)] hover:border-[hsl(38,40%,35%)] flex items-center justify-center transition-all group"
           >
-            <ChevronRight className="w-3.5 h-3.5 text-admin-text group-hover:text-admin-accent transition-colors" />
+            <ChevronRight className="w-4 h-4 text-[hsl(30,20%,45%)] group-hover:text-[hsl(38,50%,60%)] transition-colors" />
           </button>
         </div>
       </div>

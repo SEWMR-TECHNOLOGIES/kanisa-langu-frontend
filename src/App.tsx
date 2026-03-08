@@ -142,6 +142,10 @@ import SAAddOccupation from "./pages/super-admin/AddOccupation";
 import SAManageOccupations from "./pages/super-admin/ManageOccupations";
 import SARegisterPraiseSong from "./pages/super-admin/RegisterPraiseSong";
 import SAManagePraiseSongs from "./pages/super-admin/ManagePraiseSongs";
+import SAManagePayments from "./pages/super-admin/ManagePayments";
+import SAPaymentReports from "./pages/super-admin/PaymentReports";
+import SASalesReport from "./pages/super-admin/SalesReport";
+import SASMSUsageReport from "./pages/super-admin/SMSUsageReport";
 import SAProfile from "./pages/super-admin/Profile";
 
 function HPAutoPage() {

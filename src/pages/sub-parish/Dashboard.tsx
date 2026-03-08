@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Users, Home, TrendingUp, BookOpen } from "lucide-react";
 import StatsCard from "../../components/head-parish/StatsCard";
 import { Link } from "react-router-dom";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const recentActivity = [
   { action: "New member registered", detail: "Anna Mushi - Joined community A", time: "30 min ago", color: "bg-admin-success" },
@@ -65,6 +66,8 @@ export default function SubParishDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

@@ -35,3 +35,4 @@ from models.misc import (
 )
 from models.banking import BankPosting, BankClosingBalance
 from models.config import SmsApiConfig, RevenueGroupModel, RevenueGroupStreamMap, ProgramRevenueMap
+from models.bible import BibleBook, BibleChapter, BibleVerse

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Church, Users, TrendingUp, MapPin } from "lucide-react";
 import StatsCard from "../../components/head-parish/StatsCard";
 import { Link } from "react-router-dom";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const recentActivity = [
   { action: "Head parish report submitted", detail: "Msimbazi Head Parish - Q3 Report", time: "2 hours ago", color: "bg-admin-success" },
@@ -64,6 +65,8 @@ export default function ProvinceDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

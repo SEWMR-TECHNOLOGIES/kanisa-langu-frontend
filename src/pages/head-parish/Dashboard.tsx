@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Users, Building2, CreditCard, TrendingUp, Flag, BookOpen, CalendarDays, Coins } from "lucide-react";
 import StatsCard from "../../components/head-parish/StatsCard";
+import BibleWidget from "../../components/shared/BibleWidget";
+import StatsCard from "../../components/head-parish/StatsCard";
 
 const recentActivity = [
   { action: "New member registered", detail: "Maria Kimaro", time: "2 min ago", color: "bg-admin-success" },
@@ -122,6 +124,9 @@ export default function Dashboard() {
           })}
         </div>
       </motion.div>
+
+      {/* Bible Widget */}
+      <BibleWidget />
     </div>
   );
 }

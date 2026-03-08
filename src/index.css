@@ -116,10 +116,19 @@
 }
 .scrollbar-hover::-webkit-scrollbar {
   width: 6px;
+  background: transparent;
+}
+.scrollbar-hover::-webkit-scrollbar-track {
+  background: transparent;
 }
 .scrollbar-hover::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 100px;
+}
+.scrollbar-hover::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 .scrollbar-hover:hover {
   scrollbar-width: thin;
@@ -127,6 +136,11 @@
 }
 .scrollbar-hover:hover::-webkit-scrollbar-thumb {
   background: hsla(220, 14%, 60%, 0.25);
+}
+
+/* Prevent parent aside from showing its own scrollbar */
+aside {
+  overflow: hidden;
 }
 
 @layer base {

@@ -20,19 +20,6 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pt-20">
         <div className="max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm mb-8">
-              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-xs font-semibold text-white/70 uppercase tracking-widest">
-                Trusted by 500+ churches across Tanzania
-              </span>
-            </div>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -41,7 +28,7 @@ export default function Hero() {
           >
             The future of
             <br />
-            <span className="text-gradient-gold">church</span> management
+            <span className="text-secondary">church</span> management
           </motion.h1>
 
           <motion.p

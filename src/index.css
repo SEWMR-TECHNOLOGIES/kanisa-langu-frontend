@@ -122,6 +122,15 @@
   }
 }
 
+/* Modern checkbox — CSS-only, works without JS state */
+.modern-checkbox input:checked + .cb-box {
+  border-color: hsl(42, 92%, 50%);
+  background: hsl(42, 92%, 50%);
+}
+.modern-checkbox input:checked + .cb-box .cb-check {
+  opacity: 1;
+}
+
 @layer utilities {
   .text-gradient-gold {
     @apply bg-clip-text text-transparent;

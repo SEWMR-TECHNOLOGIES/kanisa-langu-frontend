@@ -162,8 +162,11 @@ export default function ElctSignIn({
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border accent-[hsl(42,92%,50%)]" />
+                <label className="modern-checkbox flex items-center gap-2.5 cursor-pointer select-none group">
+                  <input type="checkbox" className="sr-only" />
+                  <div className="cb-box w-[18px] h-[18px] rounded-md border-2 border-border transition-all duration-200 flex items-center justify-center group-hover:border-[hsl(42,92%,50%)]/60">
+                    <svg className="cb-check w-3 h-3 text-white opacity-0 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
                   <span className="text-xs text-muted-foreground">Remember me</span>
                 </label>
                 <button type="button" className="text-xs font-medium hover:underline" style={{ color: accentFrom }}>

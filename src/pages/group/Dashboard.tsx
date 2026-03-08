@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Users, BookOpen, Coins, Flag, TrendingUp, ArrowUpRight } from "lucide-react";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const stats = [
   { label: "Group Members", value: "45", icon: Users, change: "+3 this month", trend: "up" as const },

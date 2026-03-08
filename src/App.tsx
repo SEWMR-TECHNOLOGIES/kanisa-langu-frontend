@@ -246,6 +246,33 @@ export default function App() {
           <Route path="meetings" element={<CommunityMeetings />} />
           <Route path="send-notification" element={<CommunitySendNotification />} />
         </Route>
+
+        {/* Super Admin */}
+        <Route path="/app/sign-in" element={<SuperAdminSignIn />} />
+        <Route path="/app" element={<SuperAdminLayout />}>
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="register-diocese" element={<SARegisterDiocese />} />
+          <Route path="manage-dioceses" element={<SAManageDioceses />} />
+          <Route path="create-diocese-admin" element={<SACreateDioceseAdmin />} />
+          <Route path="diocese-admins-list" element={<SADioceseAdminsList />} />
+          <Route path="register-province" element={<SARegisterProvince />} />
+          <Route path="manage-provinces" element={<SAManageProvinces />} />
+          <Route path="register-head-parish" element={<SARegisterHeadParish />} />
+          <Route path="manage-head-parishes" element={<SAManageHeadParishes />} />
+          <Route path="register-bank" element={<SARegisterBank />} />
+          <Route path="manage-banks" element={<SAManageBanks />} />
+          <Route path="register-region" element={<SARegisterRegion />} />
+          <Route path="manage-regions" element={<SAManageRegions />} />
+          <Route path="register-district" element={<SARegisterDistrict />} />
+          <Route path="manage-districts" element={<SAManageDistricts />} />
+          <Route path="add-title" element={<SAAddTitle />} />
+          <Route path="manage-titles" element={<SAManageTitles />} />
+          <Route path="add-occupation" element={<SAAddOccupation />} />
+          <Route path="manage-occupations" element={<SAManageOccupations />} />
+          <Route path="register-praise-song" element={<SARegisterPraiseSong />} />
+          <Route path="manage-praise-songs" element={<SAManagePraiseSongs />} />
+          <Route path="profile" element={<SAProfile />} />
+        </Route>
       </Routes>
       <CookieConsent />
     </BrowserRouter>

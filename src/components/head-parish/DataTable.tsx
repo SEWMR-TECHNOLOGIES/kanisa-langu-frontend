@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit2, Trash2, Eye, Check, X, Save } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ModernSelect from "./ModernSelect";
+import ModernDatePicker from "./ModernDatePicker";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -143,13 +145,12 @@ export default function DataTable<T extends Record<string, any>>({
           )}
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs text-admin-text/60">Rows:</span>
-            <select
-              value={pageSize}
-              onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="admin-input rounded-lg px-2 py-1.5 text-xs outline-none cursor-pointer"
-            >
-              {pageSizes.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <ModernSelect
+              options={pageSizes.map(s => ({ value: String(s), label: String(s) }))}
+              value={String(pageSize)}
+              onChange={(val) => { setPageSize(Number(val)); setPage(1); }}
+              className="w-20"
+            />
           </div>
         </div>
 
@@ -223,13 +224,18 @@ export default function DataTable<T extends Record<string, any>>({
                       <td key={String(col.key)} className={`px-4 lg:px-6 py-3.5 text-sm text-admin-text-bright ${col.className || ""}`}>
                         {isEditing && col.editable !== false ? (
                           col.type === "select" && col.options ? (
-                            <select
+                            <ModernSelect
+                              options={col.options}
                               value={editValues[String(col.key)] || ""}
-                              onChange={e => setEditValues({ ...editValues, [String(col.key)]: e.target.value })}
-                              className="admin-input rounded-lg px-2 py-1.5 text-sm w-full outline-none"
-                            >
-                              {col.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                            </select>
+                              onChange={(val) => setEditValues({ ...editValues, [String(col.key)]: val })}
+                              className="w-full"
+                            />
+                          ) : col.type === "date" ? (
+                            <ModernDatePicker
+                              value={editValues[String(col.key)] || ""}
+                              onChange={(val) => setEditValues({ ...editValues, [String(col.key)]: val })}
+                              className="w-full"
+                            />
                           ) : (
                             <input
                               type={col.type || "text"}
@@ -320,20 +326,10 @@ export default function DataTable<T extends Record<string, any>>({
             Showing {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length} entries
           </p>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage(1)}
-              disabled={page === 1}
-              className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors"
-              title="First page"
-            >
+            <button onClick={() => setPage(1)} disabled={page === 1} className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors" title="First page">
               <ChevronsLeft className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setPage(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors"
-              title="Previous page"
-            >
+            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors" title="Previous page">
               <ChevronLeft className="w-4 h-4" />
             </button>
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -356,20 +352,10 @@ export default function DataTable<T extends Record<string, any>>({
                 </button>
               );
             })}
-            <button
-              onClick={() => setPage(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages || totalPages === 0}
-              className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors"
-              title="Next page"
-            >
+            <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages || totalPages === 0} className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors" title="Next page">
               <ChevronRight className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setPage(totalPages)}
-              disabled={page === totalPages || totalPages === 0}
-              className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors"
-              title="Last page"
-            >
+            <button onClick={() => setPage(totalPages)} disabled={page === totalPages || totalPages === 0} className="p-2 rounded-lg hover:bg-admin-surface-hover text-admin-text disabled:opacity-30 transition-colors" title="Last page">
               <ChevronsRight className="w-4 h-4" />
             </button>
           </div>

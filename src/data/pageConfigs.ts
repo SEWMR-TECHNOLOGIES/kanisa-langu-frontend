@@ -1511,6 +1511,7 @@ export const subParishPages: Record<string, PageConfig> = {
     description: "Set envelope target for a member",
     type: "form",
     submitLabel: "Set Target",
+    statusPreview: envelopeStatusPreview,
     fields: [
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
       { name: "amount", label: "Target (TZS)", type: "number", placeholder: "Enter target", required: true },

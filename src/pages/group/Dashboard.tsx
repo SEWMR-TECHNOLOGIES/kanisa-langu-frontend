@@ -41,6 +41,8 @@ export default function GroupDashboard() {
           </motion.div>
         ))}
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

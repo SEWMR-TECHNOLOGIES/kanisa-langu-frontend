@@ -66,6 +66,8 @@ export default function SubParishDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

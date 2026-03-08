@@ -129,6 +129,8 @@ export default function SuperAdminDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

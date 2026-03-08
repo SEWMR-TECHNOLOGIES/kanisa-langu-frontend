@@ -65,6 +65,8 @@ export default function CommunityDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

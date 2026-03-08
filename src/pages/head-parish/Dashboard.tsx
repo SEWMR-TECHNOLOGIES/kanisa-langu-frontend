@@ -123,7 +123,9 @@ export default function Dashboard() {
             );
           })}
         </div>
-      </motion.div>
+
+      {/* Bible Widget */}
+      <BibleWidget />
     </div>
   );
 }

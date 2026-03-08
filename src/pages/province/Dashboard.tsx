@@ -65,6 +65,8 @@ export default function ProvinceDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

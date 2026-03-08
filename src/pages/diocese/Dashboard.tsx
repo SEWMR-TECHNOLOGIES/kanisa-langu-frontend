@@ -65,6 +65,8 @@ export default function DioceseDashboard() {
           </div>
         </motion.div>
       </div>
+
+      <BibleWidget />
     </div>
   );
 }

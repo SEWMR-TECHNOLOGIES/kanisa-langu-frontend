@@ -32,9 +32,5 @@ from models.misc import (
     Feedback, FcmToken, AppVersion,
     HeadParishDebit, UnitOfMeasure, MemberOtpCode,
 )
-from models.banking import Bank, Region, District
-from models.config import (
-    Title, Occupation, ServiceColor, ChurchRole, PraiseSong,
-    RevenueGroupMap, ProgramRevenueMap, SmsApiInfo,
-    MemberExclusionReason, HarambeeExclusionReason,
-)
+from models.banking import BankPosting, BankClosingBalance
+from models.config import SmsApiConfig, RevenueGroupModel, RevenueGroupStreamMap, ProgramRevenueMap

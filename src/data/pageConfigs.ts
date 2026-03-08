@@ -1,6 +1,7 @@
 // @ts-nocheck
 // Route configuration for auto-generating pages
 import { type StatusItem } from "../components/head-parish/MemberStatusPreview";
+import { getHarambeeStatusItems, getEnvelopeStatusItems } from "../components/head-parish/MemberStatusPreview";
 // Each route maps to either a "form" or "table" page type with full config
 
 export interface FormFieldConfig {

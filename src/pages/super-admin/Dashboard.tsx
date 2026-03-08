@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Globe, MapPin, Building2, Database, Users, CreditCard, BarChart3, TrendingUp, ArrowUpRight, Activity, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import BibleWidget from "../../components/shared/BibleWidget";
 
 const stats = [
   { label: "Dioceses", value: "26", change: "+2", trend: "up" as const, icon: Globe, gradient: "from-admin-accent/20 to-admin-accent/5", iconColor: "text-admin-accent", glow: "shadow-[0_0_40px_-10px_hsla(42,92%,56%,0.15)]" },

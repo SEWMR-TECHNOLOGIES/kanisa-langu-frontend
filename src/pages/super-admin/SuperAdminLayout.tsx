@@ -160,7 +160,7 @@ export default function SuperAdminLayout() {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 h-[calc(100%-160px)]">
+        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 h-[calc(100%-160px)] scrollbar-hover">
           {navSections.map((section) => (
             <div key={section.title}>
               <p className="text-[10px] font-bold uppercase tracking-widest text-admin-text/40 px-3 mb-2">{section.title}</p>

@@ -109,6 +109,26 @@
   display: none;
 }
 
+/* Sidebar scrollbar: hidden until hover */
+.scrollbar-hover {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hover::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-hover::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 100px;
+}
+.scrollbar-hover:hover {
+  scrollbar-width: thin;
+  scrollbar-color: hsla(220, 14%, 70%, 0.3) transparent;
+}
+.scrollbar-hover:hover::-webkit-scrollbar-thumb {
+  background: hsla(220, 14%, 60%, 0.25);
+}
+
 @layer base {
   * {
     @apply border-border;

@@ -1,5 +1,5 @@
 # models/harambee.py
-from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.sql import func
 from core.base import Base
 
@@ -116,3 +116,37 @@ class DelayedHarambeeNotification(Base):
     is_mr_and_mrs = Column(Boolean, default=False, nullable=False)
     is_sent = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class HarambeeLetterStatus(Base):
+    __tablename__ = "harambee_letter_statuses"
+    id = Column(Integer, primary_key=True)
+    member_id = Column(Integer, ForeignKey("church_members.id", ondelete="CASCADE"), nullable=False)
+    head_parish_id = Column(Integer, ForeignKey("head_parishes.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(10), default="No", nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("member_id", "head_parish_id", name="uq_harambee_letter_member_parish"),
+        CheckConstraint("status IN ('Yes', 'No')", name="ck_letter_status"),
+    )
+
+
+class HarambeeExpense(Base):
+    __tablename__ = "harambee_expenses"
+    id = Column(Integer, primary_key=True)
+    target = Column(String(20), nullable=False)
+    harambee_id = Column(Integer, ForeignKey("harambees.id", ondelete="CASCADE"), nullable=False)
+    head_parish_id = Column(Integer, ForeignKey("head_parishes.id", ondelete="CASCADE"), nullable=False)
+    expense_name_id = Column(Integer, ForeignKey("expense_names.id", ondelete="RESTRICT"), nullable=False)
+    amount = Column(Numeric(15, 2), nullable=False)
+    description = Column(String, nullable=False)
+    expense_date = Column(Date, nullable=False)
+    recorded_by = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("target IN ('head_parish', 'sub_parish', 'community', 'group')", name="ck_harambee_exp_target"),
+        CheckConstraint("amount > 0", name="ck_harambee_exp_amount"),
+    )

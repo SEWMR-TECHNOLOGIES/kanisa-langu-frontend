@@ -142,7 +142,7 @@ export default function Navbar() {
               </div>
               <div className="p-4 pt-2 border-t border-white/[0.06]">
                 <a
-                  href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
+                  href="https://play.google.com/store/apps/details?id=com.sewmrtechnologies.kanisa_langu"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-3 text-sm font-semibold bg-white text-[hsl(220,30%,6%)] rounded-xl hover:bg-white/90 transition-colors"

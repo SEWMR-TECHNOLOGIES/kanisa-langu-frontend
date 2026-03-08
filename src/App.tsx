@@ -6,6 +6,12 @@ import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import CookieConsent from "./components/CookieConsent";
 
+// ELCT Sign-In Pages
+import DioceseSignIn from "./pages/diocese/SignIn";
+import ProvinceSignIn from "./pages/province/SignIn";
+import SubParishSignIn from "./pages/sub-parish/SignIn";
+import CommunitySignIn from "./pages/community/SignIn";
+
 // ELCT Head Parish Admin
 import HeadParishLayout from "./components/head-parish/HeadParishLayout";
 import HeadParishSignIn from "./pages/head-parish/SignIn";

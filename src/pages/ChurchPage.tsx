@@ -152,50 +152,63 @@ export default function ChurchPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden">
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)`,
-            backgroundSize: "72px 72px",
-          }}
-        />
-        {/* Accent glow */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[200px] opacity-[0.07]" style={{ background: church.accent }} />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.08] blur-[160px]" />
+      <section className="relative bg-[hsl(220,30%,6%)] overflow-hidden min-h-[85vh] flex items-center">
+        {/* Layered background */}
+        <div className="absolute inset-0">
+          {/* Radial gradient base */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,hsl(220,72%,20%,0.3),transparent)]" />
+          {/* Accent orb */}
+          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-[0.12]" style={{ background: church.accent }} />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[200px]" />
+          {/* Noise texture overlay */}
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.5\'/%3E%3C/svg%3E")' }} />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors mb-12 text-sm font-medium">
+        <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 relative z-10 w-full">
+          <Link to="/" className="inline-flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors mb-16 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Text */}
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div className="flex items-center gap-4 mb-8">
-                <img src={church.icon} alt={church.name} className="w-14 h-14 rounded-2xl bg-white/[0.06] p-2 border border-white/[0.06]" />
-                <span className="text-sm font-bold text-white/30 uppercase tracking-widest">{church.name}</span>
+          <div className="grid lg:grid-cols-[1fr,420px] gap-12 lg:gap-20 items-center">
+            {/* Left: Content */}
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+              <div className="flex items-center gap-3 mb-10">
+                <img src={church.icon} alt={church.name} className="w-12 h-12 rounded-2xl bg-white/[0.06] p-2 border border-white/[0.06]" />
+                <div className="h-px w-8 bg-white/10" />
+                <span className="text-xs font-bold text-white/25 uppercase tracking-[0.2em]">{church.fullName}</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white font-display tracking-tight leading-[1.08] mb-6">
-                {church.fullName}
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white font-display tracking-tight leading-[1.1] mb-5">
+                {church.tagline}
               </h1>
 
-              <p className="text-lg font-semibold mb-3" style={{ color: church.accent }}>
-                {church.tagline}
-              </p>
-
-              <p className="text-base text-white/40 leading-relaxed max-w-lg mb-10">
+              <p className="text-base text-white/35 leading-relaxed max-w-lg mb-10">
                 {church.description}
               </p>
+
+              {/* Inline stats */}
+              <div className="flex items-center gap-6 mb-10">
+                {[
+                  { value: "500+", label: "Churches" },
+                  { value: "50K+", label: "Members" },
+                  { value: "6", label: "Features" },
+                ].map((stat, i) => (
+                  <div key={stat.label} className="flex items-center gap-6">
+                    {i > 0 && <div className="h-8 w-px bg-white/[0.08]" />}
+                    <div>
+                      <div className="text-2xl font-bold text-white font-display">{stat.value}</div>
+                      <div className="text-[11px] font-medium text-white/25 uppercase tracking-wider">{stat.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <div className="flex flex-wrap gap-3">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-7 py-3.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300"
+                  className="px-7 py-3.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-secondary/20"
                 >
                   Get on Google Play
                 </a>
@@ -210,30 +223,24 @@ export default function ChurchPage() {
               </div>
             </motion.div>
 
-            {/* Right: Quick stats */}
+            {/* Right: App Mockup */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:block"
+              initial={{ opacity: 0, y: 40, rotateY: -8 }}
+              animate={{ opacity: 1, y: 0, rotateY: 0 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="hidden lg:flex justify-center relative"
             >
-              <div className="grid grid-cols-2 gap-4">
-                {church.features.slice(0, 4).map((feat, i) => (
-                  <motion.div
-                    key={feat.title}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + i * 0.08 }}
-                    className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 group"
-                  >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: church.accentLight }}>
-                      <feat.icon className="w-5 h-5" style={{ color: church.accent }} />
-                    </div>
-                    <h3 className="text-sm font-bold text-white/80 mb-1">{feat.title}</h3>
-                    <p className="text-xs text-white/30 leading-relaxed line-clamp-2">{feat.desc}</p>
-                  </motion.div>
-                ))}
+              {/* Glow behind phone */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-64 h-64 rounded-full blur-[100px] opacity-20" style={{ background: church.accent }} />
               </div>
+              <motion.img
+                src={appMockup}
+                alt="Kanisa Langu App"
+                className="relative z-10 w-[340px] drop-shadow-2xl"
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              />
             </motion.div>
           </div>
         </div>

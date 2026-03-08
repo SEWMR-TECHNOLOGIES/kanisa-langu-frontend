@@ -27,6 +27,7 @@ export interface PageConfig {
   // Form config
   submitLabel?: string;
   fields?: FormFieldConfig[];
+  infoBox?: string;
   // Table config
   columns?: TableColumnConfig[];
   data?: Record<string, any>[];
@@ -373,25 +374,15 @@ export const headParishPages: Record<string, PageConfig> = {
     actions: ["view", "edit"],
   },
   "envelope-usage": {
-    title: "Envelope Usage",
-    description: "Track envelope usage across the parish",
-    type: "table",
-    columns: [
-      { key: "envelope_number", label: "Envelope #" },
-      { key: "member", label: "Member" },
-      { key: "sub_parish", label: "Sub Parish" },
-      { key: "usage_count", label: "Times Used" },
-      { key: "total_amount", label: "Total Amount" },
+    title: "Envelope Usage Report",
+    description: "Generate envelope usage report for a specific date",
+    type: "form",
+    submitLabel: "Generate Report",
+    infoBox: "<strong>Note:</strong> The <strong>Benchmark</strong> is the standard measure of how real attendance compares to it. If not set, the default benchmark is 1000.",
+    fields: [
+      { name: "usage_date", label: "Select Date", type: "date", required: true },
+      { name: "benchmark", label: "Benchmark (Optional)", type: "number", placeholder: "Enter Benchmark (default: 1000)" },
     ],
-    data: genData(20, i => ({
-      envelope_number: `Y${String(i + 1).padStart(3, "0")}`,
-      member: memberOptions[i % 10].label,
-      sub_parish: subParishOptions[i % 4].label,
-      usage_count: 8 + (i % 5),
-      total_amount: `TZS ${(i + 1) * 85},000`,
-    })),
-    searchKeys: ["member", "envelope_number"],
-    actions: ["view"],
   },
   "set-annual-revenue-target": {
     title: "Set Annual Revenue Target",
@@ -951,25 +942,13 @@ export const headParishPages: Record<string, PageConfig> = {
     ],
   },
   "envelope-usage-summary": {
-    title: "Envelope Usage Summary",
-    description: "Overview of envelope usage across the parish",
-    type: "table",
-    columns: [
-      { key: "sub_parish", label: "Sub Parish" },
-      { key: "total_envelopes", label: "Envelopes" },
-      { key: "active", label: "Active" },
-      { key: "target", label: "Target" },
-      { key: "collected", label: "Collected" },
+    title: "Download Envelope Usage Summary",
+    description: "Download envelope usage summary report for a specific date",
+    type: "form",
+    submitLabel: "Download Report",
+    fields: [
+      { name: "report_date", label: "Select Date", type: "date", required: true },
     ],
-    data: genData(4, i => ({
-      sub_parish: subParishOptions[i].label,
-      total_envelopes: [120, 85, 150, 95][i],
-      active: [98, 72, 130, 80][i],
-      target: `TZS ${[15, 10, 18, 12][i]}M`,
-      collected: `TZS ${[9, 7, 12, 8][i]}M`,
-    })),
-    searchKeys: ["sub_parish"],
-    actions: ["view"],
   },
   // Reports
   "download-revenue-breakdown": {

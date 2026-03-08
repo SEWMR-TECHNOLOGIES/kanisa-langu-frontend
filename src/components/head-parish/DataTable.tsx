@@ -14,6 +14,13 @@ export interface Column<T> {
   options?: { value: string; label: string }[];
 }
 
+interface CustomAction<T> {
+  label: string;
+  icon: React.ElementType;
+  className?: string;
+  onClick: (row: T) => void;
+}
+
 interface DataTableProps<T> {
   title: string;
   description?: string;
@@ -23,6 +30,7 @@ interface DataTableProps<T> {
   searchKeys?: (keyof T)[];
   pageSize?: number;
   actions?: ("view" | "edit" | "delete")[];
+  customActions?: CustomAction<T>[];
   onAction?: (action: string, row: T) => void;
   onEdit?: (row: T, updated: Partial<T>) => void;
   onDelete?: (row: T) => void;
@@ -39,6 +47,7 @@ export default function DataTable<T extends Record<string, any>>({
   searchKeys = [],
   pageSize: defaultPageSize = 10,
   actions = ["edit", "delete"],
+  customActions = [],
   onAction,
   onEdit,
   onDelete,
@@ -175,7 +184,7 @@ export default function DataTable<T extends Record<string, any>>({
                     {col.label}
                   </th>
                 ))}
-                {actions.length > 0 && (
+                {(actions.length > 0 || customActions.length > 0) && (
                   <th className="px-4 lg:px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-admin-text/60">Actions</th>
                 )}
               </tr>
@@ -219,7 +228,7 @@ export default function DataTable<T extends Record<string, any>>({
                         {col.render ? col.render(row) : String(row[col.key as keyof T] ?? "")}
                       </td>
                     ))}
-                    {actions.length > 0 && (
+                    {(actions.length > 0 || customActions.length > 0) && (
                       <td className="px-4 lg:px-6 py-3.5 text-right">
                         <AnimatePresence mode="wait">
                           {isDeleting ? (
@@ -258,6 +267,16 @@ export default function DataTable<T extends Record<string, any>>({
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               )}
+                              {customActions.map((ca, caIdx) => (
+                                <button
+                                  key={caIdx}
+                                  onClick={() => ca.onClick(row)}
+                                  className={`p-2 rounded-lg transition-colors ${ca.className || "text-admin-text hover:bg-admin-surface-hover"}`}
+                                  title={ca.label}
+                                >
+                                  <ca.icon className="w-4 h-4" />
+                                </button>
+                              ))}
                             </motion.div>
                           )}
                         </AnimatePresence>

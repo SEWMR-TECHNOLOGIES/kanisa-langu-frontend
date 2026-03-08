@@ -8,7 +8,7 @@ import {
   X, Ban, Building, TrendingUp, Package, FileText
 } from "lucide-react";
 
-const BASE = "/head-parish";
+const BASE = "/elct/head-parish";
 
 interface NavItem {
   label: string;

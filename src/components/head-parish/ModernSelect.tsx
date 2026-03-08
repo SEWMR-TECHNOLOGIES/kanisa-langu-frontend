@@ -23,7 +23,7 @@ export default function ModernSelect({
   onChange,
   placeholder = "Select an option",
   name,
-  required,
+  required: _required,
   className = "",
 }: ModernSelectProps) {
   const [open, setOpen] = useState(false);

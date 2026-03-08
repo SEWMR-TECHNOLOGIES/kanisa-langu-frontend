@@ -17,7 +17,7 @@ export default function ModernDatePicker({
   onChange,
   placeholder = "Pick a date",
   name,
-  required,
+  required: _required,
   className = "",
 }: ModernDatePickerProps) {
   const [open, setOpen] = useState(false);

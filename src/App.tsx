@@ -204,6 +204,7 @@ export default function App() {
           <Route path="financial-statement" element={<FinancialStatement />} />
           <Route path="revenue-streams" element={<RevenueStreams />} />
           <Route path="record-revenue" element={<RecordRevenue />} />
+          <Route path="verify-revenues" element={<VerifyRevenues />} />
           <Route path="debits" element={<Debits />} />
           <Route path="expense-requests" element={<ExpenseRequests />} />
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />

@@ -31,6 +31,7 @@ from models.operations import (
 from models.misc import (
     Feedback, FcmToken, AppVersion,
     HeadParishDebit, UnitOfMeasure, MemberOtpCode,
+    MemberExclusionReason, HarambeeExclusionReason,
 )
 from models.banking import BankPosting, BankClosingBalance
 from models.config import SmsApiConfig, RevenueGroupModel, RevenueGroupStreamMap, ProgramRevenueMap

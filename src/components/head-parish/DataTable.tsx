@@ -184,7 +184,7 @@ export default function DataTable<T extends Record<string, any>>({
                     {col.label}
                   </th>
                 ))}
-                {actions.length > 0 && (
+                {(actions.length > 0 || customActions.length > 0) && (
                   <th className="px-4 lg:px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-admin-text/60">Actions</th>
                 )}
               </tr>

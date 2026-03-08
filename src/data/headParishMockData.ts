@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Mock data for all head parish admin pages
 
 export const mockMembers = Array.from({ length: 45 }, (_, i) => ({

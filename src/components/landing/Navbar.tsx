@@ -57,18 +57,16 @@ export default function Navbar() {
               </Link>
 
               {/* Center nav - pill style */}
-              <nav className="hidden md:flex items-center">
-                <div className="flex items-center gap-0.5 px-1 py-1 rounded-xl bg-muted/50">
-                  {navLinks.map((link) => (
-                    <button
-                      key={link.href}
-                      onClick={() => scrollTo(link.href)}
-                      className="relative px-4 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 hover:bg-muted"
-                    >
-                      {link.label}
-                    </button>
-                  ))}
-                </div>
+              <nav className="hidden md:flex items-center gap-1">
+                {navLinks.map((link) => (
+                  <button
+                    key={link.href}
+                    onClick={() => scrollTo(link.href)}
+                    className="relative px-4 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 hover:bg-muted/60"
+                  >
+                    {link.label}
+                  </button>
+                ))}
               </nav>
 
               {/* CTA */}

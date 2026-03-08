@@ -20,9 +20,6 @@ const stats = [
 ];
 
 export default function Hero() {
-  const scrollTo = (id: string) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section className="relative min-h-screen flex items-center bg-background overflow-hidden">
@@ -62,26 +59,6 @@ export default function Hero() {
             >
               Finances, members, and communications for ELCT, Roman Catholic, SDA, and Pentecostal churches. All in one place.
             </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap gap-3 mt-8"
-            >
-              <button
-                onClick={() => scrollTo("#churches")}
-                className="px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/20"
-              >
-                Get Started
-              </button>
-              <button
-                onClick={() => scrollTo("#features")}
-                className="px-7 py-3.5 text-foreground border border-border rounded-xl font-medium text-sm hover:bg-muted transition-all duration-300"
-              >
-                Learn More
-              </button>
-            </motion.div>
 
             {/* Denomination cards */}
             <motion.div
@@ -124,7 +101,7 @@ export default function Hero() {
               {/* Decorative accent line */}
               <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
               
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium mb-8">Platform overview</p>
+              
               
               <div className="space-y-0">
                 {stats.map((stat, i) => (

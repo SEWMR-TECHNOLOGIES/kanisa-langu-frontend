@@ -8,4 +8,6 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
+  // Force cache clear
+  optimizeDeps: { force: true },
 });

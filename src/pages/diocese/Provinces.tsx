@@ -9,8 +9,8 @@ export default function DioceseProvinces() {
       columns={[
         { key: "name", label: "Province Name" },
         { key: "head_parishes", label: "Head Parishes" },
-        { key: "total_members", label: "Total Members", render: (r) => <span className="tabular-nums">{r.total_members.toLocaleString()}</span> },
-        { key: "status", label: "Status", render: (r) => (
+        { key: "total_members", label: "Total Members", render: (r: any) => <span className="tabular-nums">{Number(r.total_members).toLocaleString()}</span> },
+        { key: "status", label: "Status", render: (r: any) => (
           <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${r.status === "Active" ? "bg-admin-success/10 text-admin-success" : "bg-admin-text/10 text-admin-text"}`}>
             {r.status}
           </span>

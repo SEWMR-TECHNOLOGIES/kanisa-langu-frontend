@@ -9,8 +9,8 @@ export default function ProvinceHeadParishes() {
       columns={[
         { key: "name", label: "Head Parish" },
         { key: "sub_parishes", label: "Sub Parishes" },
-        { key: "members", label: "Members", render: (r) => <span className="tabular-nums">{r.members.toLocaleString()}</span> },
-        { key: "status", label: "Status", render: (r) => (
+        { key: "members", label: "Members", render: (r: any) => <span className="tabular-nums">{Number(r.members).toLocaleString()}</span> },
+        { key: "status", label: "Status", render: (r: any) => (
           <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-admin-success/10 text-admin-success">{r.status}</span>
         )},
       ]}

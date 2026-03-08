@@ -77,7 +77,7 @@ export default function Navbar() {
                   href="https://play.google.com/store/apps/details?id=com.elerai.sewmr.kanisa_langu"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2 px-5 py-2 text-[13px] font-semibold bg-white text-[hsl(220,30%,6%)] rounded-xl hover:bg-white/90 transition-all duration-200"
+                  className="group flex items-center gap-2 px-5 py-2 text-[13px] font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all duration-200"
                 >
                   Get Started
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

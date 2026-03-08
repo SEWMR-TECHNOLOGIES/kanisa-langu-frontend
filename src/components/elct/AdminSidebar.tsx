@@ -172,7 +172,7 @@ export default function AdminSidebar({ isOpen, onClose, navigation, levelLabel, 
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-hover">
           {navigation.map((section, si) => (
             <div key={section.title}>
               <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-admin-text/50">

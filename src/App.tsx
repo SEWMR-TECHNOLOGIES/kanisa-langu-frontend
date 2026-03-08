@@ -6,6 +6,12 @@ import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import CookieConsent from "./components/CookieConsent";
 
+// ELCT Sign-In Pages
+import DioceseSignIn from "./pages/diocese/SignIn";
+import ProvinceSignIn from "./pages/province/SignIn";
+import SubParishSignIn from "./pages/sub-parish/SignIn";
+import CommunitySignIn from "./pages/community/SignIn";
+
 // ELCT Head Parish Admin
 import HeadParishLayout from "./components/head-parish/HeadParishLayout";
 import HeadParishSignIn from "./pages/head-parish/SignIn";
@@ -56,8 +62,14 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
 
-        {/* ELCT Head Parish */}
+        {/* ELCT Sign-In Pages */}
+        <Route path="/elct/diocese/sign-in" element={<DioceseSignIn />} />
+        <Route path="/elct/province/sign-in" element={<ProvinceSignIn />} />
         <Route path="/elct/head-parish/sign-in" element={<HeadParishSignIn />} />
+        <Route path="/elct/sub-parish/sign-in" element={<SubParishSignIn />} />
+        <Route path="/elct/community/sign-in" element={<CommunitySignIn />} />
+
+        {/* ELCT Head Parish */}
         <Route path="/elct/head-parish" element={<HeadParishLayout />}>
           <Route index element={<Dashboard />} />
           {/* Administration */}

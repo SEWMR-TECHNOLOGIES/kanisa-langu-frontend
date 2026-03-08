@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound } from "lucide-react";
+import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound, LogIn } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import Footer from "../components/landing/Footer";
 import elctIcon from "../assets/elct-icon.png";
@@ -10,11 +10,11 @@ import pentecostalIcon from "../assets/pentecostal-icon.png";
 
 
 const elctLevels = [
-  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },
-  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting." },
-  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area." },
-  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities." },
-  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement." },
+  { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region.", loginPath: "/elct/diocese/sign-in" },
+  { icon: MapPin, name: "Province", description: "A grouping of head parishes under the diocese, coordinating regional activities and reporting.", loginPath: "/elct/province/sign-in" },
+  { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area.", loginPath: "/elct/head-parish/sign-in" },
+  { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities.", loginPath: "/elct/sub-parish/sign-in" },
+  { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement.", loginPath: "/elct/community/sign-in" },
   { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history." },
 ];
 
@@ -240,7 +240,7 @@ export default function ChurchPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
-                  className="p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
+                  className="group p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
@@ -251,7 +251,16 @@ export default function ChurchPage() {
                       <h3 className="text-base font-bold text-foreground">{level.name}</h3>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{level.description}</p>
+                  {level.loginPath && (
+                    <Link
+                      to={level.loginPath}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-secondary/10 text-secondary hover:bg-secondary hover:text-secondary-foreground"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      Admin Login
+                    </Link>
+                  )}
                 </motion.div>
               ))}
             </div>

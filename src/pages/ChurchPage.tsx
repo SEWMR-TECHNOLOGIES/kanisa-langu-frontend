@@ -1,9 +1,13 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound } from "lucide-react";
+import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound, Sparkles } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import Footer from "../components/landing/Footer";
 import elctIcon from "../assets/elct-icon.png";
+import rcIcon from "../assets/rc-icon.png";
+import sdaIcon from "../assets/sda-icon.png";
+import pentecostalIcon from "../assets/pentecostal-icon.png";
+import appMockup from "../assets/app-mockup.png";
 import rcIcon from "../assets/rc-icon.png";
 import sdaIcon from "../assets/sda-icon.png";
 import pentecostalIcon from "../assets/pentecostal-icon.png";

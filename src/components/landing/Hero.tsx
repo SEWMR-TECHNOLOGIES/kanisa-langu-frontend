@@ -104,7 +104,7 @@ export default function Hero() {
               {/* Decorative accent line */}
               <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
               
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium mb-8">Platform overview</p>
+              
               
               <div className="space-y-0">
                 {stats.map((stat, i) => (

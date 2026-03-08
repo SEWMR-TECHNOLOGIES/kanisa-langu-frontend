@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound, LogIn, Download, Smartphone } from "lucide-react";
+import { ArrowLeft, Check, TrendingUp, Users, CreditCard, BarChart3, Shield, Bell, Building2, MapPin, Church, Home, UsersRound, UserCheck, LogIn, Download, Smartphone } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import Footer from "../components/landing/Footer";
 import elctIcon from "../assets/elct-icon.png";
@@ -15,6 +15,7 @@ const elctLevels = [
   { icon: Church, name: "Head Parish", description: "The central parish responsible for managing sub-parishes and community outreach in its area.", loginPath: "/elct/head-parish/sign-in" },
   { icon: Home, name: "Sub Parish", description: "A local worship center under a head parish, handling day-to-day congregation activities.", loginPath: "/elct/sub-parish/sign-in" },
   { icon: UsersRound, name: "Communities", description: "Neighborhood-level groups within a sub-parish for fellowship, care, and grassroots engagement.", loginPath: "/elct/community/sign-in" },
+  { icon: UserCheck, name: "Groups", description: "Church groups such as youth, women, men, and choir that organize activities, contributions, and events within a parish.", loginPath: "/elct/group/sign-in" },
   { icon: Users, name: "Church Members", description: "Individual member records with full profiles, contributions, attendance, and sacramental history.", isAppLevel: true },
 ];
 

@@ -238,7 +238,7 @@ export default function SuperAdminLayout() {
       </aside>
 
       {/* Main area */}
-      <div className="flex-1 lg:ml-[280px]">
+      <div className="flex-1 lg:ml-[280px] min-w-0 overflow-x-hidden">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-admin-header border-b border-admin-border/30 px-4 lg:px-8 py-3 flex items-center justify-between">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-admin-surface-hover text-admin-text">
@@ -265,7 +265,7 @@ export default function SuperAdminLayout() {
         </header>
 
         {/* Content */}
-        <main className="p-4 lg:p-8">
+        <main className="p-4 lg:p-8 overflow-x-auto">
           <Outlet />
         </main>
       </div>

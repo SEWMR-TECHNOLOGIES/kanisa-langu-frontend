@@ -127,6 +127,7 @@ import SARegisterPraiseSong from "./pages/super-admin/RegisterPraiseSong";
 import SAManagePraiseSongs from "./pages/super-admin/ManagePraiseSongs";
 import SAProfile from "./pages/super-admin/Profile";
 
+function HPAutoPage() {
   return <AutoPage configs={headParishPages} />;
 }
 

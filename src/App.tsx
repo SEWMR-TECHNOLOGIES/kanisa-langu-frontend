@@ -188,6 +188,7 @@ export default function App() {
           <Route path="manage-envelopes" element={<ManageEnvelopes />} />
           <Route path="add-asset" element={<AssetsManagement />} />
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />
+          <Route path="profile" element={<HPProfile />} />
           {/* All remaining HP pages rendered via AutoPage */}
           <Route path="*" element={<HPAutoPage />} />
         </Route>

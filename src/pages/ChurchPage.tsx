@@ -240,7 +240,7 @@ export default function ChurchPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
-                  className="p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
+                  className="group p-6 rounded-2xl bg-card border border-border hover:border-secondary/30 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
@@ -251,7 +251,16 @@ export default function ChurchPage() {
                       <h3 className="text-base font-bold text-foreground">{level.name}</h3>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{level.description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{level.description}</p>
+                  {level.loginPath && (
+                    <Link
+                      to={level.loginPath}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-secondary/10 text-secondary hover:bg-secondary hover:text-secondary-foreground"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      Admin Login
+                    </Link>
+                  )}
                 </motion.div>
               ))}
             </div>

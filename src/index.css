@@ -32,6 +32,34 @@
     --gold-foreground: 42 95% 20%;
 
     --hero-dark: 220 30% 6%;
+
+    /* Admin panel tokens */
+    --admin-bg: 220 25% 4%;
+    --admin-surface: 220 25% 7%;
+    --admin-surface-hover: 220 25% 10%;
+    --admin-surface-active: 220 25% 12%;
+    --admin-border: 220 20% 14%;
+    --admin-text: 220 10% 70%;
+    --admin-text-bright: 220 10% 92%;
+    --admin-accent: 42 92% 56%;
+    --admin-accent-muted: 42 80% 40%;
+    --admin-success: 152 69% 48%;
+    --admin-warning: 38 92% 50%;
+    --admin-info: 210 80% 56%;
+    --admin-sidebar: 220 28% 6%;
+    --admin-sidebar-active: 220 25% 12%;
+    --admin-header: 220 25% 5%;
+    --admin-card: 220 25% 8%;
+    --admin-card-hover: 220 25% 10%;
+
+    --sidebar: 220 28% 6%;
+    --sidebar-foreground: 220 10% 70%;
+    --sidebar-primary: 42 92% 56%;
+    --sidebar-primary-foreground: 220 30% 4%;
+    --sidebar-accent: 220 25% 12%;
+    --sidebar-accent-foreground: 220 10% 92%;
+    --sidebar-border: 220 20% 14%;
+    --sidebar-ring: 42 92% 56%;
   }
 }
 
@@ -72,5 +100,25 @@
   }
   .glow-primary {
     box-shadow: 0 0 80px -20px hsla(220, 72%, 20%, 0.3);
+  }
+  .admin-glow {
+    box-shadow: 0 4px 24px -4px hsla(220, 25%, 0%, 0.5);
+  }
+  .admin-glow-gold {
+    box-shadow: 0 0 40px -10px hsla(42, 92%, 56%, 0.15);
+  }
+  .admin-card {
+    background: hsla(220, 25%, 8%, 0.8);
+    border: 1px solid hsla(220, 20%, 14%, 0.6);
+    backdrop-filter: blur(12px);
+  }
+  .admin-input {
+    background: hsla(220, 25%, 6%, 0.8);
+    border: 1px solid hsla(220, 20%, 14%, 0.5);
+    color: hsl(220, 10%, 92%);
+  }
+  .admin-input:focus {
+    border-color: hsl(42, 92%, 56%);
+    box-shadow: 0 0 0 2px hsla(42, 92%, 56%, 0.15);
   }
 }

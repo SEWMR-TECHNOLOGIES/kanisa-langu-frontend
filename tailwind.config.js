@@ -1,5 +1,4 @@
-import type { Config } from "tailwindcss";
-
+/** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
@@ -59,7 +58,7 @@ export default {
         serif: ["Instrument Serif", "serif"],
       },
       keyframes: {
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-12px)" },
         },
@@ -69,10 +68,10 @@ export default {
         },
       },
       animation: {
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "fade-up": "fade-up 0.6s ease-out forwards",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [],
+};

@@ -1,4 +1,4 @@
-import logoIcon from "@/assets/logo-icon.png";
+import logoIcon from "../../assets/logo-icon.png";
 
 export default function Footer() {
   return (

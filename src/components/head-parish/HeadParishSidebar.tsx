@@ -450,7 +450,7 @@ export default function HeadParishSidebar({ isOpen, onClose }: HeadParishSidebar
       >
         {/* Brand */}
         <div className="flex items-center justify-between px-5 py-5 border-b border-admin-border/50">
-          <Link to="/head-parish" className="flex items-center gap-3">
+          <Link to="/elct/head-parish" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-admin-accent to-amber-600 flex items-center justify-center">
               <Building className="w-5 h-5 text-admin-bg" />
             </div>

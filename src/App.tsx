@@ -6,8 +6,9 @@ import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import CookieConsent from "./components/CookieConsent";
 
-// Head Parish Admin
+// ELCT Head Parish Admin
 import HeadParishLayout from "./components/head-parish/HeadParishLayout";
+import HeadParishSignIn from "./pages/head-parish/SignIn";
 import Dashboard from "./pages/head-parish/Dashboard";
 import SubParishes from "./pages/head-parish/SubParishes";
 import RegisterSubParish from "./pages/head-parish/RegisterSubParish";
@@ -55,8 +56,9 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
 
-        {/* Head Parish Admin */}
-        <Route path="/head-parish" element={<HeadParishLayout />}>
+        {/* ELCT Head Parish */}
+        <Route path="/elct/head-parish/sign-in" element={<HeadParishSignIn />} />
+        <Route path="/elct/head-parish" element={<HeadParishLayout />}>
           <Route index element={<Dashboard />} />
           {/* Administration */}
           <Route path="sub-parishes" element={<SubParishes />} />
@@ -103,7 +105,7 @@ export default function App() {
           <Route path="add-asset" element={<AssetsManagement />} />
           {/* Payment Wallets */}
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />
-          {/* All other pages -> GenericPage placeholder */}
+          {/* Catch-all */}
           <Route path="*" element={<GenericPage />} />
         </Route>
       </Routes>

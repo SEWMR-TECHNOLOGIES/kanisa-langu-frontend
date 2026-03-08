@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Globe, MapPin, Building2, Database, Tag, Briefcase, Music,
   CreditCard, BarChart3, LogOut, ChevronDown, Menu, X, Bell
 } from "lucide-react";
-import logo from "../../assets/kanisa-logo.png";
+import logo from "../../assets/logo.png";
 
 const BASE = "/app";
 

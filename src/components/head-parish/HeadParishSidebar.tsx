@@ -7,7 +7,7 @@ import {
   Flag, Mail, BarChart3, Settings, LogOut, ChevronDown,
   X, Ban, TrendingUp, Package, FileText, User
 } from "lucide-react";
-import logo from "../../assets/kanisa-logo.png";
+import logo from "../../assets/logo.png";
 
 const BASE = "/elct/head-parish";
 

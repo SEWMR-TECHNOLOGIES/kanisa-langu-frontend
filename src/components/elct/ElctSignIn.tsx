@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ArrowLeft } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import logo from "../../assets/kanisa-logo.png";
+import logo from "../../assets/logo.png";
 
 interface ElctSignInProps {
   level: string;

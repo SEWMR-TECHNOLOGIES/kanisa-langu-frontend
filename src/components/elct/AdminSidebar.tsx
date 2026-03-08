@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, X, User } from "lucide-react";
-import logo from "../../assets/kanisa-logo.png";
+import logo from "../../assets/logo.png";
 
 export interface NavItem {
   label: string;

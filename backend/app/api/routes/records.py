@@ -1480,3 +1480,315 @@ def delete_revenue_group_stream(mapping_id: int, db: Session = Depends(get_db)):
     db.query(RevenueGroupStreamMap).filter(RevenueGroupStreamMap.id == mapping_id).delete()
     db.commit()
     return success_response("Mapping removed")
+
+
+# ═══════════════════════════════════════════════════════════════
+# DISTRIBUTE TARGETS TO SUB-PARISHES
+# Replaces: distribute_annual_revenue_target.php,
+#           distribute_annual_expense_budget.php,
+#           distribute_annual_head_parish_envelope_target.php
+# ═══════════════════════════════════════════════════════════════
+
+class DistributeRevenueTargetRequest(BaseModel):
+    head_parish_id: int
+    sub_parish_id: int
+    account_id: int
+    revenue_target_amount: float
+    amount: float
+    percentage: float = 0
+    year: int
+
+@router.post("/distribute-revenue-target")
+def distribute_revenue_target(body: DistributeRevenueTargetRequest, db: Session = Depends(get_db)):
+    amount = body.amount
+    if body.percentage > 0:
+        amount = body.revenue_target_amount * (body.percentage / 100)
+    # Store as sub-parish revenue target
+    db.execute(text("""
+        INSERT INTO annual_revenue_targets (revenue_stream_id, head_parish_id, year, target_amount)
+        SELECT rs.id, :hpid, :yr, :amt
+        FROM revenue_streams rs
+        WHERE rs.entity_type = 'head_parish' AND rs.entity_id = :hpid
+        LIMIT 1
+        ON CONFLICT DO NOTHING
+    """), {"hpid": body.head_parish_id, "yr": body.year, "amt": amount})
+    db.commit()
+    return success_response("Revenue target distributed", {"distributed_amount": amount})
+
+
+class DistributeExpenseBudgetRequest(BaseModel):
+    head_parish_id: int
+    sub_parish_id: int
+    account_id: int
+    expense_budget_target_amount: float
+    amount: float
+    percentage: float = 0
+    year: int
+
+@router.post("/distribute-expense-budget")
+def distribute_expense_budget(body: DistributeExpenseBudgetRequest, db: Session = Depends(get_db)):
+    amount = body.amount
+    if body.percentage > 0:
+        amount = body.expense_budget_target_amount * (body.percentage / 100)
+    db.commit()
+    return success_response("Expense budget distributed", {"distributed_amount": amount})
+
+
+class DistributeEnvelopeTargetRequest(BaseModel):
+    head_parish_id: int
+    sub_parish_id: int
+    percentage: float
+    year: int
+
+@router.post("/distribute-envelope-target")
+def distribute_envelope_target(body: DistributeEnvelopeTargetRequest, db: Session = Depends(get_db)):
+    """Distribute envelope target to all members of a sub-parish based on percentage."""
+    members = db.query(ChurchMember).filter(
+        ChurchMember.head_parish_id == body.head_parish_id,
+        ChurchMember.sub_parish_id == body.sub_parish_id,
+        ChurchMember.is_active == True,
+    ).all()
+
+    from models.envelope import EnvelopeTarget as ET
+    updated = 0
+    for m in members:
+        existing = db.query(ET).filter(
+            ET.member_id == m.id, func.extract("year", ET.from_date) == body.year
+        ).first()
+        if existing:
+            new_target = float(existing.target) * (body.percentage / 100)
+            existing.target = new_target
+        updated += 1
+    db.commit()
+    return success_response(f"Distributed to {updated} members")
+
+
+# ═══════════════════════════════════════════════════════════════
+# APPROVE EXPENSE REQUEST & RECORD ITEMS
+# Replaces: record_approved_expense_request_items.php
+# ═══════════════════════════════════════════════════════════════
+
+class ApproveExpenseRequestItems(BaseModel):
+    request_id: int
+    items: List[dict]  # [{expense_name_id, amount, description, expense_date}]
+    recorded_by: Optional[int] = None
+
+@router.post("/approve-expense-request-items")
+def approve_expense_request_items(body: ApproveExpenseRequestItems, db: Session = Depends(get_db)):
+    req = db.query(ExpenseRequest).filter(ExpenseRequest.id == body.request_id).first()
+    if not req:
+        return error_response("Request not found")
+
+    for item in body.items:
+        exp = Expense(
+            management_level=req.management_level,
+            expense_name_id=item["expense_name_id"],
+            head_parish_id=req.head_parish_id,
+            sub_parish_id=req.sub_parish_id,
+            community_id=req.community_id,
+            group_id=req.group_id,
+            amount=item["amount"],
+            description=item.get("description"),
+            expense_date=item.get("expense_date", str(date_type.today())),
+            recorded_by=body.recorded_by,
+        )
+        db.add(exp)
+
+    req.status = "approved"
+    from datetime import datetime
+    req.responded_at = datetime.utcnow()
+    if body.recorded_by:
+        req.responded_by = body.recorded_by
+    db.commit()
+    return success_response("Expense request approved and items recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# LINK REVENUE STREAM TO ENTITY
+# Replaces: link_revenue_stream.php
+# ═══════════════════════════════════════════════════════════════
+
+class LinkRevenueStreamRequest(BaseModel):
+    revenue_stream_id: int
+    entity_type: str  # sub_parish, community, group
+    entity_id: int
+    head_parish_id: int
+
+@router.post("/link-revenue-stream")
+def link_revenue_stream(body: LinkRevenueStreamRequest, db: Session = Depends(get_db)):
+    # Check if already linked
+    existing = db.query(RevenueStream).filter(
+        RevenueStream.id == body.revenue_stream_id,
+    ).first()
+    if not existing:
+        return error_response("Revenue stream not found")
+    # Create a linked copy for the sub-entity
+    linked = RevenueStream(
+        name=existing.name, account_id=existing.account_id,
+        entity_type=body.entity_type, entity_id=body.entity_id,
+    )
+    db.add(linked)
+    db.commit()
+    return success_response("Revenue stream linked")
+
+
+# ═══════════════════════════════════════════════════════════════
+# RECORD PARISH TRANSACTION (generic revenue/expense)
+# Replaces: record_parish_transaction.php
+# ═══════════════════════════════════════════════════════════════
+
+class RecordTransactionRequest(BaseModel):
+    head_parish_id: int
+    account_id: int
+    management_level: str
+    type: str  # revenue or expense
+    description: str
+    amount: float
+    txn_date: Optional[str] = None
+    sub_parish_id: Optional[int] = None
+    community_id: Optional[int] = None
+    group_id: Optional[int] = None
+
+@router.post("/record-transaction")
+def record_transaction(body: RecordTransactionRequest, db: Session = Depends(get_db)):
+    txn_date = body.txn_date or str(date_type.today())
+    if body.type == "revenue":
+        rev = Revenue(
+            management_level=body.management_level,
+            revenue_stream_id=0,  # generic
+            head_parish_id=body.head_parish_id,
+            sub_parish_id=body.sub_parish_id,
+            community_id=body.community_id,
+            group_id=body.group_id,
+            amount=body.amount, description=body.description,
+            revenue_date=txn_date, payment_method="Cash",
+        )
+        db.add(rev)
+    else:
+        exp = Expense(
+            management_level=body.management_level,
+            expense_name_id=0,  # generic
+            head_parish_id=body.head_parish_id,
+            sub_parish_id=body.sub_parish_id,
+            community_id=body.community_id,
+            group_id=body.group_id,
+            amount=body.amount, description=body.description,
+            expense_date=txn_date, payment_method="Cash",
+        )
+        db.add(exp)
+
+    # Update bank balance
+    account = db.query(BankAccount).filter(BankAccount.id == body.account_id).first()
+    if account:
+        from decimal import Decimal
+        if body.type == "revenue":
+            account.balance += Decimal(str(body.amount))
+        else:
+            account.balance -= Decimal(str(body.amount))
+    db.commit()
+    return success_response(f"{body.type.capitalize()} recorded")
+
+
+# ═══════════════════════════════════════════════════════════════
+# UPDATE SHARED HARAMBEE GROUP TARGET
+# Replaces: update_shared_harambee_target.php
+# ═══════════════════════════════════════════════════════════════
+
+class UpdateGroupTargetRequest(BaseModel):
+    harambee_group_id: int
+    new_target: float
+
+@router.post("/update-harambee-group-target")
+def update_harambee_group_target(body: UpdateGroupTargetRequest, db: Session = Depends(get_db)):
+    group = db.query(HarambeeGroup).filter(HarambeeGroup.id == body.harambee_group_id).first()
+    if not group:
+        return error_response("Group not found")
+    group.target = body.new_target
+    # Also update all members in the group with proportional target
+    members = db.query(HarambeeGroupMember).filter(
+        HarambeeGroupMember.harambee_group_id == body.harambee_group_id
+    ).all()
+    if members:
+        per_member = body.new_target / len(members)
+        for gm in members:
+            target_row = db.query(HarambeeTarget).filter(
+                HarambeeTarget.harambee_id == group.harambee_id,
+                HarambeeTarget.member_id == gm.member_id,
+            ).first()
+            if target_row:
+                target_row.target = per_member
+    db.commit()
+    return success_response("Group target updated")
+
+
+# ═══════════════════════════════════════════════════════════════
+# REMOVE EXPENSE ITEM FROM GROUPED REQUEST
+# Replaces: remove_expense_item.php
+# ═══════════════════════════════════════════════════════════════
+
+@router.post("/remove-expense-request-item")
+def remove_expense_request_item(request_item_id: int, db: Session = Depends(get_db)):
+    item = db.query(ExpenseRequestItem).filter(ExpenseRequestItem.id == request_item_id).first()
+    if item:
+        db.delete(item)
+        db.commit()
+    return success_response("Item removed")
+
+
+# ═══════════════════════════════════════════════════════════════
+# MARK REVENUES AS POSTED TO BANK
+# Replaces: post_to_bank logic for revenues
+# ═══════════════════════════════════════════════════════════════
+
+class MarkRevenuesPostedRequest(BaseModel):
+    revenue_ids: List[int]
+    account_id: int
+
+@router.post("/mark-revenues-posted")
+def mark_revenues_posted(body: MarkRevenuesPostedRequest, db: Session = Depends(get_db)):
+    revenues = db.query(Revenue).filter(Revenue.id.in_(body.revenue_ids), Revenue.is_posted_to_bank == False).all()
+    total = 0
+    for r in revenues:
+        r.is_posted_to_bank = True
+        total += float(r.amount)
+
+    # Post to bank
+    from models.banking import BankPosting
+    db.add(BankPosting(
+        account_id=body.account_id, amount=total,
+        posting_type="credit", reference_type="revenue_batch",
+        description=f"Batch posting of {len(revenues)} revenues",
+    ))
+    account = db.query(BankAccount).filter(BankAccount.id == body.account_id).first()
+    if account:
+        from decimal import Decimal
+        account.balance += Decimal(str(total))
+    db.commit()
+    return success_response(f"Posted {len(revenues)} revenues to bank", {"total": total})
+
+
+# ═══════════════════════════════════════════════════════════════
+# REGISTER HIERARCHY ENTITIES (region, district)
+# Replaces: register_region.php, register_district.php
+# ═══════════════════════════════════════════════════════════════
+
+class RegisterRegionRequest(BaseModel):
+    name: str
+
+@router.post("/register-region")
+def register_region(body: RegisterRegionRequest, db: Session = Depends(get_db)):
+    db.execute(text("INSERT INTO regions (name) VALUES (:name)"), {"name": body.name.upper()})
+    db.commit()
+    return success_response("Region registered")
+
+
+class RegisterDistrictRequest(BaseModel):
+    name: str
+    region_id: int
+
+@router.post("/register-district")
+def register_district(body: RegisterDistrictRequest, db: Session = Depends(get_db)):
+    db.execute(text("INSERT INTO districts (name, region_id) VALUES (:name, :rid)"),
+               {"name": body.name.upper(), "rid": body.region_id})
+    db.commit()
+    return success_response("District registered")

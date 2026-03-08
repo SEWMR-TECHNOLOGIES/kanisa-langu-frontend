@@ -228,7 +228,7 @@ export default function DataTable<T extends Record<string, any>>({
                         {col.render ? col.render(row) : String(row[col.key as keyof T] ?? "")}
                       </td>
                     ))}
-                    {actions.length > 0 && (
+                    {(actions.length > 0 || customActions.length > 0) && (
                       <td className="px-4 lg:px-6 py-3.5 text-right">
                         <AnimatePresence mode="wait">
                           {isDeleting ? (

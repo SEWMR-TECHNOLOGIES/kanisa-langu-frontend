@@ -1572,3 +1572,339 @@ export const subParishPages: Record<string, PageConfig> = {
     ],
   },
 };
+
+// ============ GROUP PAGE CONFIGS ============
+export const groupPages: Record<string, PageConfig> = {
+  // Church Members
+  "register-church-member": {
+    title: "Register Church Member",
+    description: "Register a new church member to your group",
+    type: "form",
+    submitLabel: "Register Member",
+    fields: [
+      { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name", required: true },
+      { name: "middle_name", label: "Middle Name", type: "text", placeholder: "Enter middle name" },
+      { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name", required: true },
+      { name: "phone", label: "Phone Number", type: "tel", placeholder: "e.g. 0712345678", required: true },
+      { name: "email", label: "Email", type: "email", placeholder: "Email address" },
+    ],
+  },
+  "church-members": {
+    title: "Church Members",
+    description: "All registered group members",
+    type: "table",
+    columns: [
+      { key: "name", label: "Full Name" },
+      { key: "phone", label: "Phone" },
+      { key: "envelope", label: "Envelope No." },
+      { key: "status", label: "Status", type: "badge", badgeColors: statusBadge },
+    ],
+    data: genData(20, i => ({
+      name: memberOptions[i % 10].label,
+      phone: `07${String(12345678 + i * 111).slice(0, 8)}`,
+      envelope: `Y${String(i + 1).padStart(2, "0")}`,
+      status: i % 5 === 0 ? "Inactive" : "Active",
+    })),
+    searchKeys: ["name", "phone"],
+    actions: ["view", "edit"],
+  },
+  // Services
+  "services": {
+    title: "Sunday Services",
+    description: "All recorded Sunday services",
+    type: "table",
+    columns: [
+      { key: "date", label: "Date" },
+      { key: "type", label: "Service" },
+      { key: "attendance", label: "Attendance" },
+    ],
+    data: genData(12, i => ({
+      date: `2025-${String(1 + (i % 12)).padStart(2, "0")}-${String(5 + i).padStart(2, "0")}`,
+      type: ["Morning Service", "Afternoon Service"][i % 2],
+      attendance: 45 + i * 3,
+    })),
+    searchKeys: ["date", "type"],
+    actions: ["view"],
+  },
+  // Banking
+  "register-bank-account": {
+    title: "Register Bank Account",
+    description: "Add a new bank account",
+    type: "form",
+    submitLabel: "Register Account",
+    fields: [
+      { name: "bank_name", label: "Bank Name", type: "text", placeholder: "e.g. CRDB", required: true },
+      { name: "account_name", label: "Account Name", type: "text", placeholder: "Account name", required: true },
+      { name: "account_number", label: "Account Number", type: "text", placeholder: "Account number", required: true },
+    ],
+  },
+  "bank-accounts": {
+    title: "Bank Accounts",
+    description: "Manage group bank accounts",
+    type: "table",
+    columns: [
+      { key: "bank", label: "Bank" },
+      { key: "account_name", label: "Account Name" },
+      { key: "account_number", label: "Account Number" },
+    ],
+    data: genData(3, i => ({
+      bank: ["CRDB", "NMB", "NBC"][i],
+      account_name: ["Main Account", "Harambee Fund", "Operations"][i],
+      account_number: `${1000000 + i * 111111}`,
+    })),
+    searchKeys: ["bank", "account_name"],
+    actions: ["view", "edit", "delete"],
+  },
+  // Revenue
+  "add-revenue-stream": {
+    title: "Add Revenue Stream",
+    description: "Register a new revenue stream",
+    type: "form",
+    submitLabel: "Add Stream",
+    fields: [
+      { name: "name", label: "Revenue Stream Name", type: "text", placeholder: "e.g. Sadaka ya Ibada", required: true },
+    ],
+  },
+  "revenue-streams": {
+    title: "Revenue Streams",
+    description: "All revenue streams",
+    type: "table",
+    columns: [
+      { key: "name", label: "Stream Name" },
+      { key: "total", label: "Total Collected" },
+    ],
+    data: genData(5, i => ({
+      name: revenueStreamOptions[i].label,
+      total: `TZS ${(i + 1) * 250},000`,
+    })),
+    searchKeys: ["name"],
+    actions: ["view", "edit"],
+  },
+  "record-revenue": {
+    title: "Record Revenue",
+    description: "Record revenue collection",
+    type: "form",
+    submitLabel: "Record Revenue",
+    fields: [
+      { name: "stream", label: "Revenue Stream", type: "select", required: true, options: revenueStreamOptions },
+      { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
+      { name: "date", label: "Date", type: "date", required: true },
+    ],
+  },
+  // Expenses
+  "create-expense-groups": {
+    title: "Create Expense Groups",
+    description: "Define expense group categories",
+    type: "form",
+    submitLabel: "Create Group",
+    fields: [
+      { name: "name", label: "Group Name", type: "text", placeholder: "e.g. Office & Admin", required: true },
+    ],
+  },
+  "record-expense-names": {
+    title: "Record Expense Names",
+    description: "Register expense names under groups",
+    type: "form",
+    submitLabel: "Record Expense",
+    fields: [
+      { name: "group", label: "Expense Group", type: "select", required: true, options: expenseGroupOptions },
+      { name: "name", label: "Expense Name", type: "text", placeholder: "e.g. Office supplies", required: true },
+    ],
+  },
+  "set-expense-budget": {
+    title: "Set Expense Budget",
+    description: "Set budget for expense groups",
+    type: "form",
+    submitLabel: "Set Budget",
+    fields: [
+      { name: "group", label: "Expense Group", type: "select", required: true, options: expenseGroupOptions },
+      { name: "amount", label: "Budget (TZS)", type: "number", placeholder: "Enter budget", required: true },
+    ],
+  },
+  "expense-requests": {
+    title: "Expense Requests",
+    description: "All expense requests",
+    type: "table",
+    columns: [
+      { key: "description", label: "Description" },
+      { key: "amount", label: "Amount" },
+      { key: "status", label: "Status", type: "badge", badgeColors: statusBadge },
+      { key: "date", label: "Date" },
+    ],
+    data: genData(8, i => ({
+      description: ["Office supplies", "Travel", "Utilities", "Maintenance"][i % 4],
+      amount: `TZS ${(i + 1) * 50},000`,
+      status: ["Pending", "Approved", "Rejected", "Approved"][i % 4],
+      date: `2025-${String(1 + (i % 6)).padStart(2, "0")}-${String(5 + i).padStart(2, "0")}`,
+    })),
+    searchKeys: ["description"],
+    actions: ["view", "edit"],
+  },
+  // Harambee
+  "record-harambee": {
+    title: "Record Harambee",
+    description: "Register a new harambee",
+    type: "form",
+    submitLabel: "Record Harambee",
+    fields: [
+      { name: "name", label: "Harambee Name", type: "text", placeholder: "e.g. Church Building", required: true },
+      { name: "target", label: "Target (TZS)", type: "number", placeholder: "Target amount", required: true },
+      { name: "start_date", label: "Start Date", type: "date", required: true },
+      { name: "end_date", label: "End Date", type: "date", required: true },
+    ],
+  },
+  "harambee": {
+    title: "Harambee Details",
+    description: "All registered harambee programs",
+    type: "table",
+    columns: [
+      { key: "name", label: "Harambee" },
+      { key: "target", label: "Target" },
+      { key: "collected", label: "Collected" },
+      { key: "progress", label: "Progress", type: "progress" },
+    ],
+    data: genData(3, i => ({
+      name: ["Church Building", "Youth Center", "Road Repair"][i],
+      target: `TZS ${[5, 3, 2][i]}M`,
+      collected: `TZS ${[3, 2, 1][i]}M`,
+      progress: [60, 67, 50][i],
+    })),
+    searchKeys: ["name"],
+    actions: ["view", "edit"],
+  },
+  "record-harambee-target": {
+    title: "Set Member Harambee Target",
+    description: "Set harambee target for a member",
+    type: "form",
+    submitLabel: "Set Target",
+    statusPreview: harambeeStatusPreview,
+    fields: [
+      { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
+      { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
+      { name: "amount", label: "Target (TZS)", type: "number", placeholder: "Enter amount", required: true },
+    ],
+  },
+  "record-harambee-contribution": {
+    title: "Record Harambee Contribution",
+    description: "Record a member's harambee contribution",
+    type: "form",
+    submitLabel: "Record Contribution",
+    statusPreview: harambeeStatusPreview,
+    fields: [
+      { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
+      { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
+      { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
+      { name: "date", label: "Date", type: "date", required: true },
+    ],
+  },
+  "harambee-contribution": {
+    title: "Harambee Contributions",
+    description: "All harambee contributions",
+    type: "table",
+    columns: [
+      { key: "member", label: "Member" },
+      { key: "amount", label: "Amount" },
+      { key: "date", label: "Date" },
+    ],
+    data: genData(15, i => ({
+      member: memberOptions[i % 10].label,
+      amount: `TZS ${(i + 1) * 30},000`,
+      date: `2025-${String(1 + (i % 6)).padStart(2, "0")}-${String(5 + i).padStart(2, "0")}`,
+    })),
+    searchKeys: ["member"],
+    actions: ["view"],
+  },
+  "group-harambee-report": {
+    title: "Group Harambee Report",
+    description: "Harambee report for this group",
+    type: "table",
+    columns: [
+      { key: "harambee", label: "Harambee" },
+      { key: "target", label: "Target" },
+      { key: "collected", label: "Collected" },
+      { key: "progress", label: "Progress", type: "progress" },
+    ],
+    data: genData(3, i => ({
+      harambee: ["Church Building", "Youth Center", "Road Repair"][i],
+      target: `TZS ${[5, 3, 2][i]}M`,
+      collected: `TZS ${[3, 2, 1][i]}M`,
+      progress: [60, 67, 50][i],
+    })),
+    searchKeys: ["harambee"],
+    actions: ["view"],
+  },
+  // Envelope
+  "set-envelope-target": {
+    title: "Set Envelope Target",
+    description: "Set envelope target for a member",
+    type: "form",
+    submitLabel: "Set Target",
+    statusPreview: envelopeStatusPreview,
+    fields: [
+      { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
+      { name: "amount", label: "Target (TZS)", type: "number", placeholder: "Enter target", required: true },
+    ],
+  },
+  "record-envelope-contribution": {
+    title: "Record Envelope Contribution",
+    description: "Record a member's envelope contribution",
+    type: "form",
+    submitLabel: "Record Contribution",
+    statusPreview: envelopeStatusPreview,
+    fields: [
+      { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },
+      { name: "amount", label: "Amount (TZS)", type: "number", placeholder: "Enter amount", required: true },
+      { name: "date", label: "Date", type: "date", required: true },
+    ],
+  },
+  "manage-envelopes": {
+    title: "Manage Envelopes",
+    description: "View and manage member envelopes",
+    type: "table",
+    columns: [
+      { key: "member", label: "Member" },
+      { key: "envelope", label: "Envelope No." },
+      { key: "target", label: "Target" },
+      { key: "paid", label: "Paid" },
+      { key: "progress", label: "Progress", type: "progress" },
+    ],
+    data: genData(15, i => ({
+      member: memberOptions[i % 10].label,
+      envelope: `Y${String(i + 1).padStart(2, "0")}`,
+      target: `TZS ${(i + 1) * 10},000`,
+      paid: `TZS ${Math.floor((i + 1) * 10 * 0.6)},000`,
+      progress: 40 + (i * 5) % 60,
+    })),
+    searchKeys: ["member", "envelope"],
+    actions: ["view", "edit"],
+  },
+  // Payment Wallets
+  "register-payment-gateway-wallet": {
+    title: "Register Wallet",
+    description: "Add a new payment gateway wallet",
+    type: "form",
+    submitLabel: "Register Wallet",
+    fields: [
+      { name: "provider", label: "Provider", type: "text", placeholder: "e.g. M-Pesa", required: true },
+      { name: "wallet_number", label: "Wallet Number", type: "text", placeholder: "Wallet number", required: true },
+      { name: "name", label: "Account Name", type: "text", placeholder: "Account name", required: true },
+    ],
+  },
+  "payment-gateway-wallets": {
+    title: "Payment Wallets",
+    description: "Manage payment gateway wallets",
+    type: "table",
+    columns: [
+      { key: "provider", label: "Provider" },
+      { key: "number", label: "Wallet Number" },
+      { key: "name", label: "Account Name" },
+    ],
+    data: genData(3, i => ({
+      provider: ["M-Pesa", "Tigo Pesa", "Airtel Money"][i],
+      number: `255${712345678 + i}`,
+      name: ["Group Main", "Harambee", "Operations"][i],
+    })),
+    searchKeys: ["provider", "name"],
+    actions: ["view", "edit", "delete"],
+  },
+};

@@ -59,6 +59,7 @@ all_routers = [
     data_router,                # /data/... (reference data & lookups)
     records_router,             # /records/... (legacy-compatible record operations)
     notifications_router,       # /notifications/...
+    bible_router,               # /bible/... (scripture reference data)
 
     # Mobile app
     church_member_router,       # /church-member/...

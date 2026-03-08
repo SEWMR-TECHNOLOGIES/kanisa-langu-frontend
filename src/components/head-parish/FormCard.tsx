@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import ModernSelect from "./ModernSelect";
 import ModernDatePicker from "./ModernDatePicker";
 import ModernFileUpload from "./ModernFileUpload";
 import NumberInput from "./NumberInput";
+import MemberStatusPreview, { type StatusItem } from "./MemberStatusPreview";
 
 interface FormField {
   name: string;
@@ -17,6 +18,13 @@ interface FormField {
   accept?: string;
 }
 
+export interface StatusPreviewConfig {
+  /** Which field names must all have values to trigger preview */
+  watchFields: string[];
+  /** Function that returns status items based on current form values */
+  getStatus: (values: Record<string, string>) => StatusItem[];
+}
+
 interface FormCardProps {
   title: string;
   description?: string;
@@ -24,11 +32,12 @@ interface FormCardProps {
   submitLabel?: string;
   onSubmit?: (data: Record<string, string>) => void;
   infoBox?: string;
+  statusPreview?: StatusPreviewConfig;
 }
 
 export type { FormField };
 
-export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit, infoBox }: FormCardProps) {
+export default function FormCard({ title, description, fields, submitLabel = "Submit", onSubmit, infoBox, statusPreview }: FormCardProps) {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

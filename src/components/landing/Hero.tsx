@@ -7,10 +7,10 @@ import sdaIcon from "../../assets/sda-icon.png";
 import pentecostalIcon from "../../assets/pentecostal-icon.png";
 
 const denominations = [
-  { slug: "elct", name: "ELCT", icon: elctIcon, color: "border-blue-500/20 hover:border-blue-400/40" },
-  { slug: "roman-catholic", name: "Roman Catholic", icon: rcIcon, color: "border-red-500/20 hover:border-red-400/40" },
-  { slug: "sda", name: "SDA", icon: sdaIcon, color: "border-teal-500/20 hover:border-teal-400/40" },
-  { slug: "pentecostal", name: "Pentecostal", icon: pentecostalIcon, color: "border-orange-500/20 hover:border-orange-400/40" },
+  { slug: "elct", name: "ELCT", icon: elctIcon, color: "border-blue-500/20 hover:border-blue-500/40 bg-blue-500/[0.04]" },
+  { slug: "roman-catholic", name: "Roman Catholic", icon: rcIcon, color: "border-red-500/20 hover:border-red-500/40 bg-red-500/[0.04]" },
+  { slug: "sda", name: "SDA", icon: sdaIcon, color: "border-teal-500/20 hover:border-teal-500/40 bg-teal-500/[0.04]" },
+  { slug: "pentecostal", name: "Pentecostal", icon: pentecostalIcon, color: "border-orange-500/20 hover:border-orange-500/40 bg-orange-500/[0.04]" },
 ];
 
 const stats = [
@@ -25,19 +25,19 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center bg-[hsl(220,30%,6%)] overflow-hidden">
-      {/* Subtle grid */}
+    <section className="relative min-h-screen flex items-center bg-background overflow-hidden">
+      {/* Subtle dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.025]"
+        className="absolute inset-0 opacity-[0.4]"
         style={{
-          backgroundImage: `linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)`,
-          backgroundSize: "72px 72px",
+          backgroundImage: `radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)`,
+          backgroundSize: "32px 32px",
         }}
       />
 
-      {/* Ambient glow */}
-      <div className="absolute -top-40 right-1/4 w-[500px] h-[500px] rounded-full bg-secondary/[0.06] blur-[160px]" />
-      <div className="absolute bottom-0 -left-32 w-[400px] h-[400px] rounded-full bg-primary/[0.12] blur-[120px]" />
+      {/* Ambient glows */}
+      <div className="absolute -top-40 right-1/4 w-[600px] h-[600px] rounded-full bg-secondary/[0.08] blur-[200px]" />
+      <div className="absolute bottom-0 -left-32 w-[400px] h-[400px] rounded-full bg-primary/[0.06] blur-[160px]" />
 
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pt-32 pb-24">
         <div className="grid lg:grid-cols-[1fr,340px] gap-16 items-start">
@@ -48,7 +48,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-[2.75rem] sm:text-6xl lg:text-7xl font-bold text-white font-display leading-[1.05] tracking-tight max-w-4xl"
+              className="text-[2.75rem] sm:text-6xl lg:text-7xl font-bold text-foreground font-display leading-[1.05] tracking-tight max-w-4xl"
             >
               All you need to manage
               <br />
@@ -60,7 +60,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
-              className="mt-6 text-base sm:text-lg text-white/35 leading-relaxed max-w-lg"
+              className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg"
             >
               Finances, members, and communications for ELCT, Roman Catholic, SDA, and Pentecostal churches. All in one place.
             </motion.p>
@@ -74,13 +74,13 @@ export default function Hero() {
             >
               <button
                 onClick={() => scrollTo("#churches")}
-                className="px-7 py-3.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300"
+                className="px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/20"
               >
                 Get Started
               </button>
               <button
                 onClick={() => scrollTo("#features")}
-                className="px-7 py-3.5 text-white/50 border border-white/[0.08] rounded-xl font-medium text-sm hover:text-white hover:border-white/20 transition-all duration-300"
+                className="px-7 py-3.5 text-foreground border border-border rounded-xl font-medium text-sm hover:bg-muted transition-all duration-300"
               >
                 Learn More
               </button>
@@ -102,14 +102,14 @@ export default function Hero() {
                 >
                   <Link
                     to={`/churches/${d.slug}`}
-                    className={`group flex items-center gap-3 p-4 rounded-2xl bg-white/[0.03] border ${d.color} transition-all duration-300 hover:bg-white/[0.05]`}
+                    className={`group flex items-center gap-3 p-4 rounded-2xl border ${d.color} transition-all duration-300 hover:shadow-md`}
                   >
                     <img src={d.icon} alt={d.name} className="w-10 h-10 rounded-xl object-contain" />
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm font-bold text-white/80 block truncate">{d.name}</span>
-                      <span className="text-[10px] text-white/25 uppercase tracking-wider">Explore</span>
+                      <span className="text-sm font-bold text-foreground block truncate">{d.name}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Explore</span>
                     </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
                   </Link>
                 </motion.div>
               ))}
@@ -129,22 +129,21 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + i * 0.12 }}
-                className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm"
+                className="p-6 rounded-2xl bg-card border border-border shadow-sm"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
                     <stat.icon className="w-5 h-5 text-secondary" />
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-white font-display">{stat.value}</div>
-                    <div className="text-xs text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    <div className="text-3xl font-bold text-foreground font-display">{stat.value}</div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </motion.div>
         </div>
-
       </div>
     </section>
   );

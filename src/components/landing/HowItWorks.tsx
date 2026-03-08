@@ -1,71 +1,60 @@
 import { motion } from "framer-motion";
-import { Download, UserPlus, Sparkles } from "lucide-react";
 
 const steps = [
   {
-    icon: Download,
-    step: "01",
-    title: "Download the App",
-    description: "Get Kanisa Langu on your Android or iOS device completely free from the app stores.",
+    num: "01",
+    title: "Download",
+    description: "Get Kanisa Langu free on Android or iOS from the app stores.",
   },
   {
-    icon: UserPlus,
-    step: "02",
-    title: "Create an Account",
-    description: "Set up your parish profile, invite your team, and configure your church structure.",
+    num: "02",
+    title: "Set up your church",
+    description: "Configure your church structure, invite team members, and set permissions.",
   },
   {
-    icon: Sparkles,
-    step: "03",
-    title: "Start Managing",
-    description: "Track finances, manage members, send notifications, and generate reports effortlessly.",
+    num: "03",
+    title: "Start managing",
+    description: "Track finances, engage members, and generate reports from day one.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-28">
+    <section id="how-it-works" className="py-28 bg-muted/50">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="max-w-2xl mb-16"
         >
-          <span className="text-sm font-semibold text-secondary uppercase tracking-widest">
-            Simple Process
+          <span className="text-sm font-bold text-secondary uppercase tracking-widest">
+            Get started
           </span>
-          <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-            Get Started in{" "}
-            <span className="font-serif italic text-gradient-gold">Minutes</span>
+          <h2 className="mt-4 text-4xl sm:text-5xl font-bold text-foreground font-display tracking-tight">
+            Up and running in minutes
           </h2>
-          <p className="mt-5 text-lg text-muted-foreground">
-            Three simple steps to transform how your church operates.
-          </p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
             <motion.div
-              key={step.step}
+              key={step.num}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
-              className="relative text-center"
+              className="relative"
             >
               {/* Connector line */}
               {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-px border-t-2 border-dashed border-border" />
+                <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px border-t-2 border-dashed border-border" />
               )}
-              <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-accent mb-6">
-                <step.icon className="w-10 h-10 text-primary" />
-                <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-secondary text-secondary-foreground text-xs font-extrabold flex items-center justify-center shadow-lg">
-                  {step.step}
-                </span>
+              <div className="relative">
+                <span className="text-7xl font-bold text-secondary/15 font-display">{step.num}</span>
+                <h3 className="text-xl font-bold text-foreground font-display -mt-4">{step.title}</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">{step.description}</p>
             </motion.div>
           ))}
         </div>

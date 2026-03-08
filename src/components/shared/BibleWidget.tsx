@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import bibleIcon from "@/assets/bible-icon.png";
 
 const DAILY_VERSES = [
   { ref: "Zaburi 23:1", sw: "Bwana ndiye mchungaji wangu; sitapungukiwa na kitu.", en: "The LORD is my shepherd; I shall not want." },
@@ -76,13 +77,7 @@ export default function BibleWidget({ className = "" }: BibleWidgetProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Book icon styled like a real bible */}
-            <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[hsl(25,50%,30%)] to-[hsl(20,45%,20%)] shadow-[0_2px_8px_rgba(0,0,0,0.3)]" />
-              <div className="absolute left-[3px] top-[2px] bottom-[2px] w-[2px] rounded-full bg-[hsl(38,60%,50%)] opacity-60" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[hsl(38,70%,65%)] text-[11px] font-bold tracking-tight">✝</span>
-              </div>
-            </div>
+            <img src={bibleIcon} alt="Bible" className="w-10 h-10" />
             <div>
               <h3 className="text-sm font-bold text-[hsl(38,50%,80%)] tracking-wide">Biblia Takatifu</h3>
               <p className="text-[10px] text-[hsl(30,20%,50%)] font-medium">Neno la Leo · Daily Verse</p>

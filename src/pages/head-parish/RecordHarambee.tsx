@@ -1,27 +1,79 @@
-import FormCard from "../../components/head-parish/FormCard";
+import TabbedFormCard from "../../components/head-parish/TabbedFormCard";
+import { mockSubParishes, mockBankAccounts } from "../../data/headParishMockData";
+
+const bankOptions = mockBankAccounts.map(a => ({ value: String(a.id), label: `${a.account_name} - ${a.bank_name}` }));
+const subParishOptions = mockSubParishes.map(s => ({ value: String(s.id), label: s.name || "" }));
+const communityOptions = [
+  { value: "1", label: "Mwika" }, { value: "2", label: "Marangu" },
+  { value: "3", label: "Machame" }, { value: "4", label: "Kibosho" },
+];
+const groupOptions = [
+  { value: "1", label: "Vijana" }, { value: "2", label: "Wazee" },
+  { value: "3", label: "Wanawake" }, { value: "4", label: "Kwaya Kuu" },
+];
 
 export default function RecordHarambee() {
   return (
-    <FormCard
-      title="Record New Harambee"
-      description="Create a new harambee program"
-      submitLabel="Record Harambee"
-      fields={[
-        { name: "description", label: "Harambee Description", type: "text", placeholder: "e.g., Church Building Fund", required: true },
-        { name: "target_level", label: "Target Level", type: "select", required: true, options: [
-          { value: "head-parish", label: "Head Parish" },
-          { value: "sub-parish", label: "Sub Parish" },
-          { value: "community", label: "Community" },
-          { value: "group", label: "Group" },
-        ]},
-        { name: "amount", label: "Target Amount (TZS)", type: "number", placeholder: "Enter target amount", required: true },
-        { name: "account_id", label: "Bank Account", type: "select", required: true, options: [
-          { value: "1", label: "Main Account - CRDB" },
-          { value: "2", label: "Building Fund - NMB" },
-          { value: "3", label: "Harambee Account - NBC" },
-        ]},
-        { name: "from_date", label: "Start Date", type: "date", required: true },
-        { name: "to_date", label: "End Date", type: "date", required: true },
+    <TabbedFormCard
+      title="Add New Harambee"
+      description="Create a new harambee fundraiser at different levels"
+      tabs={[
+        {
+          id: "head-parish",
+          label: "Head Parish",
+          submitLabel: "Submit Harambee",
+          fields: [
+            { name: "name", label: "Name", type: "text", placeholder: "Enter harambee name", required: true },
+            { name: "description", label: "Description", type: "textarea", placeholder: "Enter description..." },
+            { name: "account_id", label: "Bank Account", type: "select", required: true, options: bankOptions },
+            { name: "amount", label: "Amount", type: "number", placeholder: "Amount" },
+            { name: "from_date", label: "From Date", type: "date", required: true },
+            { name: "to_date", label: "To Date", type: "date", required: true },
+          ],
+        },
+        {
+          id: "sub-parish",
+          label: "Sub Parish",
+          submitLabel: "Submit Harambee",
+          fields: [
+            { name: "name", label: "Name", type: "text", placeholder: "Enter harambee name", required: true },
+            { name: "description", label: "Description", type: "textarea", placeholder: "Enter description..." },
+            { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: subParishOptions },
+            { name: "account_id", label: "Bank Account", type: "select", required: true, options: bankOptions },
+            { name: "amount", label: "Amount", type: "number", placeholder: "Amount" },
+            { name: "from_date", label: "From Date", type: "date", required: true },
+            { name: "to_date", label: "To Date", type: "date", required: true },
+          ],
+        },
+        {
+          id: "community",
+          label: "Community",
+          submitLabel: "Submit Harambee",
+          fields: [
+            { name: "name", label: "Name", type: "text", placeholder: "Enter harambee name", required: true },
+            { name: "description", label: "Description", type: "textarea", placeholder: "Enter description..." },
+            { name: "sub_parish_id", label: "Sub Parish", type: "select", required: true, options: subParishOptions },
+            { name: "community_id", label: "Community", type: "select", required: true, options: communityOptions },
+            { name: "account_id", label: "Bank Account", type: "select", required: true, options: bankOptions },
+            { name: "amount", label: "Amount", type: "number", placeholder: "Amount" },
+            { name: "from_date", label: "From Date", type: "date", required: true },
+            { name: "to_date", label: "To Date", type: "date", required: true },
+          ],
+        },
+        {
+          id: "group",
+          label: "Group",
+          submitLabel: "Submit Harambee",
+          fields: [
+            { name: "name", label: "Name", type: "text", placeholder: "Enter harambee name", required: true },
+            { name: "description", label: "Description", type: "textarea", placeholder: "Enter description..." },
+            { name: "group_id", label: "Group", type: "select", required: true, options: groupOptions },
+            { name: "account_id", label: "Bank Account", type: "select", required: true, options: bankOptions },
+            { name: "amount", label: "Amount", type: "number", placeholder: "Amount" },
+            { name: "from_date", label: "From Date", type: "date", required: true },
+            { name: "to_date", label: "To Date", type: "date", required: true },
+          ],
+        },
       ]}
     />
   );

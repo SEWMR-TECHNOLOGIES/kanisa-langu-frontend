@@ -55,6 +55,11 @@ export default function FormCard({ title, description, fields, submitLabel = "Su
         transition={{ duration: 0.3 }}
         className="admin-card rounded-2xl p-6 lg:p-8"
       >
+        {infoBox && (
+          <div className="mb-6 p-4 rounded-xl bg-admin-info/5 border border-admin-info/20">
+            <p className="text-sm text-admin-info" dangerouslySetInnerHTML={{ __html: infoBox }} />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             {fields.map((field) => (

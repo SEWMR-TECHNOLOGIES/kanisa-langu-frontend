@@ -314,6 +314,10 @@ export default function App() {
           <Route path="manage-occupations" element={<SAManageOccupations />} />
           <Route path="register-praise-song" element={<SARegisterPraiseSong />} />
           <Route path="manage-praise-songs" element={<SAManagePraiseSongs />} />
+          <Route path="manage-payments" element={<SAManagePayments />} />
+          <Route path="payment-reports" element={<SAPaymentReports />} />
+          <Route path="sales-report" element={<SASalesReport />} />
+          <Route path="sms-usage-report" element={<SASMSUsageReport />} />
           <Route path="profile" element={<SAProfile />} />
         </Route>
       </Routes>

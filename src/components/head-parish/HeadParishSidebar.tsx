@@ -5,8 +5,9 @@ import {
   LayoutDashboard, Building2, Users, Shield, UserCheck, Music, BookOpen,
   CalendarDays, CalendarPlus, Bell, CreditCard, Coins, Receipt, Wallet,
   Flag, Mail, BarChart3, Settings, LogOut, ChevronDown,
-  X, Ban, Building, TrendingUp, Package, FileText
+  X, Ban, TrendingUp, Package, FileText
 } from "lucide-react";
+import logo from "../../assets/kanisa-logo.png";
 
 const BASE = "/elct/head-parish";
 

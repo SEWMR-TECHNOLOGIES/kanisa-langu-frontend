@@ -291,3 +291,417 @@ def list_member_exclusion_reasons(head_parish_id: int, db: Session = Depends(get
 def list_harambee_exclusion_reasons(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.execute(text("SELECT id, reason FROM harambee_exclusion_reasons WHERE head_parish_id = :hpid"), {"hpid": head_parish_id}).mappings().all()
     return success_response(data=[dict(r) for r in rows])
+
+
+# ── SMS API Config ────────────────────────────────────────────
+@router.get("/sms-api-config")
+def get_sms_api_config(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.config import SmsApiConfig
+    cfg = db.query(SmsApiConfig).filter(SmsApiConfig.head_parish_id == head_parish_id).first()
+    if not cfg:
+        return success_response(data=None)
+    return success_response(data={
+        "id": cfg.id, "account_name": cfg.account_name,
+        "api_username": cfg.api_username, "sender_id": cfg.sender_id,
+    })
+
+
+# ── Payment Gateway Wallets ──────────────────────────────────
+@router.get("/payment-wallets")
+def list_payment_wallets(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.payments import PaymentGatewayWallet
+    rows = db.query(PaymentGatewayWallet).filter(
+        PaymentGatewayWallet.head_parish_id == head_parish_id,
+        PaymentGatewayWallet.is_active == True,
+    ).all()
+    return success_response(data=[{
+        "id": w.id, "wallet_name": w.wallet_name, "wallet_number": w.wallet_number,
+        "provider": w.provider, "is_active": w.is_active,
+    } for w in rows])
+
+
+# ── Church Events ─────────────────────────────────────────────
+@router.get("/church-events")
+def list_church_events(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.operations import ChurchEvent
+    rows = db.query(ChurchEvent).filter(
+        ChurchEvent.head_parish_id == head_parish_id
+    ).order_by(ChurchEvent.event_date.desc()).limit(100).all()
+    return success_response(data=[{
+        "id": e.id, "title": e.title, "description": e.description,
+        "event_date": str(e.event_date), "event_time": str(e.event_time) if e.event_time else None,
+        "location": e.location,
+    } for e in rows])
+
+
+# ── Bank Postings & Closing Balances ─────────────────────────
+@router.get("/bank-postings")
+def list_bank_postings(account_id: int, db: Session = Depends(get_db)):
+    rows = db.query(BankPosting).filter(
+        BankPosting.account_id == account_id
+    ).order_by(BankPosting.posted_at.desc()).limit(200).all()
+    return success_response(data=[{
+        "id": p.id, "amount": float(p.amount), "posting_type": p.posting_type,
+        "reference_type": p.reference_type, "description": p.description,
+        "posted_at": str(p.posted_at),
+    } for p in rows])
+
+@router.get("/bank-closing-balances")
+def list_closing_balances(account_id: int, db: Session = Depends(get_db)):
+    rows = db.query(BankClosingBalance).filter(
+        BankClosingBalance.account_id == account_id
+    ).order_by(BankClosingBalance.balance_date.desc()).limit(50).all()
+    return success_response(data=[{
+        "id": b.id, "closing_balance": float(b.closing_balance),
+        "balance_date": str(b.balance_date),
+    } for b in rows])
+
+
+# ── Harambee Distributions ────────────────────────────────────
+@router.get("/harambee-distributions")
+def list_harambee_distributions(harambee_id: int, db: Session = Depends(get_db)):
+    from models.harambee import HarambeeDistribution
+    rows = db.query(HarambeeDistribution).filter(
+        HarambeeDistribution.harambee_id == harambee_id
+    ).order_by(HarambeeDistribution.distribution_date.desc()).all()
+    return success_response(data=[{
+        "id": d.id, "member_id": d.member_id, "amount": float(d.amount),
+        "distribution_date": str(d.distribution_date),
+    } for d in rows])
+
+
+# ── Harambee Expenses ─────────────────────────────────────────
+@router.get("/harambee-expenses")
+def list_harambee_expenses(harambee_id: int, db: Session = Depends(get_db)):
+    from models.harambee import HarambeeExpense
+    rows = db.query(HarambeeExpense).filter(
+        HarambeeExpense.harambee_id == harambee_id
+    ).order_by(HarambeeExpense.expense_date.desc()).all()
+    return success_response(data=[{
+        "id": e.id, "expense_name_id": e.expense_name_id,
+        "amount": float(e.amount), "description": e.description,
+        "expense_date": str(e.expense_date),
+    } for e in rows])
+
+
+# ── Harambee Excluded Members ─────────────────────────────────
+@router.get("/harambee-excluded-members")
+def list_harambee_excluded_members(harambee_id: int, db: Session = Depends(get_db)):
+    from models.harambee import HarambeeExclusion
+    rows = db.execute(text("""
+        SELECT he.id, he.member_id, he.reason,
+               cm.first_name, cm.middle_name, cm.last_name, cm.envelope_number
+        FROM harambee_exclusions he
+        JOIN church_members cm ON he.member_id = cm.id
+        WHERE he.harambee_id = :hid
+    """), {"hid": harambee_id}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+
+# ── Harambee Letter Statuses ──────────────────────────────────
+@router.get("/harambee-letter-statuses")
+def list_harambee_letter_statuses(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.harambee import HarambeeLetterStatus
+    rows = db.execute(text("""
+        SELECT hls.member_id, hls.status,
+               cm.first_name, cm.last_name, cm.envelope_number
+        FROM harambee_letter_statuses hls
+        JOIN church_members cm ON hls.member_id = cm.id
+        WHERE hls.head_parish_id = :hpid
+    """), {"hpid": head_parish_id}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+
+# ── Harambee Targets ──────────────────────────────────────────
+@router.get("/harambee-targets")
+def list_harambee_targets(harambee_id: int, db: Session = Depends(get_db)):
+    rows = db.execute(text("""
+        SELECT ht.id, ht.member_id, ht.target, ht.target_type,
+               cm.first_name, cm.last_name, cm.envelope_number,
+               COALESCE(SUM(hc.amount), 0) AS total_contributed
+        FROM harambee_targets ht
+        JOIN church_members cm ON ht.member_id = cm.id
+        LEFT JOIN harambee_contributions hc ON hc.harambee_id = ht.harambee_id AND hc.member_id = ht.member_id
+        WHERE ht.harambee_id = :hid
+        GROUP BY ht.id, cm.first_name, cm.last_name, cm.envelope_number
+        ORDER BY cm.first_name
+    """), {"hid": harambee_id}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+
+# ── Harambee Contributions by member ─────────────────────────
+@router.get("/harambee-contributions")
+def list_harambee_contributions(
+    harambee_id: int,
+    member_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    from models.harambee import HarambeeContribution
+    q = db.query(HarambeeContribution).filter(HarambeeContribution.harambee_id == harambee_id)
+    if member_id:
+        q = q.filter(HarambeeContribution.member_id == member_id)
+    rows = q.order_by(HarambeeContribution.contribution_date.desc()).all()
+    return success_response(data=[{
+        "id": c.id, "member_id": c.member_id, "amount": float(c.amount),
+        "contribution_date": str(c.contribution_date), "payment_method": c.payment_method,
+    } for c in rows])
+
+
+# ── Envelope Contributions ────────────────────────────────────
+@router.get("/envelope-contributions")
+def list_envelope_contributions(
+    head_parish_id: int,
+    member_id: Optional[int] = None,
+    year: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    from models.envelope import EnvelopeContribution
+    q = db.query(EnvelopeContribution).filter(EnvelopeContribution.head_parish_id == head_parish_id)
+    if member_id:
+        q = q.filter(EnvelopeContribution.member_id == member_id)
+    if year:
+        q = q.filter(func.extract("year", EnvelopeContribution.contribution_date) == year)
+    rows = q.order_by(EnvelopeContribution.contribution_date.desc()).limit(500).all()
+    return success_response(data=[{
+        "id": c.id, "member_id": c.member_id, "amount": float(c.amount),
+        "contribution_date": str(c.contribution_date), "payment_method": c.payment_method,
+    } for c in rows])
+
+
+# ── App Version ───────────────────────────────────────────────
+@router.get("/app-version")
+def get_app_version(platform: str = "android", db: Session = Depends(get_db)):
+    from models.misc import AppVersion
+    ver = db.query(AppVersion).filter(
+        AppVersion.platform == platform
+    ).order_by(AppVersion.created_at.desc()).first()
+    if not ver:
+        return success_response(data=None)
+    return success_response(data={
+        "version": ver.version, "force_update": ver.force_update, "platform": ver.platform,
+    })
+
+
+# ── Revenue Group Stream Mapping ──────────────────────────────
+@router.get("/revenue-group-streams")
+def list_revenue_group_streams(revenue_group_id: int, db: Session = Depends(get_db)):
+    from models.config import RevenueGroupStreamMap
+    rows = db.execute(text("""
+        SELECT rgsm.id, rgsm.revenue_stream_id, rs.name AS stream_name
+        FROM revenue_group_stream_map rgsm
+        JOIN revenue_streams rs ON rgsm.revenue_stream_id = rs.id
+        WHERE rgsm.revenue_group_id = :rgid
+    """), {"rgid": revenue_group_id}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+
+# ── Program Revenue Mapping ───────────────────────────────────
+@router.get("/program-revenue-map")
+def list_program_revenue_map(head_parish_id: int, db: Session = Depends(get_db)):
+    rows = db.execute(text("""
+        SELECT prm.id, prm.program_name, prm.revenue_stream_id, rs.name AS stream_name
+        FROM program_revenue_map prm
+        JOIN revenue_streams rs ON prm.revenue_stream_id = rs.id
+        WHERE prm.head_parish_id = :hpid
+    """), {"hpid": head_parish_id}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+
+# ── Expense Requests ──────────────────────────────────────────
+@router.get("/expense-requests")
+def list_expense_requests(
+    head_parish_id: int,
+    status: Optional[str] = None,
+    management_level: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    from models.finance import ExpenseRequest, ExpenseRequestItem
+    q = db.query(ExpenseRequest).filter(ExpenseRequest.head_parish_id == head_parish_id)
+    if status:
+        q = q.filter(ExpenseRequest.status == status)
+    if management_level:
+        q = q.filter(ExpenseRequest.management_level == management_level)
+    requests = q.order_by(ExpenseRequest.created_at.desc()).limit(100).all()
+    result = []
+    for r in requests:
+        items = db.query(ExpenseRequestItem).filter(ExpenseRequestItem.request_id == r.id).all()
+        result.append({
+            "id": r.id, "management_level": r.management_level,
+            "status": r.status, "total_amount": float(r.total_amount),
+            "notes": r.notes, "created_at": str(r.created_at),
+            "items": [{"expense_name_id": i.expense_name_id, "amount": float(i.amount), "description": i.description} for i in items],
+        })
+    return success_response(data=result)
+
+
+# ── Annual Revenue Targets ────────────────────────────────────
+@router.get("/annual-revenue-targets")
+def list_annual_revenue_targets(head_parish_id: int, year: Optional[int] = None, db: Session = Depends(get_db)):
+    from models.finance import AnnualRevenueTarget
+    q = db.query(AnnualRevenueTarget).filter(AnnualRevenueTarget.head_parish_id == head_parish_id)
+    if year:
+        q = q.filter(AnnualRevenueTarget.year == year)
+    rows = q.all()
+    return success_response(data=[{
+        "id": t.id, "revenue_stream_id": t.revenue_stream_id,
+        "year": t.year, "target_amount": float(t.target_amount),
+    } for t in rows])
+
+
+# ── Annual Expense Budgets ────────────────────────────────────
+@router.get("/annual-expense-budgets")
+def list_annual_expense_budgets(head_parish_id: int, year: Optional[int] = None, db: Session = Depends(get_db)):
+    from models.finance import AnnualExpenseBudget
+    q = db.query(AnnualExpenseBudget).filter(AnnualExpenseBudget.head_parish_id == head_parish_id)
+    if year:
+        q = q.filter(AnnualExpenseBudget.year == year)
+    rows = q.all()
+    return success_response(data=[{
+        "id": b.id, "expense_name_id": b.expense_name_id,
+        "year": b.year, "budget_amount": float(b.budget_amount),
+    } for b in rows])
+
+
+# ── Revenues listing ──────────────────────────────────────────
+@router.get("/revenues")
+def list_revenues(
+    head_parish_id: int,
+    management_level: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    is_verified: Optional[bool] = None,
+    db: Session = Depends(get_db),
+):
+    from models.finance import Revenue
+    q = db.query(Revenue).filter(Revenue.head_parish_id == head_parish_id)
+    if management_level:
+        q = q.filter(Revenue.management_level == management_level)
+    if from_date:
+        q = q.filter(Revenue.revenue_date >= from_date)
+    if to_date:
+        q = q.filter(Revenue.revenue_date <= to_date)
+    if is_verified is not None:
+        q = q.filter(Revenue.is_verified == is_verified)
+    rows = q.order_by(Revenue.revenue_date.desc()).limit(500).all()
+    return success_response(data=[{
+        "id": r.id, "management_level": r.management_level,
+        "revenue_stream_id": r.revenue_stream_id, "amount": float(r.amount),
+        "payment_method": r.payment_method, "description": r.description,
+        "revenue_date": str(r.revenue_date), "is_verified": r.is_verified,
+        "is_posted_to_bank": r.is_posted_to_bank, "service_number": r.service_number,
+    } for r in rows])
+
+
+# ── Expenses listing ──────────────────────────────────────────
+@router.get("/expenses")
+def list_expenses(
+    head_parish_id: int,
+    management_level: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    from models.finance import Expense
+    q = db.query(Expense).filter(Expense.head_parish_id == head_parish_id)
+    if management_level:
+        q = q.filter(Expense.management_level == management_level)
+    if from_date:
+        q = q.filter(Expense.expense_date >= from_date)
+    if to_date:
+        q = q.filter(Expense.expense_date <= to_date)
+    rows = q.order_by(Expense.expense_date.desc()).limit(500).all()
+    return success_response(data=[{
+        "id": r.id, "management_level": r.management_level,
+        "expense_name_id": r.expense_name_id, "amount": float(r.amount),
+        "payment_method": r.payment_method, "description": r.description,
+        "expense_date": str(r.expense_date),
+    } for r in rows])
+
+
+# ── Attendance listing ────────────────────────────────────────
+@router.get("/attendance")
+def list_attendance_data(
+    head_parish_id: int,
+    management_level: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    q = db.query(Attendance).filter(Attendance.head_parish_id == head_parish_id)
+    if management_level:
+        q = q.filter(Attendance.management_level == management_level)
+    if from_date:
+        q = q.filter(Attendance.attendance_date >= from_date)
+    if to_date:
+        q = q.filter(Attendance.attendance_date <= to_date)
+    rows = q.order_by(Attendance.attendance_date.desc()).limit(500).all()
+    return success_response(data=[{
+        "id": a.id, "event_title": a.event_title,
+        "male": a.male_attendance, "female": a.female_attendance,
+        "children": a.children_attendance,
+        "total": a.male_attendance + a.female_attendance + a.children_attendance,
+        "date": str(a.attendance_date), "service_number": a.service_number,
+        "management_level": a.management_level,
+    } for a in rows])
+
+
+# ── Sunday Services data ──────────────────────────────────────
+@router.get("/sunday-services")
+def list_sunday_services_data(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.sunday_service import SundayService
+    rows = db.query(SundayService).filter(
+        SundayService.head_parish_id == head_parish_id
+    ).order_by(SundayService.service_date.desc()).limit(52).all()
+    return success_response(data=[{
+        "id": s.id, "service_date": str(s.service_date),
+        "service_color_id": s.service_color_id,
+        "base_scripture_text": s.base_scripture_text,
+    } for s in rows])
+
+
+# ── Service Times ─────────────────────────────────────────────
+@router.get("/service-times")
+def list_service_times(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.sunday_service import HeadParishServiceTime
+    rows = db.query(HeadParishServiceTime).filter(
+        HeadParishServiceTime.head_parish_id == head_parish_id
+    ).order_by(HeadParishServiceTime.service_number).all()
+    return success_response(data=[{
+        "service_number": t.service_number,
+        "start_time": str(t.start_time), "end_time": str(t.end_time) if t.end_time else None,
+    } for t in rows])
+
+
+# ── Services Count ────────────────────────────────────────────
+@router.get("/services-count")
+def get_services_count(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.sunday_service import HeadParishServicesCount
+    row = db.query(HeadParishServicesCount).filter(
+        HeadParishServicesCount.head_parish_id == head_parish_id
+    ).first()
+    return success_response(data={"services_count": row.services_count if row else 0})
+
+
+# ── Assets listing ────────────────────────────────────────────
+@router.get("/assets")
+def list_assets_data(head_parish_id: int, db: Session = Depends(get_db)):
+    from models.operations import Asset
+    rows = db.query(Asset).filter(Asset.head_parish_id == head_parish_id).order_by(Asset.name).all()
+    return success_response(data=[{
+        "id": a.id, "name": a.name, "generates_revenue": a.generates_revenue, "status": a.status,
+    } for a in rows])
+
+
+# ── Feedback listing (for system admin) ───────────────────────
+@router.get("/feedback")
+def list_feedback(head_parish_id: Optional[int] = None, db: Session = Depends(get_db)):
+    from models.misc import Feedback
+    q = db.query(Feedback)
+    if head_parish_id:
+        q = q.filter(Feedback.head_parish_id == head_parish_id)
+    rows = q.order_by(Feedback.submitted_at.desc()).limit(100).all()
+    return success_response(data=[{
+        "id": f.id, "head_parish_id": f.head_parish_id,
+        "feedback_type": f.feedback_type, "subject": f.subject,
+        "message": f.message, "submitted_at": str(f.submitted_at),
+    } for f in rows])

@@ -1163,3 +1163,320 @@ def delete_harambee_group_member(harambee_group_id: int, member_id: int, db: Ses
     ).delete()
     db.commit()
     return success_response("Member removed from group")
+
+
+@router.delete("/church-member/{member_id}")
+def delete_member(member_id: int, db: Session = Depends(get_db)):
+    member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
+    if not member:
+        return error_response("Member not found")
+    member.is_active = False
+    member.status = "Inactive"
+    db.commit()
+    return success_response("Member deactivated")
+
+
+@router.delete("/church-leader/{leader_id}")
+def delete_leader(leader_id: int, db: Session = Depends(get_db)):
+    leader = db.query(ChurchLeader).filter(ChurchLeader.id == leader_id).first()
+    if not leader:
+        return error_response("Leader not found")
+    leader.status = "Inactive"
+    db.commit()
+    return success_response("Leader deactivated")
+
+
+@router.delete("/church-choir/{choir_id}")
+def delete_choir(choir_id: int, db: Session = Depends(get_db)):
+    db.query(ChurchChoir).filter(ChurchChoir.id == choir_id).delete()
+    db.commit()
+    return success_response("Choir deleted")
+
+
+@router.delete("/asset/{asset_id}")
+def delete_asset(asset_id: int, db: Session = Depends(get_db)):
+    asset = db.query(Asset).filter(Asset.id == asset_id).first()
+    if asset:
+        asset.status = "Decommissioned"
+    db.commit()
+    return success_response("Asset decommissioned")
+
+
+@router.delete("/meeting/{meeting_id}")
+def delete_meeting(meeting_id: int, db: Session = Depends(get_db)):
+    db.query(MeetingNotes).filter(MeetingNotes.meeting_id == meeting_id).delete()
+    db.query(MeetingMinutes).filter(MeetingMinutes.meeting_id == meeting_id).delete()
+    db.query(MeetingAgenda).filter(MeetingAgenda.meeting_id == meeting_id).delete()
+    db.query(Meeting).filter(Meeting.id == meeting_id).delete()
+    db.commit()
+    return success_response("Meeting deleted")
+
+
+@router.delete("/revenue/{revenue_id}")
+def delete_revenue(revenue_id: int, db: Session = Depends(get_db)):
+    db.query(Revenue).filter(Revenue.id == revenue_id).delete()
+    db.commit()
+    return success_response("Revenue deleted")
+
+
+@router.delete("/expense/{expense_id}")
+def delete_expense(expense_id: int, db: Session = Depends(get_db)):
+    db.query(Expense).filter(Expense.id == expense_id).delete()
+    db.commit()
+    return success_response("Expense deleted")
+
+
+@router.delete("/bank-account/{account_id}")
+def delete_bank_account(account_id: int, db: Session = Depends(get_db)):
+    account = db.query(BankAccount).filter(BankAccount.id == account_id).first()
+    if account:
+        account.is_active = False
+    db.commit()
+    return success_response("Bank account deactivated")
+
+
+@router.delete("/revenue-stream/{stream_id}")
+def delete_revenue_stream(stream_id: int, db: Session = Depends(get_db)):
+    stream = db.query(RevenueStream).filter(RevenueStream.id == stream_id).first()
+    if stream:
+        stream.is_active = False
+    db.commit()
+    return success_response("Revenue stream deactivated")
+
+
+@router.delete("/expense-group/{group_id}")
+def delete_expense_group(group_id: int, db: Session = Depends(get_db)):
+    db.query(ExpenseName).filter(ExpenseName.expense_group_id == group_id).delete()
+    db.query(ExpenseGroup).filter(ExpenseGroup.id == group_id).delete()
+    db.commit()
+    return success_response("Expense group deleted")
+
+
+@router.delete("/expense-name/{name_id}")
+def delete_expense_name(name_id: int, db: Session = Depends(get_db)):
+    db.query(ExpenseName).filter(ExpenseName.id == name_id).delete()
+    db.commit()
+    return success_response("Expense name deleted")
+
+
+@router.delete("/payment-wallet/{wallet_id}")
+def delete_payment_wallet(wallet_id: int, db: Session = Depends(get_db)):
+    wallet = db.query(PaymentGatewayWallet).filter(PaymentGatewayWallet.id == wallet_id).first()
+    if wallet:
+        wallet.is_active = False
+    db.commit()
+    return success_response("Wallet deactivated")
+
+
+@router.delete("/church-event/{event_id}")
+def delete_church_event(event_id: int, db: Session = Depends(get_db)):
+    db.query(ChurchEvent).filter(ChurchEvent.id == event_id).delete()
+    db.commit()
+    return success_response("Event deleted")
+
+
+# ═══════════════════════════════════════════════════════════════
+# UPDATE OPERATIONS
+# ═══════════════════════════════════════════════════════════════
+
+class UpdateMemberRequest(BaseModel):
+    title_id: Optional[int] = None
+    first_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    last_name: Optional[str] = None
+    occupation_id: Optional[int] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    status: Optional[str] = None
+
+@router.put("/update-member/{member_id}")
+def update_member(member_id: int, body: UpdateMemberRequest, db: Session = Depends(get_db)):
+    member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
+    if not member:
+        return error_response("Member not found")
+    for field, value in body.dict(exclude_unset=True).items():
+        setattr(member, field, value)
+    db.commit()
+    return success_response("Member updated")
+
+
+class UpdateLeaderRequest(BaseModel):
+    status: Optional[str] = None
+    end_date: Optional[date_type] = None
+    role_id: Optional[int] = None
+
+@router.put("/update-leader/{leader_id}")
+def update_leader(leader_id: int, body: UpdateLeaderRequest, db: Session = Depends(get_db)):
+    leader = db.query(ChurchLeader).filter(ChurchLeader.id == leader_id).first()
+    if not leader:
+        return error_response("Leader not found")
+    for field, value in body.dict(exclude_unset=True).items():
+        setattr(leader, field, value)
+    db.commit()
+    return success_response("Leader updated")
+
+
+class UpdateHarambeeRequest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    to_date: Optional[date_type] = None
+    amount: Optional[float] = None
+
+@router.put("/update-harambee/{harambee_id}")
+def update_harambee(harambee_id: int, body: UpdateHarambeeRequest, db: Session = Depends(get_db)):
+    h = db.query(Harambee).filter(Harambee.id == harambee_id).first()
+    if not h:
+        return error_response("Harambee not found")
+    for field, value in body.dict(exclude_unset=True).items():
+        setattr(h, field, value)
+    db.commit()
+    return success_response("Harambee updated")
+
+
+# ═══════════════════════════════════════════════════════════════
+# VERIFY REVENUE
+# Replaces: verify_revenue.php
+# ═══════════════════════════════════════════════════════════════
+
+class VerifyRevenueRequest(BaseModel):
+    revenue_ids: List[int]
+    is_verified: bool = True
+
+@router.post("/verify-revenues")
+def verify_revenues(body: VerifyRevenueRequest, db: Session = Depends(get_db)):
+    db.query(Revenue).filter(Revenue.id.in_(body.revenue_ids)).update(
+        {Revenue.is_verified: body.is_verified}, synchronize_session="fetch"
+    )
+    db.commit()
+    return success_response(f"{'Verified' if body.is_verified else 'Unverified'} {len(body.revenue_ids)} revenue(s)")
+
+
+# ═══════════════════════════════════════════════════════════════
+# UPLOAD / CSV IMPORT
+# Replaces: upload_church_members.php, upload_envelope_data.php, upload_harambee_targets.php
+# ═══════════════════════════════════════════════════════════════
+
+@router.post("/upload-members")
+async def upload_members(
+    head_parish_id: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    import csv, io
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+    added = 0
+    errors = []
+    for i, row in enumerate(reader, start=2):
+        try:
+            phone = normalize_phone(row.get("phone", "").strip()) if row.get("phone") else None
+            m = ChurchMember(
+                first_name=row["first_name"].strip().capitalize(),
+                middle_name=row.get("middle_name", "").strip().capitalize() or None,
+                last_name=row["last_name"].strip().capitalize(),
+                date_of_birth=row["date_of_birth"],
+                gender=row["gender"].strip(),
+                member_type=row.get("member_type", "Mwenyeji").strip(),
+                head_parish_id=head_parish_id,
+                sub_parish_id=int(row["sub_parish_id"]),
+                community_id=int(row["community_id"]),
+                envelope_number=row.get("envelope_number", "").strip() or None,
+                phone=phone,
+                email=row.get("email", "").strip() or None,
+            )
+            db.add(m)
+            added += 1
+        except Exception as e:
+            errors.append(f"Row {i}: {str(e)}")
+    db.commit()
+    return success_response(f"Uploaded {added} members", {"errors": errors[:20]})
+
+
+@router.post("/upload-envelope-data")
+async def upload_envelope_data(
+    head_parish_id: int = Form(...),
+    year: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    import csv, io
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+    added = 0
+    for row in reader:
+        member_id = int(row["member_id"])
+        target = float(row["target"])
+        existing = db.query(EnvelopeTarget).filter(
+            EnvelopeTarget.member_id == member_id,
+            func.extract("year", EnvelopeTarget.from_date) == year,
+        ).first()
+        if existing:
+            existing.target = target
+        else:
+            db.add(EnvelopeTarget(
+                member_id=member_id, target=target,
+                from_date=date_type(year, 1, 1), end_date=date_type(year, 12, 31),
+            ))
+        added += 1
+    db.commit()
+    return success_response(f"Uploaded {added} envelope targets")
+
+
+@router.post("/upload-harambee-targets")
+async def upload_harambee_targets(
+    harambee_id: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    import csv, io
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+    added = 0
+    for row in reader:
+        member_id = int(row["member_id"])
+        target = float(row["target"])
+        existing = db.query(HarambeeTarget).filter(
+            HarambeeTarget.harambee_id == harambee_id,
+            HarambeeTarget.member_id == member_id,
+        ).first()
+        if existing:
+            existing.target = target
+        else:
+            member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
+            db.add(HarambeeTarget(
+                harambee_id=harambee_id, member_id=member_id, target=target,
+                sub_parish_id=member.sub_parish_id if member else None,
+                community_id=member.community_id if member else None,
+            ))
+        added += 1
+    db.commit()
+    return success_response(f"Uploaded {added} harambee targets")
+
+
+# ═══════════════════════════════════════════════════════════════
+# REVENUE GROUP STREAM MAPPING
+# ═══════════════════════════════════════════════════════════════
+
+class MapRevenueGroupStreamRequest(BaseModel):
+    revenue_group_id: int
+    revenue_stream_id: int
+
+@router.post("/map-revenue-group-stream")
+def map_revenue_group_stream(body: MapRevenueGroupStreamRequest, db: Session = Depends(get_db)):
+    from models.config import RevenueGroupStreamMap
+    existing = db.query(RevenueGroupStreamMap).filter(
+        RevenueGroupStreamMap.revenue_group_id == body.revenue_group_id,
+        RevenueGroupStreamMap.revenue_stream_id == body.revenue_stream_id,
+    ).first()
+    if existing:
+        return error_response("Mapping already exists")
+    db.add(RevenueGroupStreamMap(**body.dict()))
+    db.commit()
+    return success_response("Stream mapped to revenue group")
+
+@router.delete("/revenue-group-stream/{mapping_id}")
+def delete_revenue_group_stream(mapping_id: int, db: Session = Depends(get_db)):
+    from models.config import RevenueGroupStreamMap
+    db.query(RevenueGroupStreamMap).filter(RevenueGroupStreamMap.id == mapping_id).delete()
+    db.commit()
+    return success_response("Mapping removed")

@@ -14,6 +14,7 @@ from .auth import router as auth_router
 # ── Shared services (used across levels) ──────────────────────
 from .hierarchy import router as hierarchy_router
 from .admins import router as admins_router
+from .bible import router as bible_router
 from .members import router as members_router
 from .finance import router as finance_router
 from .envelope import router as envelope_router
@@ -58,6 +59,7 @@ all_routers = [
     data_router,                # /data/... (reference data & lookups)
     records_router,             # /records/... (legacy-compatible record operations)
     notifications_router,       # /notifications/...
+    bible_router,               # /bible/... (scripture reference data)
 
     # Mobile app
     church_member_router,       # /church-member/...

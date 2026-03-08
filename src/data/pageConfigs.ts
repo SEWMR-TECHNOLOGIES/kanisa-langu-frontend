@@ -895,6 +895,7 @@ export const headParishPages: Record<string, PageConfig> = {
     description: "Exclude a member from harambee participation",
     type: "form",
     submitLabel: "Exclude Member",
+    statusPreview: harambeeStatusPreview,
     fields: [
       { name: "harambee", label: "Select Harambee", type: "select", required: true, options: harambeeOptions },
       { name: "member", label: "Select Member", type: "select", required: true, options: memberOptions },

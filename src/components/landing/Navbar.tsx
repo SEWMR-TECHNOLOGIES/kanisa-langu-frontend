@@ -51,7 +51,7 @@ export default function Navbar() {
                   <img src={logo} alt="Kanisa Langu" className="h-8 w-8 relative z-10" />
                   <div className="absolute inset-0 bg-secondary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <span className="text-[15px] font-semibold tracking-tight text-white">
+                <span className="text-[15px] font-semibold tracking-tight text-foreground">
                   Kanisa Langu
                 </span>
               </Link>

@@ -176,6 +176,10 @@ export default function App() {
           <Route path="make-expense-request" element={<MakeExpenseRequest />} />
           <Route path="harambee" element={<Harambee />} />
           <Route path="record-harambee" element={<RecordHarambee />} />
+          <Route path="record-harambee-contribution" element={<RecordHarambeeContribution />} />
+          <Route path="upload-church-members" element={<UploadChurchMembers />} />
+          <Route path="upload-envelope-data" element={<UploadEnvelopeData />} />
+          <Route path="upload-harambee-targets" element={<UploadHarambeeTargets />} />
           <Route path="manage-envelopes" element={<ManageEnvelopes />} />
           <Route path="add-asset" element={<AssetsManagement />} />
           <Route path="payment-gateway-wallets" element={<PaymentGatewayWallets />} />

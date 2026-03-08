@@ -1,10 +1,11 @@
 # api/routes/province_admin.py
-"""Province admin routes — manage head parishes, province-level operations."""
+"""Province admin routes — manage head parishes, province-level admins,
+financial overview, members overview, payments, and reports."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from typing import Optional
 from datetime import date
 
@@ -12,7 +13,8 @@ from core.database import get_db
 from models.admins import Admin
 from models.hierarchy import Province, HeadParish, SubParish
 from models.members import ChurchMember
-from models.finance import BankAccount, RevenueStream
+from models.finance import BankAccount, RevenueStream, Revenue, Expense
+from models.payments import Payment
 from utils.auth import hash_password, get_current_admin
 from utils.validation import is_valid_email, is_valid_phone
 from utils.response import success_response, error_response
@@ -36,13 +38,19 @@ def _require_province_admin(admin: Admin) -> int:
 def province_dashboard(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
     pid = _require_province_admin(admin)
     province = db.query(Province).filter(Province.id == pid).first()
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.province_id == pid).all()]
+    total_revenue = 0.0
+    if hp_ids:
+        total_revenue = float(db.query(func.coalesce(func.sum(Revenue.amount), 0)).filter(Revenue.head_parish_id.in_(hp_ids)).scalar() or 0)
     return success_response(data={
         "province": {"id": province.id, "name": province.name} if province else None,
         "total_head_parishes": db.query(func.count(HeadParish.id)).filter(HeadParish.province_id == pid, HeadParish.is_active == True).scalar(),
+        "total_sub_parishes": db.query(func.count(SubParish.id)).join(HeadParish).filter(HeadParish.province_id == pid, SubParish.is_active == True).scalar(),
         "total_members": db.query(func.count(ChurchMember.id)).join(HeadParish).filter(
             HeadParish.province_id == pid, ChurchMember.is_active == True
         ).scalar(),
         "total_admins": db.query(func.count(Admin.id)).filter(Admin.province_id == pid, Admin.is_active == True).scalar(),
+        "total_revenue": total_revenue,
     })
 
 
@@ -144,7 +152,7 @@ class ProvinceAdminCreate(BaseModel):
     phone: str
     email: Optional[str] = ""
     role: str
-    admin_level: str  # province or head_parish
+    admin_level: str
     head_parish_id: Optional[int] = None
 
 @router.get("/admins")
@@ -176,6 +184,47 @@ def create_province_admin(body: ProvinceAdminCreate, db: Session = Depends(get_d
     db.add(a); db.commit(); db.refresh(a)
     return success_response("Admin registered", {"id": a.id})
 
+@router.delete("/admins/{admin_id}")
+def deactivate_province_admin(admin_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    pid = _require_province_admin(admin)
+    target = db.query(Admin).filter(Admin.id == admin_id, Admin.province_id == pid).first()
+    if not target:
+        raise HTTPException(404, "Admin not found")
+    target.is_active = False; db.commit()
+    return success_response("Admin deactivated")
+
+
+# ═══════════════════════════════════════════════════════════════
+# MEMBERS OVERVIEW
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/members")
+def province_members_overview(
+    head_parish_id: Optional[int] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=500),
+    db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin),
+):
+    pid = _require_province_admin(admin)
+    q = db.query(ChurchMember).join(HeadParish).filter(
+        HeadParish.province_id == pid, ChurchMember.is_active == True
+    )
+    if head_parish_id:
+        q = q.filter(ChurchMember.head_parish_id == head_parish_id)
+    if search:
+        from sqlalchemy import or_
+        s = f"%{search}%"
+        q = q.filter(or_(ChurchMember.first_name.ilike(s), ChurchMember.last_name.ilike(s), ChurchMember.phone.ilike(s)))
+    total = q.count()
+    rows = q.order_by(ChurchMember.first_name).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "members": [{
+            "id": m.id, "first_name": m.first_name, "last_name": m.last_name,
+            "phone": m.phone, "head_parish_id": m.head_parish_id,
+        } for m in rows],
+        "total": total, "page": page, "total_pages": -(-total // limit),
+    })
+
 
 # ═══════════════════════════════════════════════════════════════
 # PROVINCE FINANCIAL
@@ -199,3 +248,75 @@ def province_revenue_streams(db: Session = Depends(get_db), admin: Admin = Depen
         RevenueStream.entity_type == "province", RevenueStream.entity_id == pid, RevenueStream.is_active == True
     ).all()
     return success_response(data=[{"id": r.id, "name": r.name, "account_id": r.account_id} for r in rows])
+
+@router.get("/financial-summary")
+def province_financial_summary(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    pid = _require_province_admin(admin)
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.province_id == pid).all()]
+    if not hp_ids:
+        return success_response(data={"total_revenue": 0, "total_expense": 0, "balance": 0})
+    total_rev = float(db.query(func.coalesce(func.sum(Revenue.amount), 0)).filter(Revenue.head_parish_id.in_(hp_ids)).scalar() or 0)
+    total_exp = float(db.query(func.coalesce(func.sum(Expense.amount), 0)).filter(Expense.head_parish_id.in_(hp_ids)).scalar() or 0)
+    return success_response(data={"total_revenue": total_rev, "total_expense": total_exp, "balance": total_rev - total_exp})
+
+
+# ═══════════════════════════════════════════════════════════════
+# PAYMENTS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/payments")
+def province_payments(
+    page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin),
+):
+    pid = _require_province_admin(admin)
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.province_id == pid).all()]
+    q = db.query(Payment).filter(Payment.head_parish_id.in_(hp_ids)) if hp_ids else db.query(Payment).filter(False)
+    total = q.count()
+    rows = q.order_by(Payment.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "payments": [{
+            "id": p.id, "amount": float(p.amount), "payment_reason": p.payment_reason,
+            "payment_status": p.payment_status, "payment_date": str(p.payment_date),
+        } for p in rows],
+        "total": total, "page": page,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# REPORTS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/reports/sales")
+def province_sales_report(year: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    pid = _require_province_admin(admin)
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.province_id == pid).all()]
+    q = db.query(Payment).filter(Payment.head_parish_id.in_(hp_ids), Payment.payment_status == "Completed") if hp_ids else db.query(Payment).filter(False)
+    if year:
+        q = q.filter(func.extract("year", Payment.payment_date) == year)
+    total = float(q.with_entities(func.coalesce(func.sum(Payment.amount), 0)).scalar() or 0)
+    return success_response(data={"total_sales": total, "transaction_count": q.count()})
+
+@router.get("/reports/sms-usage")
+def province_sms_report(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    pid = _require_province_admin(admin)
+    rows = db.execute(text("""
+        SELECT hp.id, hp.name, COUNT(sl.id) AS total_sms, COALESCE(SUM(sl.cost), 0) AS total_cost
+        FROM head_parishes hp
+        LEFT JOIN sms_logs sl ON sl.head_parish_id = hp.id
+        WHERE hp.province_id = :pid AND hp.is_active = true
+        GROUP BY hp.id, hp.name ORDER BY total_sms DESC
+    """), {"pid": pid}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+@router.get("/reports/revenue-by-parish")
+def province_revenue_by_parish(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    pid = _require_province_admin(admin)
+    rows = db.execute(text("""
+        SELECT hp.id, hp.name, COALESCE(SUM(r.amount), 0) AS total_revenue
+        FROM head_parishes hp
+        LEFT JOIN revenues r ON r.head_parish_id = hp.id
+        WHERE hp.province_id = :pid AND hp.is_active = true
+        GROUP BY hp.id, hp.name ORDER BY total_revenue DESC
+    """), {"pid": pid}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])

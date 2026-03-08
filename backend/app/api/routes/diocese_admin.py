@@ -1,11 +1,11 @@
 # api/routes/diocese_admin.py
-"""Diocese admin routes — manage provinces, diocese-level admins, and diocese-level reporting.
-Scoped: all operations filtered by the authenticated admin's diocese_id."""
+"""Diocese admin routes — manage provinces, head parishes, diocese-level admins,
+financial overview, payments, and reports. Scoped by diocese_id."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from typing import Optional
 from datetime import date
 
@@ -14,6 +14,7 @@ from models.admins import Admin
 from models.hierarchy import Diocese, Province, HeadParish, SubParish
 from models.members import ChurchMember
 from models.finance import BankAccount, RevenueStream, Revenue, Expense
+from models.payments import Payment
 from utils.auth import hash_password, get_current_admin
 from utils.validation import is_valid_email, is_valid_phone
 from utils.response import success_response, error_response
@@ -22,7 +23,6 @@ router = APIRouter(prefix="/diocese", tags=["Diocese Admin"])
 
 
 def _require_diocese_admin(admin: Admin) -> int:
-    """Ensure admin is diocese-level and return diocese_id."""
     if admin.admin_level != "diocese":
         raise HTTPException(403, "Diocese-level access required")
     if not admin.diocese_id:
@@ -38,6 +38,9 @@ def _require_diocese_admin(admin: Admin) -> int:
 def diocese_dashboard(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
     did = _require_diocese_admin(admin)
     diocese = db.query(Diocese).filter(Diocese.id == did).first()
+    total_revenue = float(db.query(func.coalesce(func.sum(Revenue.amount), 0)).join(
+        HeadParish, Revenue.head_parish_id == HeadParish.id
+    ).filter(HeadParish.diocese_id == did).scalar() or 0)
     return success_response(data={
         "diocese": {"id": diocese.id, "name": diocese.name} if diocese else None,
         "total_provinces": db.query(func.count(Province.id)).filter(Province.diocese_id == did, Province.is_active == True).scalar(),
@@ -46,6 +49,7 @@ def diocese_dashboard(db: Session = Depends(get_db), admin: Admin = Depends(get_
             HeadParish.diocese_id == did, ChurchMember.is_active == True
         ).scalar(),
         "total_admins": db.query(func.count(Admin.id)).filter(Admin.diocese_id == did, Admin.is_active == True).scalar(),
+        "total_revenue": total_revenue,
     })
 
 
@@ -76,8 +80,7 @@ def list_provinces(db: Session = Depends(get_db), admin: Admin = Depends(get_cur
         hp_count = db.query(func.count(HeadParish.id)).filter(HeadParish.province_id == p.id, HeadParish.is_active == True).scalar()
         result.append({
             "id": p.id, "name": p.name, "address": p.address,
-            "email": p.email, "phone": p.phone,
-            "head_parish_count": hp_count,
+            "email": p.email, "phone": p.phone, "head_parish_count": hp_count,
         })
     return success_response(data=result)
 
@@ -134,8 +137,17 @@ def get_province_detail(province_id: int, db: Session = Depends(get_db), admin: 
 
 
 # ═══════════════════════════════════════════════════════════════
-# HEAD PARISHES (view from diocese level)
+# HEAD PARISHES (view + register from diocese level)
 # ═══════════════════════════════════════════════════════════════
+
+class HeadParishCreate(BaseModel):
+    name: str
+    province_id: int
+    region_id: int
+    district_id: int
+    address: str
+    email: str
+    phone: str = ""
 
 @router.get("/head-parishes")
 def list_head_parishes(province_id: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
@@ -143,10 +155,32 @@ def list_head_parishes(province_id: Optional[int] = None, db: Session = Depends(
     q = db.query(HeadParish).filter(HeadParish.diocese_id == did, HeadParish.is_active == True)
     if province_id:
         q = q.filter(HeadParish.province_id == province_id)
-    return success_response(data=[{
-        "id": hp.id, "name": hp.name, "province_id": hp.province_id,
-        "address": hp.address, "email": hp.email, "phone": hp.phone,
-    } for hp in q.order_by(HeadParish.name).all()])
+    rows = q.order_by(HeadParish.name).all()
+    result = []
+    for hp in rows:
+        member_count = db.query(func.count(ChurchMember.id)).filter(
+            ChurchMember.head_parish_id == hp.id, ChurchMember.is_active == True
+        ).scalar()
+        result.append({
+            "id": hp.id, "name": hp.name, "province_id": hp.province_id,
+            "address": hp.address, "email": hp.email, "phone": hp.phone,
+            "member_count": member_count,
+        })
+    return success_response(data=result)
+
+@router.post("/head-parishes")
+def register_head_parish(body: HeadParishCreate, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    name = body.name.strip().upper()
+    if not is_valid_email(body.email):
+        raise HTTPException(400, "Invalid email")
+    if db.query(HeadParish).filter(HeadParish.name == name, HeadParish.province_id == body.province_id).first():
+        raise HTTPException(400, "Head parish already exists in this province")
+    hp = HeadParish(name=name, diocese_id=did, province_id=body.province_id,
+                    region_id=body.region_id, district_id=body.district_id,
+                    address=body.address, email=body.email, phone=body.phone)
+    db.add(hp); db.commit(); db.refresh(hp)
+    return success_response("Head parish registered", {"id": hp.id})
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -158,8 +192,9 @@ class DioceseAdminCreate(BaseModel):
     phone: str
     email: Optional[str] = ""
     role: str
-    admin_level: str  # diocese or province
+    admin_level: str
     province_id: Optional[int] = None
+    head_parish_id: Optional[int] = None
 
 @router.get("/admins")
 def list_diocese_admins(admin_level: Optional[str] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
@@ -176,18 +211,33 @@ def list_diocese_admins(admin_level: Optional[str] = None, db: Session = Depends
 @router.post("/admins")
 def create_diocese_admin(body: DioceseAdminCreate, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
     did = _require_diocese_admin(admin)
-    if body.admin_level not in ("diocese", "province"):
-        raise HTTPException(400, "Diocese admin can only create diocese or province level admins")
+    if body.admin_level not in ("diocese", "province", "head_parish"):
+        raise HTTPException(400, "Diocese admin can create diocese, province, or head_parish level admins")
     if not is_valid_phone(body.phone):
         raise HTTPException(400, "Invalid phone")
+    province_id = body.province_id
+    if body.admin_level == "head_parish" and body.head_parish_id:
+        hp = db.query(HeadParish).filter(HeadParish.id == body.head_parish_id, HeadParish.diocese_id == did).first()
+        if not hp:
+            raise HTTPException(404, "Head parish not found in this diocese")
+        province_id = hp.province_id
     a = Admin(
         fullname=body.fullname, phone=body.phone, email=body.email or None,
         role=body.role, password=hash_password("KanisaLangu"),
         admin_level=body.admin_level, diocese_id=did,
-        province_id=body.province_id,
+        province_id=province_id, head_parish_id=body.head_parish_id,
     )
     db.add(a); db.commit(); db.refresh(a)
     return success_response("Admin registered", {"id": a.id})
+
+@router.delete("/admins/{admin_id}")
+def deactivate_diocese_admin(admin_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    target = db.query(Admin).filter(Admin.id == admin_id, Admin.diocese_id == did).first()
+    if not target:
+        raise HTTPException(404, "Admin not found")
+    target.is_active = False; db.commit()
+    return success_response("Admin deactivated")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -212,3 +262,77 @@ def diocese_revenue_streams(db: Session = Depends(get_db), admin: Admin = Depend
         RevenueStream.entity_type == "diocese", RevenueStream.entity_id == did, RevenueStream.is_active == True
     ).all()
     return success_response(data=[{"id": r.id, "name": r.name, "account_id": r.account_id} for r in rows])
+
+@router.get("/financial-overview")
+def diocese_financial_overview(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    hps = db.query(HeadParish.id).filter(HeadParish.diocese_id == did).all()
+    hp_ids = [hp.id for hp in hps]
+    if not hp_ids:
+        return success_response(data={"total_revenue": 0, "total_expense": 0, "balance": 0})
+    total_rev = float(db.query(func.coalesce(func.sum(Revenue.amount), 0)).filter(Revenue.head_parish_id.in_(hp_ids)).scalar() or 0)
+    total_exp = float(db.query(func.coalesce(func.sum(Expense.amount), 0)).filter(Expense.head_parish_id.in_(hp_ids)).scalar() or 0)
+    return success_response(data={"total_revenue": total_rev, "total_expense": total_exp, "balance": total_rev - total_exp})
+
+
+# ═══════════════════════════════════════════════════════════════
+# PAYMENTS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/payments")
+def diocese_payments(
+    page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin),
+):
+    did = _require_diocese_admin(admin)
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.diocese_id == did).all()]
+    q = db.query(Payment).filter(Payment.head_parish_id.in_(hp_ids)) if hp_ids else db.query(Payment).filter(False)
+    total = q.count()
+    rows = q.order_by(Payment.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    return success_response(data={
+        "payments": [{
+            "id": p.id, "amount": float(p.amount), "payment_reason": p.payment_reason,
+            "payment_status": p.payment_status, "payment_date": str(p.payment_date),
+            "head_parish_id": p.head_parish_id,
+        } for p in rows],
+        "total": total, "page": page,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# REPORTS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/reports/sales")
+def diocese_sales_report(year: Optional[int] = None, db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    hp_ids = [hp.id for hp in db.query(HeadParish.id).filter(HeadParish.diocese_id == did).all()]
+    q = db.query(Payment).filter(Payment.head_parish_id.in_(hp_ids), Payment.payment_status == "Completed") if hp_ids else db.query(Payment).filter(False)
+    if year:
+        q = q.filter(func.extract("year", Payment.payment_date) == year)
+    total = float(q.with_entities(func.coalesce(func.sum(Payment.amount), 0)).scalar() or 0)
+    return success_response(data={"total_sales": total, "transaction_count": q.count()})
+
+@router.get("/reports/sms-usage")
+def diocese_sms_report(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    rows = db.execute(text("""
+        SELECT hp.id, hp.name, COUNT(sl.id) AS total_sms, COALESCE(SUM(sl.cost), 0) AS total_cost
+        FROM head_parishes hp
+        LEFT JOIN sms_logs sl ON sl.head_parish_id = hp.id
+        WHERE hp.diocese_id = :did AND hp.is_active = true
+        GROUP BY hp.id, hp.name ORDER BY total_sms DESC
+    """), {"did": did}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])
+
+@router.get("/reports/revenue-by-parish")
+def revenue_by_parish(db: Session = Depends(get_db), admin: Admin = Depends(get_current_admin)):
+    did = _require_diocese_admin(admin)
+    rows = db.execute(text("""
+        SELECT hp.id, hp.name, COALESCE(SUM(r.amount), 0) AS total_revenue
+        FROM head_parishes hp
+        LEFT JOIN revenues r ON r.head_parish_id = hp.id
+        WHERE hp.diocese_id = :did AND hp.is_active = true
+        GROUP BY hp.id, hp.name ORDER BY total_revenue DESC
+    """), {"did": did}).mappings().all()
+    return success_response(data=[dict(r) for r in rows])

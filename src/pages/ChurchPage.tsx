@@ -7,7 +7,7 @@ import elctIcon from "../assets/elct-icon.png";
 import rcIcon from "../assets/rc-icon.png";
 import sdaIcon from "../assets/sda-icon.png";
 import pentecostalIcon from "../assets/pentecostal-icon.png";
-import appMockup from "../assets/app-mockup.png";
+
 
 const elctLevels = [
   { icon: Building2, name: "Diocese", description: "Top-level administrative unit overseeing all provinces, parishes, and operations within a region." },

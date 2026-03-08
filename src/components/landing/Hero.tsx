@@ -40,106 +40,121 @@ export default function Hero() {
       <div className="absolute bottom-0 -left-32 w-[400px] h-[400px] rounded-full bg-primary/[0.06] blur-[160px]" />
 
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pt-32 pb-20">
-        {/* Main content */}
-        <div className="max-w-3xl">
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-[2.75rem] sm:text-6xl lg:text-7xl font-bold text-foreground font-display leading-[1.05] tracking-tight"
-          >
-            All you need to manage
-            <br />
-            <span className="text-secondary">church operations</span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg"
-          >
-            Finances, members, and communications for ELCT, Roman Catholic, SDA, and Pentecostal churches. All in one place.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap gap-3 mt-8"
-          >
-            <button
-              onClick={() => scrollTo("#churches")}
-              className="px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/20"
-            >
-              Get Started
-            </button>
-            <button
-              onClick={() => scrollTo("#features")}
-              className="px-7 py-3.5 text-foreground border border-border rounded-xl font-medium text-sm hover:bg-muted transition-all duration-300"
-            >
-              Learn More
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Stats bar - inline, modern */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-16 flex items-center gap-0 w-fit rounded-2xl bg-card border border-border overflow-hidden shadow-sm"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 12 }}
+        <div className="grid lg:grid-cols-[1fr,380px] gap-12 lg:gap-20 items-center">
+          {/* Left column */}
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 + i * 0.1 }}
-              className={`flex items-center gap-3 px-6 sm:px-8 py-5 ${
-                i < stats.length - 1 ? "border-r border-border" : ""
-              }`}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-[2.75rem] sm:text-6xl lg:text-7xl font-bold text-foreground font-display leading-[1.05] tracking-tight"
             >
-              <stat.icon className="w-5 h-5 text-secondary hidden sm:block" />
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-foreground font-display leading-none">{stat.value}</div>
-                <div className="text-[11px] text-muted-foreground uppercase tracking-wider mt-1">{stat.label}</div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              All you need to manage
+              <br />
+              <span className="text-secondary">church operations</span>
+            </motion.h1>
 
-        {/* Denomination cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.65 }}
-          className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl"
-        >
-          {denominations.map((d, i) => (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg"
+            >
+              Finances, members, and communications for ELCT, Roman Catholic, SDA, and Pentecostal churches. All in one place.
+            </motion.p>
+
             <motion.div
-              key={d.slug}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 + i * 0.08 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-wrap gap-3 mt-8"
             >
-              <Link
-                to={`/churches/${d.slug}`}
-                className={`group flex items-center gap-3 p-4 rounded-2xl border ${d.color} transition-all duration-300 hover:shadow-md`}
+              <button
+                onClick={() => scrollTo("#churches")}
+                className="px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/20"
               >
-                <img src={d.icon} alt={d.name} className="w-10 h-10 rounded-xl object-contain" />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-bold text-foreground block truncate">{d.name}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Explore</span>
-                </div>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
-              </Link>
+                Get Started
+              </button>
+              <button
+                onClick={() => scrollTo("#features")}
+                className="px-7 py-3.5 text-foreground border border-border rounded-xl font-medium text-sm hover:bg-muted transition-all duration-300"
+              >
+                Learn More
+              </button>
             </motion.div>
-          ))}
-        </motion.div>
+
+            {/* Denomination cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.55 }}
+              className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-3"
+            >
+              {denominations.map((d, i) => (
+                <motion.div
+                  key={d.slug}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 + i * 0.08 }}
+                >
+                  <Link
+                    to={`/churches/${d.slug}`}
+                    className={`group flex items-center gap-3 p-4 rounded-2xl border ${d.color} transition-all duration-300 hover:shadow-md`}
+                  >
+                    <img src={d.icon} alt={d.name} className="w-10 h-10 rounded-xl object-contain" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-bold text-foreground block truncate">{d.name}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Explore</span>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right column: Stats - modern vertical layout */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="hidden lg:block"
+          >
+            <div className="relative p-8 rounded-3xl bg-card border border-border shadow-sm">
+              {/* Decorative accent line */}
+              <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
+              
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium mb-8">Platform overview</p>
+              
+              <div className="space-y-0">
+                {stats.map((stat, i) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 + i * 0.12 }}
+                    className={`flex items-center gap-5 py-6 ${
+                      i < stats.length - 1 ? "border-b border-border" : ""
+                    }`}
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+                      <stat.icon className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-4xl font-bold text-foreground font-display leading-none tracking-tight">{stat.value}</div>
+                      <div className="text-xs text-muted-foreground mt-1.5">{stat.label}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Bottom accent */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs text-muted-foreground">Trusted across Tanzania</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -65,6 +65,7 @@ export default function App() {
         {/* ELCT Sign-In Pages */}
         <Route path="/elct/diocese/sign-in" element={<DioceseSignIn />} />
         <Route path="/elct/province/sign-in" element={<ProvinceSignIn />} />
+        <Route path="/elct/head-parish/sign-in" element={<HeadParishSignIn />} />
         <Route path="/elct/sub-parish/sign-in" element={<SubParishSignIn />} />
         <Route path="/elct/community/sign-in" element={<CommunitySignIn />} />
 

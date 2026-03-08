@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import bibleIcon from "@/assets/bible-icon.png";
 
 const DAILY_VERSES = [
   { ref: "Zaburi 23:1", sw: "Bwana ndiye mchungaji wangu; sitapungukiwa na kitu.", en: "The LORD is my shepherd; I shall not want." },

@@ -1,5 +1,5 @@
 # models/hierarchy.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from core.base import Base
@@ -39,6 +39,10 @@ class Province(Base):
     diocese = relationship("Diocese", back_populates="provinces")
     head_parishes = relationship("HeadParish", back_populates="province", cascade="all, delete-orphan")
 
+    __table_args__ = (
+        UniqueConstraint("name", "diocese_id", name="uq_province_name_diocese"),
+    )
+
 
 class HeadParish(Base):
     __tablename__ = "head_parishes"
@@ -74,6 +78,10 @@ class SubParish(Base):
     head_parish = relationship("HeadParish", back_populates="sub_parishes")
     communities = relationship("Community", back_populates="sub_parish", cascade="all, delete-orphan")
 
+    __table_args__ = (
+        UniqueConstraint("name", "head_parish_id", name="uq_sub_parish_name_hp"),
+    )
+
 
 class Community(Base):
     __tablename__ = "communities"
@@ -88,6 +96,10 @@ class Community(Base):
 
     sub_parish = relationship("SubParish", back_populates="communities")
 
+    __table_args__ = (
+        UniqueConstraint("name", "sub_parish_id", name="uq_community_name_sp"),
+    )
+
 
 class Group(Base):
     __tablename__ = "groups"
@@ -100,3 +112,7 @@ class Group(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     head_parish = relationship("HeadParish", back_populates="groups")
+
+    __table_args__ = (
+        UniqueConstraint("name", "head_parish_id", name="uq_group_name_hp"),
+    )

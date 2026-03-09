@@ -57,6 +57,10 @@ class HarambeeTarget(Base):
     committee_responsibility = Column(String(50))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    __table_args__ = (
+        UniqueConstraint("harambee_id", "member_id", name="uq_harambee_target_member"),
+    )
+
 
 class HarambeeContribution(Base):
     __tablename__ = "harambee_contributions"

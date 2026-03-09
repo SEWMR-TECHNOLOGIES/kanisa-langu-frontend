@@ -1,5 +1,5 @@
 # models/banking.py
-from sqlalchemy import Column, Integer, String, Numeric, Date, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, Date, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from core.base import Base
 
@@ -15,6 +15,10 @@ class BankPosting(Base):
     description = Column(String)
     posted_by = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"))
     posted_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("posting_type IN ('credit','debit')", name="ck_posting_type"),
+    )
 
 
 class BankClosingBalance(Base):

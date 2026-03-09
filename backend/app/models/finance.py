@@ -1,5 +1,5 @@
 # models/finance.py
-from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.sql import func
 from core.base import Base
 
@@ -105,6 +105,10 @@ class ExpenseRequest(Base):
     responded_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    __table_args__ = (
+        CheckConstraint("status IN ('pending','approved','rejected')", name="ck_expense_req_status"),
+    )
+
 
 class ExpenseRequestItem(Base):
     __tablename__ = "expense_request_items"
@@ -124,6 +128,10 @@ class AnnualRevenueTarget(Base):
     target_amount = Column(Numeric(15, 2), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    __table_args__ = (
+        UniqueConstraint("revenue_stream_id", "head_parish_id", "year", name="uq_rev_target_stream_hp_year"),
+    )
+
 
 class AnnualExpenseBudget(Base):
     __tablename__ = "annual_expense_budgets"
@@ -133,3 +141,7 @@ class AnnualExpenseBudget(Base):
     year = Column(Integer, nullable=False)
     budget_amount = Column(Numeric(15, 2), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("expense_name_id", "head_parish_id", "year", name="uq_exp_budget_name_hp_year"),
+    )

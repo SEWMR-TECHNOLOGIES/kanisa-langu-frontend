@@ -1,5 +1,5 @@
 # models/operations.py
-from sqlalchemy import Column, Integer, String, Boolean, Date, Time, DateTime, ForeignKey, Numeric
+from sqlalchemy import Column, Integer, String, Boolean, Date, Time, DateTime, ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.sql import func
 from core.base import Base
 
@@ -29,6 +29,10 @@ class AttendanceBenchmark(Base):
     benchmark = Column(Integer, default=0, nullable=False)
     year = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("head_parish_id", "year", name="uq_attendance_bench_hp_year"),
+    )
 
 
 class Meeting(Base):

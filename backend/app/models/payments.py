@@ -1,5 +1,5 @@
 # models/payments.py
-from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from core.base import Base
 
@@ -23,6 +23,10 @@ class Payment(Base):
     service_date = Column(Date)
     target = Column(String(20), default="head-parish")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("payment_status IN ('Pending','Completed','Failed','Cancelled')", name="ck_payment_status"),
+    )
 
 
 class PaymentGatewayWallet(Base):

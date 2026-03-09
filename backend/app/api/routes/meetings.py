@@ -3,23 +3,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 
 from core.database import get_db
 from models.operations import Meeting, MeetingAgenda, MeetingMinutes, MeetingNotes
 from utils.response import success_response
 
+from schemas.base import ApiResponse, IdData
+from schemas.operations import MeetingCreate, MeetingOut
+
 router = APIRouter(prefix="/meetings", tags=["Meetings"])
-
-
-class MeetingCreate(BaseModel):
-    head_parish_id: int
-    title: str
-    description: Optional[str] = None
-    meeting_date: date
-    meeting_time: str
-    meeting_place: str
 
 
 class AgendaCreate(BaseModel):
@@ -27,13 +21,12 @@ class AgendaCreate(BaseModel):
     agenda_item: str
     sort_order: int = 0
 
-
 class MinutesCreate(BaseModel):
     meeting_id: int
     content: str
 
 
-@router.get("/")
+@router.get("/", response_model=ApiResponse[List[MeetingOut]], summary="List meetings for a head parish")
 def list_meetings(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.query(Meeting).filter(Meeting.head_parish_id == head_parish_id).order_by(Meeting.meeting_date.desc()).all()
     return success_response(data=[{
@@ -42,7 +35,7 @@ def list_meetings(head_parish_id: int, db: Session = Depends(get_db)):
     } for m in rows])
 
 
-@router.post("/")
+@router.post("/", response_model=ApiResponse[IdData], summary="Create a meeting")
 def create_meeting(body: MeetingCreate, db: Session = Depends(get_db)):
     if not body.title.strip():
         raise HTTPException(400, "Meeting title is required")
@@ -57,14 +50,14 @@ def create_meeting(body: MeetingCreate, db: Session = Depends(get_db)):
     return success_response("Meeting created", {"id": m.id})
 
 
-@router.post("/agendas")
+@router.post("/agendas", response_model=ApiResponse[None], summary="Add an agenda item to a meeting")
 def add_agenda(body: AgendaCreate, db: Session = Depends(get_db)):
     a = MeetingAgenda(**body.dict())
     db.add(a); db.commit()
     return success_response("Agenda added")
 
 
-@router.post("/minutes")
+@router.post("/minutes", response_model=ApiResponse[None], summary="Add minutes to a meeting")
 def add_minutes(body: MinutesCreate, db: Session = Depends(get_db)):
     m = MeetingMinutes(**body.dict())
     db.add(m); db.commit()

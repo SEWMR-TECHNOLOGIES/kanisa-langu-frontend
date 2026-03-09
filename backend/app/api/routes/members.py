@@ -1,10 +1,9 @@
 # api/routes/members.py
 """Church member CRUD — mirrors register_church_member.php, church_members.php, update_church_member.php."""
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 
 from core.database import get_db
@@ -12,38 +11,69 @@ from models.members import ChurchMember, ChurchLeader, ChurchChoir, MemberExclus
 from utils.validation import is_valid_email, is_valid_phone, normalize_phone, validate_age
 from utils.response import success_response
 
+from schemas.base import ApiResponse, IdData
+from schemas.members import (
+    MemberCreate, MemberUpdate, MemberOut, MemberListOut,
+    LeaderOut, ChoirOut,
+)
+
 router = APIRouter(prefix="/members", tags=["Church Members"])
 
 
-class MemberCreate(BaseModel):
+class LeaderCreate(MemberCreate):
     title_id: Optional[int] = None
     first_name: str
     middle_name: Optional[str] = None
     last_name: str
-    date_of_birth: date
     gender: str
-    member_type: str
+    leader_type: str
     head_parish_id: int
-    sub_parish_id: int
-    community_id: int
-    envelope_number: Optional[str] = None
-    occupation_id: Optional[int] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
+    role_id: int
+    appointment_date: date
+    end_date: Optional[date] = None
 
 
-class MemberUpdate(BaseModel):
+class ChoirCreate(MemberCreate):
+    name: str
+    head_parish_id: int
+    description: Optional[str] = None
+
+
+class ExcludeRequest(MemberCreate):
+    reason: str
+
+
+# ── Fix: redefine properly ──
+
+from pydantic import BaseModel
+
+class LeaderCreateBody(BaseModel):
     title_id: Optional[int] = None
-    first_name: Optional[str] = None
+    first_name: str
     middle_name: Optional[str] = None
-    last_name: Optional[str] = None
-    occupation_id: Optional[int] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    status: Optional[str] = None
+    last_name: str
+    gender: str
+    leader_type: str
+    head_parish_id: int
+    role_id: int
+    appointment_date: date
+    end_date: Optional[date] = None
+
+class ChoirCreateBody(BaseModel):
+    name: str
+    head_parish_id: int
+    description: Optional[str] = None
+
+class ExcludeBody(BaseModel):
+    reason: str
 
 
-@router.get("/")
+@router.get(
+    "/",
+    response_model=ApiResponse[MemberListOut],
+    summary="List church members",
+    description="Paginated member list with search across name, phone, envelope number.",
+)
 def list_members(
     head_parish_id: int,
     sub_parish_id: Optional[int] = None,
@@ -78,26 +108,17 @@ def list_members(
 
     return success_response(data={
         "members": [{
-            "id": m.id,
-            "first_name": m.first_name,
-            "middle_name": m.middle_name,
-            "last_name": m.last_name,
-            "date_of_birth": str(m.date_of_birth),
-            "gender": m.gender,
-            "member_type": m.member_type,
-            "envelope_number": m.envelope_number,
-            "phone": m.phone,
-            "email": m.email,
-            "sub_parish_id": m.sub_parish_id,
-            "community_id": m.community_id,
+            "id": m.id, "first_name": m.first_name, "middle_name": m.middle_name,
+            "last_name": m.last_name, "date_of_birth": str(m.date_of_birth),
+            "gender": m.gender, "member_type": m.member_type,
+            "envelope_number": m.envelope_number, "phone": m.phone, "email": m.email,
+            "sub_parish_id": m.sub_parish_id, "community_id": m.community_id,
         } for m in members],
-        "total": total,
-        "page": page,
-        "total_pages": -(-total // limit),  # ceiling division
+        "total": total, "page": page, "total_pages": -(-total // limit),
     })
 
 
-@router.post("/")
+@router.post("/", response_model=ApiResponse[IdData], summary="Register a new church member")
 def create_member(body: MemberCreate, db: Session = Depends(get_db)):
     if not body.first_name.strip():
         raise HTTPException(400, "First name is required")
@@ -114,7 +135,6 @@ def create_member(body: MemberCreate, db: Session = Depends(get_db)):
     if body.phone and not is_valid_phone(body.phone):
         raise HTTPException(400, "Invalid phone")
 
-    # Uniqueness checks
     if body.email and db.query(ChurchMember).filter(ChurchMember.email == body.email).first():
         raise HTTPException(400, "Email already exists")
     if phone and db.query(ChurchMember).filter(ChurchMember.phone == phone).first():
@@ -127,22 +147,16 @@ def create_member(body: MemberCreate, db: Session = Depends(get_db)):
         first_name=body.first_name.capitalize(),
         middle_name=body.middle_name.capitalize() if body.middle_name else None,
         last_name=body.last_name.capitalize(),
-        date_of_birth=body.date_of_birth,
-        gender=body.gender,
-        member_type=body.member_type,
-        head_parish_id=body.head_parish_id,
-        sub_parish_id=body.sub_parish_id,
-        community_id=body.community_id,
-        envelope_number=body.envelope_number,
-        occupation_id=body.occupation_id,
-        phone=phone,
-        email=body.email,
+        date_of_birth=body.date_of_birth, gender=body.gender, member_type=body.member_type,
+        head_parish_id=body.head_parish_id, sub_parish_id=body.sub_parish_id,
+        community_id=body.community_id, envelope_number=body.envelope_number,
+        occupation_id=body.occupation_id, phone=phone, email=body.email,
     )
     db.add(member); db.commit(); db.refresh(member)
     return success_response("Church member registered", {"id": member.id})
 
 
-@router.put("/{member_id}")
+@router.put("/{member_id}", response_model=ApiResponse[None], summary="Update a church member")
 def update_member(member_id: int, body: MemberUpdate, db: Session = Depends(get_db)):
     member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
     if not member:
@@ -153,7 +167,7 @@ def update_member(member_id: int, body: MemberUpdate, db: Session = Depends(get_
     return success_response("Member updated")
 
 
-@router.get("/{member_id}")
+@router.get("/{member_id}", response_model=ApiResponse[MemberOut], summary="Get member details")
 def get_member(member_id: int, db: Session = Depends(get_db)):
     m = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
     if not m:
@@ -169,11 +183,9 @@ def get_member(member_id: int, db: Session = Depends(get_db)):
 
 
 # ── Exclusions ───────────────────────────────────────────────
-class ExcludeRequest(BaseModel):
-    reason: str
 
-@router.post("/{member_id}/exclude")
-def exclude_member(member_id: int, body: ExcludeRequest, db: Session = Depends(get_db)):
+@router.post("/{member_id}/exclude", response_model=ApiResponse[None], summary="Exclude a member from the church")
+def exclude_member(member_id: int, body: ExcludeBody, db: Session = Depends(get_db)):
     member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
     if not member:
         raise HTTPException(404, "Member not found")
@@ -184,19 +196,8 @@ def exclude_member(member_id: int, body: ExcludeRequest, db: Session = Depends(g
 
 
 # ── Church Leaders ───────────────────────────────────────────
-class LeaderCreate(BaseModel):
-    title_id: Optional[int] = None
-    first_name: str
-    middle_name: Optional[str] = None
-    last_name: str
-    gender: str
-    leader_type: str
-    head_parish_id: int
-    role_id: int
-    appointment_date: date
-    end_date: Optional[date] = None
 
-@router.get("/leaders")
+@router.get("/leaders", response_model=ApiResponse[List[LeaderOut]], summary="List church leaders")
 def list_leaders(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.query(ChurchLeader).filter(ChurchLeader.head_parish_id == head_parish_id).order_by(ChurchLeader.first_name).all()
     return success_response(data=[{
@@ -205,26 +206,22 @@ def list_leaders(head_parish_id: int, db: Session = Depends(get_db)):
         "appointment_date": str(l.appointment_date),
     } for l in rows])
 
-@router.post("/leaders")
-def create_leader(body: LeaderCreate, db: Session = Depends(get_db)):
+@router.post("/leaders", response_model=ApiResponse[IdData], summary="Register a church leader")
+def create_leader(body: LeaderCreateBody, db: Session = Depends(get_db)):
     leader = ChurchLeader(**body.dict())
     db.add(leader); db.commit(); db.refresh(leader)
     return success_response("Church leader registered", {"id": leader.id})
 
 
 # ── Church Choirs ────────────────────────────────────────────
-class ChoirCreate(BaseModel):
-    name: str
-    head_parish_id: int
-    description: Optional[str] = None
 
-@router.get("/choirs")
+@router.get("/choirs", response_model=ApiResponse[List[ChoirOut]], summary="List church choirs")
 def list_choirs(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.query(ChurchChoir).filter(ChurchChoir.head_parish_id == head_parish_id).order_by(ChurchChoir.name).all()
     return success_response(data=[{"id": c.id, "name": c.name} for c in rows])
 
-@router.post("/choirs")
-def create_choir(body: ChoirCreate, db: Session = Depends(get_db)):
+@router.post("/choirs", response_model=ApiResponse[IdData], summary="Register a choir")
+def create_choir(body: ChoirCreateBody, db: Session = Depends(get_db)):
     if db.query(ChurchChoir).filter(ChurchChoir.name == body.name, ChurchChoir.head_parish_id == body.head_parish_id).first():
         raise HTTPException(400, "Choir already exists")
     c = ChurchChoir(**body.dict())

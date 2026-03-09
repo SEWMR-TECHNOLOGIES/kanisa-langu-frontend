@@ -1,46 +1,33 @@
 # api/routes/notifications.py
-"""Notification routes — push notifications, SMS, delayed harambee notifications.
-Replaces: send_push_notification.php, notify_members.php, send_harambee_*.php"""
-
+"""Notification routes — push notifications, SMS, delayed harambee notifications."""
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import text
-from typing import Optional, List
 
 from core.database import get_db
 from models.harambee import DelayedHarambeeNotification
 from utils.response import success_response
 
+from schemas.base import ApiResponse
+from schemas.operations import SendPushNotificationRequest, NotifyMembersRequest
+
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
-class SendPushNotificationRequest(BaseModel):
-    head_parish_id: int
-    title: str
-    body: str
-    topic: Optional[str] = None
-
-@router.post("/push")
+@router.post("/push", response_model=ApiResponse[None], summary="Send push notification to a head parish topic")
 def send_push_notification(body: SendPushNotificationRequest, db: Session = Depends(get_db)):
     # TODO: Integrate FCM push notification
     return success_response("Push notification queued")
 
 
-class NotifyMembersRequest(BaseModel):
-    head_parish_id: int
-    message: str
-    member_ids: Optional[List[int]] = None
-
-@router.post("/notify-members")
+@router.post("/notify-members", response_model=ApiResponse[None], summary="Send SMS notification to members")
 def notify_members(body: NotifyMembersRequest, db: Session = Depends(get_db)):
     # TODO: Send SMS to selected members or all members
     return success_response("Notification queued")
 
 
-@router.post("/process-delayed-harambee")
+@router.post("/process-delayed-harambee", response_model=ApiResponse[None], summary="Process pending delayed harambee notifications")
 def process_delayed_harambee_notifications(db: Session = Depends(get_db)):
-    """Process unprocessed delayed harambee notifications. Replaces send_delayed_harambee_notifications.php."""
+    """Process unprocessed delayed harambee notifications."""
     pending = db.query(DelayedHarambeeNotification).filter(
         DelayedHarambeeNotification.is_sent == False,
     ).limit(50).all()

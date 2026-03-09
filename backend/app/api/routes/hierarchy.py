@@ -1,14 +1,20 @@
 # api/routes/hierarchy.py
 """CRUD for church hierarchy: dioceses, provinces, head parishes, sub parishes, communities, groups."""
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 
 from core.database import get_db
 from models.hierarchy import Diocese, Province, HeadParish, SubParish, Community, Group
 from utils.validation import is_valid_email, is_valid_phone
 from utils.response import success_response
+
+from schemas.base import ApiResponse, IdData
+from schemas.hierarchy import (
+    DioceseCreate, ProvinceCreate, HeadParishCreate,
+    SubParishCreate, CommunityCreate, GroupCreate,
+    DioceseOut, ProvinceOut, HeadParishOut, SubParishOut, CommunityOut, GroupOut,
+)
 
 router = APIRouter(tags=["Church Hierarchy"])
 
@@ -16,15 +22,8 @@ router = APIRouter(tags=["Church Hierarchy"])
 # ══════════════════════════════════════════════════════════════
 # DIOCESES
 # ══════════════════════════════════════════════════════════════
-class DioceseCreate(BaseModel):
-    name: str
-    region_id: int
-    district_id: int
-    address: str
-    email: str
-    phone: str
 
-@router.get("/dioceses")
+@router.get("/dioceses", response_model=ApiResponse[List[DioceseOut]], summary="List all active dioceses")
 def list_dioceses(db: Session = Depends(get_db)):
     rows = db.query(Diocese).filter(Diocese.is_active == True).order_by(Diocese.name).all()
     return success_response(data=[{
@@ -33,7 +32,7 @@ def list_dioceses(db: Session = Depends(get_db)):
         "region_id": d.region_id, "district_id": d.district_id,
     } for d in rows])
 
-@router.post("/dioceses")
+@router.post("/dioceses", response_model=ApiResponse[IdData], summary="Register a new diocese")
 def create_diocese(body: DioceseCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if not is_valid_email(body.email):
@@ -47,7 +46,7 @@ def create_diocese(body: DioceseCreate, db: Session = Depends(get_db)):
     db.add(d); db.commit(); db.refresh(d)
     return success_response("Diocese registered", {"id": d.id})
 
-@router.get("/dioceses/{diocese_id}")
+@router.get("/dioceses/{diocese_id}", response_model=ApiResponse[DioceseOut], summary="Get diocese details")
 def get_diocese(diocese_id: int, db: Session = Depends(get_db)):
     d = db.query(Diocese).filter(Diocese.id == diocese_id).first()
     if not d:
@@ -59,16 +58,8 @@ def get_diocese(diocese_id: int, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # PROVINCES
 # ══════════════════════════════════════════════════════════════
-class ProvinceCreate(BaseModel):
-    name: str
-    diocese_id: int
-    region_id: int
-    district_id: int
-    address: str
-    email: str
-    phone: str
 
-@router.get("/provinces")
+@router.get("/provinces", response_model=ApiResponse[List[ProvinceOut]], summary="List provinces, optionally filtered by diocese")
 def list_provinces(diocese_id: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(Province).filter(Province.is_active == True)
     if diocese_id:
@@ -79,7 +70,7 @@ def list_provinces(diocese_id: Optional[int] = None, db: Session = Depends(get_d
         "region_id": p.region_id, "district_id": p.district_id,
     } for p in q.order_by(Province.name).all()])
 
-@router.post("/provinces")
+@router.post("/provinces", response_model=ApiResponse[IdData], summary="Register a new province")
 def create_province(body: ProvinceCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if not is_valid_email(body.email):
@@ -96,17 +87,8 @@ def create_province(body: ProvinceCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # HEAD PARISHES
 # ══════════════════════════════════════════════════════════════
-class HeadParishCreate(BaseModel):
-    name: str
-    diocese_id: int
-    province_id: int
-    region_id: int
-    district_id: int
-    address: str
-    email: str
-    phone: str = ""
 
-@router.get("/head-parishes")
+@router.get("/head-parishes", response_model=ApiResponse[List[HeadParishOut]], summary="List head parishes")
 def list_head_parishes(province_id: Optional[int] = None, diocese_id: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(HeadParish).filter(HeadParish.is_active == True)
     if province_id:
@@ -119,7 +101,7 @@ def list_head_parishes(province_id: Optional[int] = None, diocese_id: Optional[i
         "email": h.email, "phone": h.phone,
     } for h in q.order_by(HeadParish.name).all()])
 
-@router.post("/head-parishes")
+@router.post("/head-parishes", response_model=ApiResponse[IdData], summary="Register a new head parish")
 def create_head_parish(body: HeadParishCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if not is_valid_email(body.email):
@@ -136,17 +118,13 @@ def create_head_parish(body: HeadParishCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # SUB PARISHES
 # ══════════════════════════════════════════════════════════════
-class SubParishCreate(BaseModel):
-    name: str
-    head_parish_id: int
-    description: Optional[str] = None
 
-@router.get("/sub-parishes")
+@router.get("/sub-parishes", response_model=ApiResponse[List[SubParishOut]], summary="List sub parishes for a head parish")
 def list_sub_parishes(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.query(SubParish).filter(SubParish.head_parish_id == head_parish_id, SubParish.is_active == True).order_by(SubParish.name).all()
     return success_response(data=[{"id": s.id, "name": s.name, "description": s.description} for s in rows])
 
-@router.post("/sub-parishes")
+@router.post("/sub-parishes", response_model=ApiResponse[IdData], summary="Create a sub parish")
 def create_sub_parish(body: SubParishCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if db.query(SubParish).filter(SubParish.name == name, SubParish.head_parish_id == body.head_parish_id).first():
@@ -159,13 +137,8 @@ def create_sub_parish(body: SubParishCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # COMMUNITIES
 # ══════════════════════════════════════════════════════════════
-class CommunityCreate(BaseModel):
-    name: str
-    head_parish_id: int
-    sub_parish_id: int
-    description: Optional[str] = None
 
-@router.get("/communities")
+@router.get("/communities", response_model=ApiResponse[List[CommunityOut]], summary="List communities")
 def list_communities(sub_parish_id: Optional[int] = None, head_parish_id: Optional[int] = None, db: Session = Depends(get_db)):
     q = db.query(Community).filter(Community.is_active == True)
     if sub_parish_id:
@@ -174,7 +147,7 @@ def list_communities(sub_parish_id: Optional[int] = None, head_parish_id: Option
         q = q.filter(Community.head_parish_id == head_parish_id)
     return success_response(data=[{"id": c.id, "name": c.name, "sub_parish_id": c.sub_parish_id} for c in q.order_by(Community.name).all()])
 
-@router.post("/communities")
+@router.post("/communities", response_model=ApiResponse[IdData], summary="Create a community")
 def create_community(body: CommunityCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if db.query(Community).filter(Community.name == name, Community.sub_parish_id == body.sub_parish_id).first():
@@ -187,17 +160,13 @@ def create_community(body: CommunityCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # GROUPS
 # ══════════════════════════════════════════════════════════════
-class GroupCreate(BaseModel):
-    name: str
-    head_parish_id: int
-    description: Optional[str] = None
 
-@router.get("/groups")
+@router.get("/groups", response_model=ApiResponse[List[GroupOut]], summary="List groups for a head parish")
 def list_groups(head_parish_id: int, db: Session = Depends(get_db)):
     rows = db.query(Group).filter(Group.head_parish_id == head_parish_id, Group.is_active == True).order_by(Group.name).all()
     return success_response(data=[{"id": g.id, "name": g.name, "description": g.description} for g in rows])
 
-@router.post("/groups")
+@router.post("/groups", response_model=ApiResponse[IdData], summary="Create a group")
 def create_group(body: GroupCreate, db: Session = Depends(get_db)):
     name = body.name.upper()
     if db.query(Group).filter(Group.name == name, Group.head_parish_id == body.head_parish_id).first():

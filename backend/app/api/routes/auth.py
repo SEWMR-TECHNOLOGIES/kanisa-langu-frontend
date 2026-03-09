@@ -1,13 +1,8 @@
 # api/routes/auth.py
-"""Authentication routes for Kanisa Langu admin signin (all levels) + member signin.
-Replaces: kanisalangu_admin_signin.php, diocese_admin_signin.php, province_admin_signin.php,
-head_parish_admin_signin.php, sub_parish_admin_signin.php, community_admin_signin.php,
-group_admin_signin.php, update_admin_password.php, verify_password_reset_code.php,
-deleting_account.php"""
+"""Authentication routes for Kanisa Langu admin signin (all levels) + member signin."""
 
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -23,19 +18,26 @@ from utils.auth import (
 from utils.validation import is_valid_email, normalize_phone
 from utils.response import success_response, error_response
 
+from schemas.base import ApiResponse
+from schemas.auth import (
+    AdminSigninRequest, SystemAdminSigninRequest, AdminPasswordUpdate,
+    VerifyResetCodeRequest, RefreshTokenRequest,
+    AdminSigninResponse, SystemAdminSigninResponse, CurrentAdminResponse, TokenPair,
+)
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 # ═══════════════════════════════════════════════════════════════
 # ADMIN SIGNIN (unified for all levels)
-# Replaces: diocese_admin_signin.php, province_admin_signin.php, etc.
 # ═══════════════════════════════════════════════════════════════
-class AdminSigninRequest(BaseModel):
-    credential: str  # email or phone
-    password: str
-    admin_level: Optional[str] = None  # optional filter
 
-@router.post("/admin/signin")
+@router.post(
+    "/admin/signin",
+    response_model=ApiResponse[AdminSigninResponse],
+    summary="Admin sign-in",
+    description="Authenticate any admin (diocese, province, head parish, sub parish, community, group) with email/phone + password.",
+)
 def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depends(get_db)):
     if not body.credential.strip():
         return error_response("Email or phone is required")
@@ -44,7 +46,6 @@ def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depen
 
     credential = body.credential.strip()
 
-    # Find admin by email or phone
     admin = db.query(Admin).filter(
         Admin.is_active == True,
         (Admin.email == credential) | (Admin.phone == credential)
@@ -59,16 +60,13 @@ def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depen
     if not verify_password(body.password, admin.password):
         return error_response("Invalid credentials")
 
-    # Check first login
     is_first_login = check_first_login(db, admin)
 
-    # Generate JWT
     token_data = {
         "admin_id": admin.id,
         "admin_level": admin.admin_level,
         "role": admin.role,
     }
-    # Add entity IDs based on admin level
     if admin.head_parish_id:
         token_data["head_parish_id"] = admin.head_parish_id
     if admin.diocese_id:
@@ -79,14 +77,12 @@ def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depen
     access_token = create_access_token(token_data)
     refresh_token = create_refresh_token(token_data)
 
-    # Record login
     record_admin_login(
         db, admin_id=admin.id,
         ip_address=request.client.host if request.client else None,
         user_agent=request.headers.get("user-agent"),
     )
 
-    # Build response with entity names (like legacy)
     admin_data = {
         "admin_id": admin.id,
         "fullname": admin.fullname,
@@ -104,7 +100,6 @@ def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depen
     }
 
     if is_first_login:
-        # Generate password reset code for first login
         raw_code = save_reset_code(db, admin_id=admin.id)
         admin_data["reset_code"] = raw_code
 
@@ -118,13 +113,14 @@ def admin_signin(body: AdminSigninRequest, request: Request, db: Session = Depen
 
 # ═══════════════════════════════════════════════════════════════
 # SYSTEM ADMIN (Kanisa Langu) SIGNIN
-# Replaces: kanisalangu_admin_signin.php
 # ═══════════════════════════════════════════════════════════════
-class SystemAdminSigninRequest(BaseModel):
-    username: str
-    password: str
 
-@router.post("/system-admin/signin")
+@router.post(
+    "/system-admin/signin",
+    response_model=ApiResponse[SystemAdminSigninResponse],
+    summary="System admin sign-in",
+    description="Authenticate the Kanisa Langu super-admin.",
+)
 def system_admin_signin(body: SystemAdminSigninRequest, request: Request, db: Session = Depends(get_db)):
     if not body.username.strip() or not body.password:
         return error_response("Username and password are required")
@@ -157,19 +153,18 @@ def system_admin_signin(body: SystemAdminSigninRequest, request: Request, db: Se
 
 # ═══════════════════════════════════════════════════════════════
 # ADMIN PASSWORD UPDATE
-# Replaces: update_admin_password.php
 # ═══════════════════════════════════════════════════════════════
-class AdminPasswordUpdate(BaseModel):
-    new_password: str
-    confirm_password: str
-    reset_code: Optional[str] = None
 
-@router.post("/admin/update-password")
+@router.post(
+    "/admin/update-password",
+    response_model=ApiResponse[None],
+    summary="Update admin password",
+    description="Update password after first login or manual reset. Requires strong password.",
+)
 def update_admin_password(body: AdminPasswordUpdate, admin: Admin = Depends(get_current_admin), db: Session = Depends(get_db)):
     if body.new_password != body.confirm_password:
         return error_response("Passwords do not match")
 
-    # Validate password strength
     pwd = body.new_password
     if len(pwd) < 8:
         return error_response("Password must be at least 8 characters")
@@ -183,7 +178,6 @@ def update_admin_password(body: AdminPasswordUpdate, admin: Admin = Depends(get_
     if not re.search(r"[\W_]", pwd):
         return error_response("Password must contain a special character")
 
-    # If reset code provided, verify it
     if body.reset_code:
         if not verify_reset_code(db, admin.id, body.reset_code):
             return error_response("Invalid or expired reset code")
@@ -197,13 +191,13 @@ def update_admin_password(body: AdminPasswordUpdate, admin: Admin = Depends(get_
 
 # ═══════════════════════════════════════════════════════════════
 # VERIFY RESET CODE
-# Replaces: verify_password_reset_code.php
 # ═══════════════════════════════════════════════════════════════
-class VerifyResetCodeRequest(BaseModel):
-    admin_id: int
-    code: str
 
-@router.post("/verify-reset-code")
+@router.post(
+    "/verify-reset-code",
+    response_model=ApiResponse[None],
+    summary="Verify password reset code",
+)
 def verify_reset_code_endpoint(body: VerifyResetCodeRequest, db: Session = Depends(get_db)):
     if verify_reset_code(db, body.admin_id, body.code):
         return success_response("Reset code verified")
@@ -213,16 +207,18 @@ def verify_reset_code_endpoint(body: VerifyResetCodeRequest, db: Session = Depen
 # ═══════════════════════════════════════════════════════════════
 # REFRESH TOKEN
 # ═══════════════════════════════════════════════════════════════
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    response_model=ApiResponse[TokenPair],
+    summary="Refresh JWT tokens",
+    description="Exchange a valid refresh token for a new access + refresh token pair.",
+)
 def refresh_token(body: RefreshTokenRequest):
     payload = decode_token(body.refresh_token)
     if not payload or payload.get("type") != "refresh":
         return error_response("Invalid or expired refresh token")
 
-    # Rebuild token data from payload
     new_data = {k: v for k, v in payload.items() if k not in ("exp", "type", "iat")}
     return success_response("Token refreshed", {
         "access_token": create_access_token(new_data),
@@ -234,7 +230,13 @@ def refresh_token(body: RefreshTokenRequest):
 # ═══════════════════════════════════════════════════════════════
 # GET CURRENT ADMIN
 # ═══════════════════════════════════════════════════════════════
-@router.get("/me")
+
+@router.get(
+    "/me",
+    response_model=ApiResponse[CurrentAdminResponse],
+    summary="Get current admin profile",
+    description="Returns the profile of the currently authenticated admin.",
+)
 def get_me(admin: Admin = Depends(get_current_admin)):
     return success_response(data={
         "admin_id": admin.id, "fullname": admin.fullname,
@@ -249,6 +251,12 @@ def get_me(admin: Admin = Depends(get_current_admin)):
 # ═══════════════════════════════════════════════════════════════
 # LOGOUT
 # ═══════════════════════════════════════════════════════════════
-@router.post("/logout")
+
+@router.post(
+    "/logout",
+    response_model=ApiResponse[None],
+    summary="Logout",
+    description="Invalidate the current session (client-side token discard).",
+)
 def logout():
     return success_response("Logged out successfully")

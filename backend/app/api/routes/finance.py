@@ -1,9 +1,8 @@
 # api/routes/finance.py
 """Financial routes: bank accounts, revenue streams, revenues, expenses, budgets."""
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 
 from core.database import get_db
@@ -15,21 +14,21 @@ from models.finance import (
 from utils.helpers import update_account_balance, get_account_id_by_revenue_stream
 from utils.response import success_response
 
+from schemas.base import ApiResponse, IdData
+from schemas.finance import (
+    BankAccountCreate, BankAccountOut, RevenueStreamCreate, RevenueStreamOut,
+    RevenueCreate, RevenueOut, ExpenseGroupOut, ExpenseCreate,
+    RevenueTargetCreate, ExpenseBudgetCreate,
+)
+
 router = APIRouter(prefix="/finance", tags=["Finance"])
 
 
 # ══════════════════════════════════════════════════════════════
-# BANK ACCOUNTS (polymorphic: diocese, province, head_parish)
+# BANK ACCOUNTS
 # ══════════════════════════════════════════════════════════════
-class BankAccountCreate(BaseModel):
-    account_name: str
-    account_number: str
-    bank_id: int
-    balance: float = 0.0
-    entity_type: str  # diocese, province, head_parish
-    entity_id: int
 
-@router.get("/bank-accounts")
+@router.get("/bank-accounts", response_model=ApiResponse[List[BankAccountOut]], summary="List bank accounts for an entity")
 def list_bank_accounts(entity_type: str, entity_id: int, db: Session = Depends(get_db)):
     rows = db.query(BankAccount).filter(
         BankAccount.entity_type == entity_type,
@@ -41,7 +40,7 @@ def list_bank_accounts(entity_type: str, entity_id: int, db: Session = Depends(g
         "bank_id": a.bank_id, "balance": float(a.balance),
     } for a in rows])
 
-@router.post("/bank-accounts")
+@router.post("/bank-accounts", response_model=ApiResponse[IdData], summary="Create a bank account")
 def create_bank_account(body: BankAccountCreate, db: Session = Depends(get_db)):
     if body.entity_type not in ("diocese", "province", "head_parish"):
         raise HTTPException(400, "Invalid entity type")
@@ -55,13 +54,8 @@ def create_bank_account(body: BankAccountCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # REVENUE STREAMS
 # ══════════════════════════════════════════════════════════════
-class RevenueStreamCreate(BaseModel):
-    name: str
-    account_id: int
-    entity_type: str
-    entity_id: int
 
-@router.get("/revenue-streams")
+@router.get("/revenue-streams", response_model=ApiResponse[List[RevenueStreamOut]], summary="List revenue streams")
 def list_revenue_streams(entity_type: str, entity_id: int, db: Session = Depends(get_db)):
     rows = db.query(RevenueStream).filter(
         RevenueStream.entity_type == entity_type,
@@ -70,7 +64,7 @@ def list_revenue_streams(entity_type: str, entity_id: int, db: Session = Depends
     ).all()
     return success_response(data=[{"id": r.id, "name": r.name, "account_id": r.account_id} for r in rows])
 
-@router.post("/revenue-streams")
+@router.post("/revenue-streams", response_model=ApiResponse[IdData], summary="Create a revenue stream")
 def create_revenue_stream(body: RevenueStreamCreate, db: Session = Depends(get_db)):
     if db.query(RevenueStream).filter(
         RevenueStream.name == body.name,
@@ -84,22 +78,10 @@ def create_revenue_stream(body: RevenueStreamCreate, db: Session = Depends(get_d
 
 
 # ══════════════════════════════════════════════════════════════
-# REVENUES (unified: head_parish, sub_parish, community, group)
+# REVENUES
 # ══════════════════════════════════════════════════════════════
-class RevenueCreate(BaseModel):
-    management_level: str
-    revenue_stream_id: int
-    head_parish_id: int
-    sub_parish_id: Optional[int] = None
-    community_id: Optional[int] = None
-    group_id: Optional[int] = None
-    service_number: Optional[int] = None
-    amount: float
-    payment_method: str = "Cash"
-    description: Optional[str] = None
-    revenue_date: date
 
-@router.get("/revenues")
+@router.get("/revenues", response_model=ApiResponse[List[RevenueOut]], summary="List revenues for a head parish")
 def list_revenues(
     head_parish_id: int,
     management_level: Optional[str] = None,
@@ -116,14 +98,13 @@ def list_revenues(
         "description": r.description,
     } for r in rows])
 
-@router.post("/revenues")
+@router.post("/revenues", response_model=ApiResponse[IdData], summary="Record a revenue entry")
 def record_revenue(body: RevenueCreate, db: Session = Depends(get_db)):
     if body.amount <= 0:
         raise HTTPException(400, "Amount must be greater than 0")
     rev = Revenue(**body.dict())
     db.add(rev)
 
-    # Update account balance
     account_id = get_account_id_by_revenue_stream(db, body.revenue_stream_id)
     if account_id:
         from decimal import Decimal
@@ -136,31 +117,33 @@ def record_revenue(body: RevenueCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # EXPENSE GROUPS & NAMES
 # ══════════════════════════════════════════════════════════════
+
+from pydantic import BaseModel
+
 class ExpenseGroupCreate(BaseModel):
     name: str
     management_level: str
     head_parish_id: int
-
-@router.get("/expense-groups")
-def list_expense_groups(head_parish_id: int, management_level: Optional[str] = None, db: Session = Depends(get_db)):
-    q = db.query(ExpenseGroup).filter(ExpenseGroup.head_parish_id == head_parish_id)
-    if management_level:
-        q = q.filter(ExpenseGroup.management_level == management_level)
-    return success_response(data=[{"id": g.id, "name": g.name, "management_level": g.management_level} for g in q.all()])
-
-@router.post("/expense-groups")
-def create_expense_group(body: ExpenseGroupCreate, db: Session = Depends(get_db)):
-    eg = ExpenseGroup(**body.dict())
-    db.add(eg); db.commit(); db.refresh(eg)
-    return success_response("Expense group created", {"id": eg.id})
-
 
 class ExpenseNameCreate(BaseModel):
     expense_group_id: int
     name: str
     management_level: str
 
-@router.post("/expense-names")
+@router.get("/expense-groups", response_model=ApiResponse[List[ExpenseGroupOut]], summary="List expense groups")
+def list_expense_groups(head_parish_id: int, management_level: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(ExpenseGroup).filter(ExpenseGroup.head_parish_id == head_parish_id)
+    if management_level:
+        q = q.filter(ExpenseGroup.management_level == management_level)
+    return success_response(data=[{"id": g.id, "name": g.name, "management_level": g.management_level} for g in q.all()])
+
+@router.post("/expense-groups", response_model=ApiResponse[IdData], summary="Create an expense group")
+def create_expense_group(body: ExpenseGroupCreate, db: Session = Depends(get_db)):
+    eg = ExpenseGroup(**body.dict())
+    db.add(eg); db.commit(); db.refresh(eg)
+    return success_response("Expense group created", {"id": eg.id})
+
+@router.post("/expense-names", response_model=ApiResponse[IdData], summary="Create an expense name under a group")
 def create_expense_name(body: ExpenseNameCreate, db: Session = Depends(get_db)):
     if db.query(ExpenseName).filter(ExpenseName.name == body.name, ExpenseName.expense_group_id == body.expense_group_id).first():
         raise HTTPException(400, "Expense name already exists")
@@ -172,19 +155,8 @@ def create_expense_name(body: ExpenseNameCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # EXPENSES
 # ══════════════════════════════════════════════════════════════
-class ExpenseCreate(BaseModel):
-    management_level: str
-    expense_name_id: int
-    head_parish_id: int
-    sub_parish_id: Optional[int] = None
-    community_id: Optional[int] = None
-    group_id: Optional[int] = None
-    amount: float
-    payment_method: str = "Cash"
-    description: Optional[str] = None
-    expense_date: date
 
-@router.post("/expenses")
+@router.post("/expenses", response_model=ApiResponse[IdData], summary="Record an expense")
 def record_expense(body: ExpenseCreate, db: Session = Depends(get_db)):
     if body.amount <= 0:
         raise HTTPException(400, "Amount must be greater than 0")
@@ -196,13 +168,8 @@ def record_expense(body: ExpenseCreate, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 # ANNUAL TARGETS & BUDGETS
 # ══════════════════════════════════════════════════════════════
-class RevenueTargetCreate(BaseModel):
-    revenue_stream_id: int
-    head_parish_id: int
-    year: int
-    target_amount: float
 
-@router.post("/revenue-targets")
+@router.post("/revenue-targets", response_model=ApiResponse[None], summary="Set annual revenue target for a stream")
 def set_revenue_target(body: RevenueTargetCreate, db: Session = Depends(get_db)):
     existing = db.query(AnnualRevenueTarget).filter(
         AnnualRevenueTarget.revenue_stream_id == body.revenue_stream_id,
@@ -217,13 +184,7 @@ def set_revenue_target(body: RevenueTargetCreate, db: Session = Depends(get_db))
     return success_response("Revenue target set")
 
 
-class ExpenseBudgetCreate(BaseModel):
-    expense_name_id: int
-    head_parish_id: int
-    year: int
-    budget_amount: float
-
-@router.post("/expense-budgets")
+@router.post("/expense-budgets", response_model=ApiResponse[None], summary="Set annual expense budget")
 def set_expense_budget(body: ExpenseBudgetCreate, db: Session = Depends(get_db)):
     existing = db.query(AnnualExpenseBudget).filter(
         AnnualExpenseBudget.expense_name_id == body.expense_name_id,
